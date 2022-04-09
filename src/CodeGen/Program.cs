@@ -1,7 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
+using CodeGen.Logging;
 
+using var _ = Logger.Start();
 
 const string longtailBasePath = @"O:\tmp\longtail";
 var longtailLibPath = Path.Combine(longtailBasePath, "lib");
@@ -14,7 +15,8 @@ var headerFiles = Directory.GetDirectories(longtailLibPath, "*", SearchOption.To
 
 foreach (var file in headerFiles)
 {
-    Console.WriteLine(file);
+    Logger.Info(file);
 }
+
 
 
