@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
-using CodeGen.Lexer;
 using CodeGen.Logging;
+using CodeGen.Tokenizer;
 
 using var _ = Logger.Start();
 
@@ -20,22 +20,16 @@ var firstFile = File.ReadAllText(headerFiles.First());
 //var fileContents = firstFile;
 ////var fileContents = firstFile.Substring(0, 1000);
 ////var fileContents = "#define LONGTAIL_PREPROCESSOR_STR1_PRIVATE(x) #x\n";
-var tokens = new Lexer(firstFile)
-    .Process();
+var tokens = new Tokenizer()
+    .Tokenize(firstFile)
+    ;
 
 
 
 
-//Logger.Info(headerFiles.First());
-//foreach (var token in tokens)
-//{
-//    if (token.Type == SyntaxTokenType.PreprocessorDirective)
-//    {
-//        Logger.Trace($"{token.PreProcessorDirective.ToString().PadRight(25)}{token.SingleValue}{token.Value}");
-//    }
-//    else
-//    {
-//        Logger.Trace($"{token.Type.ToString().PadRight(25)}{token.SingleValue}{token.Value}");
-//    }
-    
-//}
+Logger.Info(headerFiles.First());
+foreach (var token in tokens)
+{
+    Logger.Trace($"{token.Type.ToString().PadRight(25)}{token.Value.PadRight(50)}{token.Line}:{token.Column}");
+
+}
