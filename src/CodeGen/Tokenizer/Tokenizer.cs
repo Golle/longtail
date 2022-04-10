@@ -7,12 +7,14 @@ namespace CodeGen.Tokenizer;
 internal class Tokenizer
 {
     private readonly bool _skipComments;
-    
-    public Tokenizer(bool skipComments = true)
+    private readonly IDictionary<string, TokenType> _tokenLookupTable;
+
+    public Tokenizer(bool skipComments = true, IDictionary<string, TokenType>? tokenLookupTable = null)
     {
         _skipComments = skipComments;
+        _tokenLookupTable = tokenLookupTable ?? new Dictionary<string, TokenType>();
     }
-    
+
     public IReadOnlyList<Token> Tokenize(string input)
     {
         Cursor cursor = new(input);
@@ -40,7 +42,7 @@ internal class Tokenizer
                     }
                     break;
 
-                case '*' or '!' or '+' or '-' or '^' or '&' or '=' or '?' or '~' or ':'  or '<' or '>' or '%' or '|' or '~':
+                case '*' or '!' or '+' or '-' or '^' or '&' or '=' or '?' or '~' or ':' or '<' or '>' or '%' or '|' or '~':
                     Operator(ref cursor, ref token);
                     break;
                 case ',':
@@ -83,10 +85,14 @@ internal class Tokenizer
                     break;
                 default:
                     Identifier(ref cursor, ref token);
+                    if (_tokenLookupTable.TryGetValue(token.Value, out var newToken))
+                    {
+                        token.Type = newToken;
+                    }
                     break;
             }
-            
-            if(token.Type != TokenType.Unknown) // Ignore space, tabs etc that does't affect the code
+
+            if (token.Type != TokenType.Unknown) // Ignore space, tabs etc that does't affect the code
             {
                 tokens.Add(token);
             }
@@ -104,7 +110,7 @@ internal class Tokenizer
     private static void NumberLiteral(ref Cursor cursor, ref Token token)
     {
         static bool IsNumber(char c) => c is >= '0' and <= '9';
-        static bool IsValidNumberLiteral(char c) => c is 'U' or 'L' or 'F' or 'u' or 'l' or 'f' or '.' ||IsNumber(c);
+        static bool IsValidNumberLiteral(char c) => c is 'U' or 'L' or 'F' or 'u' or 'l' or 'f' or '.' || IsNumber(c);
         static bool IsValidHexLiteral(char c) => c is >= 'A' and <= 'F' || c is >= 'a' and <= 'f' || IsValidNumberLiteral(c);
 
         Span<char> buffer = stackalloc char[128];
@@ -128,7 +134,7 @@ internal class Tokenizer
                 buffer[i++] = cursor.Current;
             }
         }
-        
+
         token.Type = TokenType.Number;
         token.Value = new string(buffer[..i]);
     }
@@ -139,7 +145,7 @@ internal class Tokenizer
         {
             throw new FormatException("A character literal can only be a single letter.");
         }
-        
+
         token.Value = cursor.Peek().ToString();
         token.Type = TokenType.Character;
         cursor.Advance(2);
@@ -231,14 +237,14 @@ internal class Tokenizer
             }
             cursor.Advance();
         }
-        
+
     }
 
     private static void Operator(ref Cursor cursor, ref Token token)
     {
         //static bool IsOperator(char c) => c is '^' or '?' or '~' or ':' or '%' or '|' or ',' or '~' || IsCompoundOperator(c);
         static bool IsCompoundOperator(char c) => c is '!' or '+' or '-' or '&' or '=' or '<' or '>' or '|';
-        
+
         var current = cursor.Current;
         if (current == '-' && cursor.Peek() == '>')
         {

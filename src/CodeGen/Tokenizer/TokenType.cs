@@ -53,5 +53,6 @@ internal enum TokenType
     Equal,
     EqualEqual,
     StaticAssert,
+    CPlusPlus,
     EndOfFile
 }

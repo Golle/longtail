@@ -25,8 +25,10 @@ internal static class CppKeywords
     private const string DllExport = "dllexport";
     private const string Auto = "auto";
     private const string StaticAssert = "static_assert";
+    private const string CPlusPlus = "__cplusplus";
 
-    
+
+
     private static readonly string[] CallTypes = { "__cdecl", "__stdcall", "__fastcall" };
 
 
@@ -137,12 +139,15 @@ internal static class CppKeywords
             return (TokenType.StaticAssert, string.Empty);
         }
 
+        if (IsMatch(CPlusPlus, identifier))
+        {
+            return (TokenType.CPlusPlus, string.Empty);
+        }
         //if (IsMatch(Auto, identifier))
         //{
         //    // TODO: if we want something special to happen implement this.
         //    return (TokenType.Identifier, "auto");
         //}
-
         return (TokenType.Identifier, new string(identifier));
     }
 

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32210.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeGen", "src\CodeGen\CodeGen.csproj", "{80D78C22-DDCB-4FCD-B326-5EB7C3D8C3B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGen.Tests", "tests\CodeGen.Tests\CodeGen.Tests.csproj", "{7F7CCA61-2B7E-4B92-AAB7-AEF16B4D7B03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{80D78C22-DDCB-4FCD-B326-5EB7C3D8C3B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80D78C22-DDCB-4FCD-B326-5EB7C3D8C3B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80D78C22-DDCB-4FCD-B326-5EB7C3D8C3B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F7CCA61-2B7E-4B92-AAB7-AEF16B4D7B03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F7CCA61-2B7E-4B92-AAB7-AEF16B4D7B03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F7CCA61-2B7E-4B92-AAB7-AEF16B4D7B03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F7CCA61-2B7E-4B92-AAB7-AEF16B4D7B03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

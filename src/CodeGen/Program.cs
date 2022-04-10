@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using CodeGen.Logging;
+using CodeGen.Logging;using CodeGen.Parser;
 using CodeGen.Tokenizer;
 
 using var _ = Logger.Start();
@@ -15,21 +17,32 @@ var headerFiles = Directory.GetDirectories(longtailLibPath, "*", SearchOption.To
     //.Select(f => new Lexer(File.ReadAllText(f)).Process())
     .ToArray();
 
-var firstFile = File.ReadAllText(headerFiles.First());
+var firstFilename = headerFiles.First();
+var firstFileContents = File.ReadAllText(firstFilename);
 
 //var fileContents = firstFile;
 ////var fileContents = firstFile.Substring(0, 1000);
 ////var fileContents = "#define LONGTAIL_PREPROCESSOR_STR1_PRIVATE(x) #x\n";
-var tokens = new Tokenizer()
-    .Tokenize(firstFile)
+
+Logger.Info(firstFilename);
+
+var lookupTable = new Dictionary<string, TokenType>()
+{
+    { "LONGTAIL_EXPORT", TokenType.DllExport }
+};
+
+var tokens = new Tokenizer(true, lookupTable)
+    .Tokenize(firstFileContents)
+    .ToArray()
     ;
 
 
+var node = new LongtailParser()
+    .Parse(tokens);
 
+//
+//foreach (var token in tokens)
+//{
+//    Logger.Trace($"{token.Type.ToString().PadRight(25)}{token.Value.PadRight(50)}{token.Line}:{token.Column}");
 
-Logger.Info(headerFiles.First());
-foreach (var token in tokens)
-{
-    Logger.Trace($"{token.Type.ToString().PadRight(25)}{token.Value.PadRight(50)}{token.Line}:{token.Column}");
-
-}
+//}
