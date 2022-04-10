@@ -143,4 +143,97 @@ public class TokenCursorTests
 
         Assert.That(result, Is.Not.Null);
     }
+
+    [Test]
+    public void Peek_Previous_ReturnPrevious()
+    {
+        var cursor = new TokenCursor(_tokens);
+        cursor.Advance(2, false);
+
+        var result = cursor.Peek(-1);
+
+        Assert.That(result.Type, Is.EqualTo(TokenType.Identifier));
+        Assert.That(result.Value, Is.EqualTo("b"));
+    }
+
+    [Test]
+    public void FindNext_NoMatch_ReturnError()
+    {
+        var cursor = new TokenCursor(_tokens);
+        
+        var result = cursor.FindNext(TokenType.CPPKeyword);
+
+        Assert.That(result, Is.EqualTo(-1));
+    }
+
+    [Test]
+    public void FindNext_Match_ReturnIndex()
+    {
+        var cursor = new TokenCursor(_tokens);
+
+        var result = cursor.FindNext(TokenType.Boolean);
+
+        Assert.That(result, Is.EqualTo(5));
+    }
+
+    [Test]
+    public void FindNext_MultipleTokens_ReturnNext()
+    {
+        var tokens = new[]
+        {
+            new Token { Type = TokenType.Identifier},
+            new Token { Type = TokenType.Identifier},
+            new Token { Type = TokenType.Identifier}
+        };
+        var cursor = new TokenCursor(tokens);
+        
+        var result = cursor.FindNext(TokenType.Identifier);
+
+        Assert.That(result, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void FindNext_MatchOnIdentifierNotOnValue_ReturnError()
+    {
+        var cursor = new TokenCursor(_tokens);
+
+        var result = cursor.FindNext(TokenType.Identifier, "asd");
+
+        Assert.That(result, Is.EqualTo(-1));
+    }
+
+    [Test]
+    public void FindNext_MatchOnBoth_ReturnIndex()
+    {
+        var cursor = new TokenCursor(_tokens);
+
+        var result = cursor.FindNext(TokenType.Identifier, "c");
+
+        Assert.That(result, Is.EqualTo(6));
+    }
+
+
+    [Test]
+    public void FindNext_NotOnFirstToken_ReturnIndexDiff()
+    {
+        var cursor = new TokenCursor(_tokens);
+        cursor.Advance(3, skipNewLine: false);
+
+        var result = cursor.FindNext(TokenType.Identifier, "c");
+
+        Assert.That(result, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void FindNext_MoveForward_ReturnToken()
+    {
+        var cursor = new TokenCursor(_tokens);
+        var count = cursor.FindNext(TokenType.Identifier, "c");
+        cursor.Advance((uint)count, skipNewLine: false);
+
+        ref readonly var result = ref cursor.Current;
+
+        Assert.That(result.Type, Is.EqualTo(TokenType.Identifier));
+        Assert.That(result.Value, Is.EqualTo("c"));
+    }
 }

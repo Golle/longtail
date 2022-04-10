@@ -21,9 +21,15 @@ internal ref struct TokenCursor
     public ref readonly Token Peek(int offset = 1, bool skipNewLine = true)
     {
         var position = _position;
+        // Go back or forward
+        var increment = offset > 0 ? 1 : -1;
+
+        // Make sure the offset is positive
+        offset *= increment;
+
         for (var i = 1; i <= offset; ++i)
         {
-            if (!PeekNext(ref position, skipNewLine))
+            if (!PeekNext(ref position, increment, skipNewLine))
             {
                 throw new IndexOutOfRangeException("Can't peek past the last token");
             }
@@ -31,19 +37,19 @@ internal ref struct TokenCursor
         return ref _tokens[position];
     }
 
-    private bool PeekNext(ref int position, bool skipNewLine)
+    private bool PeekNext(ref int position, int increment, bool skipNewLine)
     {
-        start:
-        position++;
-        if (position >= _length)
+start:
+        position += increment;
+        if (position >= _length || position < 0)
         {
             return false;
-            
+
         }
 
         if (skipNewLine && _tokens[position].Type == TokenType.NewLine)
         {
-            goto start;;
+            goto start;
         }
         return true;
     }
@@ -63,7 +69,7 @@ internal ref struct TokenCursor
 
     public bool Advance(bool skipNewLine = true)
     {
-        start:
+start:
         if (_position + 1 >= _length)
         {
             return false;
@@ -76,5 +82,25 @@ internal ref struct TokenCursor
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Find the next token by type and optional value. This will always count new lines, so if you're using this to advance the cursor make sure you set skip new lines to false.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="value"></param>
+    /// <returns>The amount to move forward to reach this token</returns>
+    public int FindNext(TokenType type, string? value = null)
+    {
+        // Increment the current position with 1 since we're looking for the next token.
+        for (var position = _position + 1; position < _length; ++position)
+        {
+            // Check the type and if there's a value specified check that as well.
+            if (_tokens[position].Type == type && (value == null || _tokens[position].Value == value))
+            {
+                return position - _position;
+            }
+        }
+        return -1;
     }
 }
