@@ -1,10 +1,9 @@
 ﻿using System;
 using CodeGen.Logging;
+using CodeGen.Parser.Types;
 using CodeGen.Tokenizer;
 
 namespace CodeGen.Parser;
-
-
 
 internal class SyntaxNode
 {
@@ -13,6 +12,12 @@ internal class SyntaxNode
 
 internal class LongtailParser
 {
+    private readonly TypeLookupTable _lookupTable;
+
+    public LongtailParser(TypeLookupTable? lookupTable = null)
+    {
+        _lookupTable = lookupTable ?? TypeLookupTable.CreateDefault();
+    }
 
     public SyntaxNode Parse(ReadOnlySpan<Token> tokens)
     {

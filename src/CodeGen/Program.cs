@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using CodeGen.Logging;
 using CodeGen.Parser;
+using CodeGen.Parser.Types;
 using CodeGen.Tokenizer;
 
 using var _ = Logger.Start();
@@ -21,6 +22,12 @@ var lookupTable = new Dictionary<string, TokenType>()
     { "LONGTAIL_EXPORT", TokenType.DllExport }
 };
 
+var typeLookupTable = TypeLookupTable.CreateDefault()
+    .AddTypedef("uint64_t","unsigned long long")
+    .AddTypedef("uint32_t", "unsigned int");
+
+
+
 foreach (var headerFile in headerFiles)
 {
     Logger.Info($"------------- {headerFile} ------------- ");
@@ -28,7 +35,7 @@ foreach (var headerFile in headerFiles)
     var tokens = new Tokenizer(true, lookupTable)
             .Tokenize(contents)
             .ToArray();
-    var node = new LongtailParser()
+    var node = new LongtailParser(typeLookupTable)
         .Parse(tokens);
 
     Logger.Info($"------------- {headerFile} -------------\n\n");
