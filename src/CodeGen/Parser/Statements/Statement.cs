@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 
-namespace CodeGen.Parser.Expressions;
+namespace CodeGen.Parser.Statements;
 
 [DebuggerDisplay("{DebugString()}")]
-internal abstract class Expression
+internal abstract class Statement
 {
     public virtual string DebugString() => string.Empty;
 }

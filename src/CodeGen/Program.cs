@@ -28,7 +28,7 @@ var typeLookupTable = TypeLookupTable.CreateDefault()
 
 
 
-foreach (var headerFile in headerFiles)
+foreach (var headerFile in headerFiles.Take(1))
 {
     Logger.Info($"------------- {headerFile} ------------- ");
     var contents = File.ReadAllText(headerFile);

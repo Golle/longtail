@@ -13,8 +13,4 @@
       <_Parameter1>CodeGen.Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Parser\Expressions\" />
-  </ItemGroup>
 </Project>

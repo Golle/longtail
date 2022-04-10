@@ -1,5 +1,6 @@
 ﻿using System;
 using CodeGen.Logging;
+using CodeGen.Parser.Statements;
 using CodeGen.Parser.Types;
 using CodeGen.Tokenizer;
 
@@ -28,10 +29,25 @@ internal class LongtailParser
 
             switch (token.Type)
             {
+                case TokenType.NewLine:
+                case TokenType.Comment:
+                    Logger.Trace($"Skipping {token.Type} on Line: {token.Line} Column: {token.Column}");
+                    cursor.Advance();
+                    break;
                 case TokenType.PreProcessor:
                     ParsePreProcessorDirective(ref cursor);
                     break;
+                case TokenType.Typedef:
+                case TokenType.Struct:
+                case TokenType.Class:
+                case TokenType.Enum:
+                    TypeParser.Parse(ref cursor, _lookupTable);
+                    break;
+                case TokenType.DllExport:
+                    cursor.Advance();
+                    break;
                 default:
+                    var statement = StatementParser.Parse(ref cursor, _lookupTable);
                     //Logger.Info(token.Value);
                     cursor.Advance();
                     break;
