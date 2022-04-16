@@ -51,4 +51,20 @@ internal class ExpressionParserTests
         Assert.That(right.Value, Is.EqualTo("2"));
         Assert.That(result.Operator, Is.EqualTo(op));
     }
+
+    [Test]
+    public void Parse_ParenthesizedExpression_ReturnExpression()
+    {
+        var code = "(1 + 2)";
+
+        var parenthesizedExpression = (ParenthesizedExpression)new Parser(code).Parse().GetChildren().Single()!;
+        var result = (BinaryExpression)parenthesizedExpression.Inner;
+        var left = (LiteralExpression)result.Left;
+        var right = (LiteralExpression)result.Right;
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(left.Value, Is.EqualTo("1"));
+        Assert.That(right.Value, Is.EqualTo("2"));
+        Assert.That(result.Operator, Is.EqualTo("+"));
+    }
 }

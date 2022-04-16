@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using CodeGen.Lexer;
@@ -116,6 +117,18 @@ internal class Parser
         {
             _position++;
             return new IdentifierExpression(current.Value);
+        }
+
+        if (current.Type == TokenType.LeftParenthesis)
+        {
+            _position++;
+            var inside = ParseExpression();
+            if (Current.Type != TokenType.RightParenthesis)
+            {
+                throw new ParserException($"Expected {TokenType.RightParenthesis} but found {TokenType.LeftParenthesis}");
+            }
+            _position++;
+            return new ParenthesizedExpression(inside);
         }
 
         throw new ParserException($"Primary expression for token type {current.Type} has not been implemented. FIX IT!");
