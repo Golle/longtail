@@ -9,50 +9,68 @@
 internal enum TokenType
 {
     Unknown,
-    NewLine,
-    Operator,
-    CompoundOperator,
-    Identifier,
-    Comma,
-    Punctuation,
+
+    //If, Else, When, For, Switch, Case, Default, Continue, Break, Do, Return, Union, Goto, Try, Catch, Throw, NOTE(Jens); Should we use more explicit tokens?
+    Statement,
+    
+    // Function/type modifiers etc
+    DeclSpec,
+    ForceInline,
+    ClassModifier,
+    CallType,
+    FunctionModifier,
+    CPPKeyword,
+    VariadicArgument,
+    
+    // DLL
+    DllImport,
+    DllExport,
+    
+    
+    // Scopes
     LeftParenthesis,
     RightParenthesis,
     LeftSquareBracket,
-    RightSquareBracket, 
+    RightSquareBracket,
     LeftCurlyBracer,
     RightCurlyBracer,
     Colon,
     ColonColon,
     Semicolon,
-    Backslash,
-    Comment,
     Pointer,
-    PreProcessor,
-    Character,
-    String,
-    Number,
-    VariadicArgument,
-    Statement,
-    PrimitiveType,
+
+    // Types
+    Identifier,
     Class,
     Struct,
     Enum,
     Union,
     Typedef,
-    ClassModifier,
-    CallType,
-    FunctionModifier,
-    CPPKeyword,
-    This,
-    DllImport,
-    DllExport,
     Boolean,
+    PrimitiveType,
+    Character,
+    String,
+    Number,
+    This,
     Null,
-    DeclSpec,
-    ForceInline,
+
+    // Operators
     Equal,
     EqualEqual,
-    StaticAssert,
+    Operator,
+    CompoundOperator,
+    Comma,
+    Punctuation,
+
+    // Special
+    Invalid,
     CPlusPlus,
-    EndOfFile
+    NewLine,
+    Backslash,
+    Comment,
+    StaticAssert,
+    PreProcessor,
+
+    // EOF
+    EndOfFile,
 }

@@ -242,8 +242,9 @@ internal class Tokenizer
 
     private static void Operator(ref Cursor cursor, ref Token token)
     {
+        //NOTE(Jens): The handling for compound operators must change, this currently supports everything like *& and <+
         //static bool IsOperator(char c) => c is '^' or '?' or '~' or ':' or '%' or '|' or ',' or '~' || IsCompoundOperator(c);
-        static bool IsCompoundOperator(char c) => c is '!' or '+' or '-' or '&' or '=' or '<' or '>' or '|';
+        static bool IsCompoundOperator(char c) => c is '!' or '+' or '-' or '&' or '=' or '<' or '>' or '|' or '*' or '/' or '^';
 
         var current = cursor.Current;
         if (current == '-' && cursor.Peek() == '>')

@@ -9,14 +9,15 @@ using CodeGen.Syntax;
 
 
 using var _ = Logger.Start();
-var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-var outPath = @"F:\Git\longtail\src\Longtail\Generated";
 
-var fileOutput = new FileOutput(outPath);
-await fileOutput.WriteClass(new CSharpFileDefinition("Longtail_AStruct", new[] { "System", "System.IO" }, "Longtail"));
+var sampleCode = @"
+struct 
+
+";
 
 
 Console.WriteLine("Welcome to the interpreter!");
+
 while (true)
 {
     Console.Write("> ");
@@ -28,7 +29,7 @@ while (true)
 
     if (line.Length == 0)
     {
-        line = File.ReadAllText(@"O:\tmp\longtail\src\longtail.h");
+        //line = File.ReadAllText(@"O:\tmp\longtail\src\longtail.h");
     }
     else if (line.StartsWith("#longtail"))
     {
@@ -55,72 +56,22 @@ while (true)
         }
     }
 
-    var parser = new Parser(line);
+    var result = new Parser(line)
+        .Parse();
 
-    Logger.Info($"Successfully parsed {parser._tokens.Length} tokens");
-
-    //for (var i = 0; i < parser._tokens.Length; ++i)
-    //{
-    //    var token = parser._tokens[i];
-
-    //    if (token.Type == TokenType.Struct)
-    //    {
-    //        for (var x = 0; x < 4; ++x)
-    //        {
-    //            var t = parser._tokens[i+x];
-    //            Console.Write( t + " ");
-    //        }
-    //        Console.WriteLine();
-    //    }
-    //}
-
-    //continue;
-    foreach (var token in parser._tokens)
+    foreach (var syntaxNode in result.GetChildren())
     {
-
-        if (token.Type != TokenType.NewLine)
-        {
-            Console.Write($"{token.Type} ");
-        }
-        else
-        {
-            Console.WriteLine();
-        }
-        
+        syntaxNode.PrettyPrint();
     }
-    //var lexer = new Lexer(line);
-
-    //Token token;
-    //while ((token = lexer.Lex()).Kind != TokenKind.EndOfFile)
-    //{
-    //    Console.WriteLine(token);
-    //}
+    
     Console.WriteLine("End of file reached.");
 }
 
 
 
-//var lookupTable = new Dictionary<string, TokenType>()
-//{
-//    { "LONGTAIL_EXPORT", TokenType.DllExport }
-//};
 
-//var typeLookupTable = TypeLookupTable.CreateDefault()
-//    .AddTypedef("uint64_t","unsigned long long")
-//    .AddTypedef("uint32_t", "unsigned int");
+// Test output code
+//var outPath = @"F:\Git\longtail\src\Longtail\Generated";
 
-
-
-//foreach (var headerFile in headerFiles.Take(1))
-//{
-//    Logger.Info($"------------- {headerFile} ------------- ");
-//    var contents = File.ReadAllText(headerFile);
-//    var tokens = new Tokenizer(true, lookupTable)
-//            .Tokenize(contents)
-//            .ToArray();
-//    var node = new LongtailParser(typeLookupTable)
-//        .Parse(tokens);
-
-//    Logger.Info($"------------- {headerFile} -------------\n\n");
-//}
-
+//var fileOutput = new FileOutput(outPath);
+//await fileOutput.WriteClass(new CSharpFileDefinition("Longtail_AStruct", new[] { "System", "System.IO" }, "Longtail"));
