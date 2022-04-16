@@ -1,10 +1,19 @@
 ﻿using System;
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using CodeGen;
+using CodeGen.CodeWriter;
+using CodeGen.Lexer;
 using CodeGen.Logging;
+using CodeGen.Syntax;
 
 
 using var _ = Logger.Start();
+var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+var outPath = @"F:\Git\longtail\src\Longtail\Generated";
 
+var fileOutput = new FileOutput(outPath);
+await fileOutput.WriteClass(new CSharpFileDefinition("Longtail_AStruct", new[] { "System", "System.IO" }, "Longtail"));
 
 
 Console.WriteLine("Welcome to the interpreter!");
@@ -17,39 +26,78 @@ while (true)
         continue;
     }
 
-    var lexer = new Lexer(line);
-
-    Token token;
-    while ((token = lexer.Lex()).Kind != TokenKind.EndOfFile)
+    if (line.Length == 0)
     {
-        Console.WriteLine(token);
+        line = File.ReadAllText(@"O:\tmp\longtail\src\longtail.h");
     }
+    else if (line.StartsWith("#longtail"))
+    {
+        line = new LongtailPreParser(@"O:\tmp\longtail")
+            .Run();
+    }
+    else if (line.StartsWith("#file"))
+    {
+        var splits = line.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+        if (splits.Length == 1)
+        {
+            Console.WriteLine("Failed to get the path of the file");
+            continue;
+        }
+
+        if (File.Exists(splits[1]))
+        {
+            line = File.ReadAllText(splits[1]);
+        }
+        else
+        {
+            Console.WriteLine($"File {splits[1]} does not exist.");
+            continue;
+        }
+    }
+
+    var parser = new Parser(line);
+
+    Logger.Info($"Successfully parsed {parser._tokens.Length} tokens");
+
+    //for (var i = 0; i < parser._tokens.Length; ++i)
+    //{
+    //    var token = parser._tokens[i];
+
+    //    if (token.Type == TokenType.Struct)
+    //    {
+    //        for (var x = 0; x < 4; ++x)
+    //        {
+    //            var t = parser._tokens[i+x];
+    //            Console.Write( t + " ");
+    //        }
+    //        Console.WriteLine();
+    //    }
+    //}
+
+    //continue;
+    foreach (var token in parser._tokens)
+    {
+
+        if (token.Type != TokenType.NewLine)
+        {
+            Console.Write($"{token.Type} ");
+        }
+        else
+        {
+            Console.WriteLine();
+        }
+        
+    }
+    //var lexer = new Lexer(line);
+
+    //Token token;
+    //while ((token = lexer.Lex()).Kind != TokenKind.EndOfFile)
+    //{
+    //    Console.WriteLine(token);
+    //}
     Console.WriteLine("End of file reached.");
 }
 
-
-
-
-//const string longtailBasePath = @"O:\tmp\longtail";
-//var longtailLibPath = Path.Combine(longtailBasePath, "lib");
-//var longtailHeaderPath = Path.Combine(longtailBasePath, "src", "longtail.h");
-
-//var headerFiles = Directory.GetDirectories(longtailLibPath, "*", SearchOption.TopDirectoryOnly)
-//    .SelectMany(lib => Directory.GetFiles(lib, "*.h", SearchOption.TopDirectoryOnly));
-//    //.Concat(new[] { longtailHeaderPath })
-
-//var includes = headerFiles.Select(h => $"#include \"{h}\"");
-//var tempFile = Path.GetTempFileName();
-//try
-//{
-//    File.WriteAllLines(tempFile, includes);
-//    var process = Process.Start("gcc", $" -xc \"{tempFile}\" -E -P -o con:");
-//    process.WaitForExit();
-//}
-//finally
-//{
-//    File.Delete(tempFile);
-//}
 
 
 //var lookupTable = new Dictionary<string, TokenType>()
