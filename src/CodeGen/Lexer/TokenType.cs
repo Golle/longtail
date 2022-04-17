@@ -34,10 +34,7 @@ internal enum TokenType
     RightSquareBracket,
     LeftCurlyBracer,
     RightCurlyBracer,
-    Colon,
-    ColonColon,
-    Semicolon,
-    Pointer,
+    
 
     // Types
     Identifier,
@@ -55,12 +52,58 @@ internal enum TokenType
     Null,
 
     // Operators
+    Colon,
+    ColonColon,
+    Semicolon,
+    Pointer,
     Equal,
     EqualEqual,
-    Operator,
-    CompoundOperator,
+    Amp,
+    AmpAmp,
+    AmpEqual,
+    Star,
+    StarEqual,
+    Plus,
+    PlusPlus,
+    PlusEqual,
+    Minus,
+    MinusMinus,
+    MinusEqual,
+    Tilde, 
+    Bang,
+    BangEqual,
+    Slash,
+    SlashEqual,
+    Percent,
+    PercentEqual,
+    Less,
+    LessLess,
+    LessEqual,
+    LessLessEqual,
+    Spaceship, // Name from llvm, <=>
+    Greater,
+    GreaterGreater,
+    GreaterEqual,
+    GreaterGreaterEqual,
+    Caret, // ^
+    CaretEqual,
+    Pipe,
+    PipeEqual,
+    PipePipe,
+    PipePipeEqual,
+    Question,
+    // These are not used by the operator parser yet (Used in PreProcessor parsing)
+    Hash,
+    HashHash,
+    HashHat, // #@
+    // End not supported
+
+    PeriodStar, // .*, pointer-to-member.  https://stackoverflow.com/questions/2548555/dot-asterisk-operator-in-c
+    PointerStar, // ->* 
+
     Comma,
     Punctuation,
+    
 
     // Special
     Invalid,
@@ -71,6 +114,7 @@ internal enum TokenType
     StaticAssert,
     PreProcessor,
 
-    // EOF
-    EndOfFile,
+    // EOF/EOD
+    EndOfDirective, // End of preprocessor directive
+    EndOfFile,// End of the file
 }

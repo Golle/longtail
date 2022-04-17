@@ -13,25 +13,11 @@ internal class Parser
     private static readonly Token InvalidToken = new() { Type = TokenType.Invalid };
     private readonly Token[] _tokens;
     private int _position;
-
-
     private Token Current => Peek(0);
-    //private Token ConsumeToken()
-    //{
-    //    return _tokens[_position++];
-    //}
-
     private Token Peek(int steps)
     {
         var position = _position + steps;
         return position < _tokens.Length ? _tokens[position] : InvalidToken;
-    }
-
-    private Token Consume()
-    {
-        var current = Current;
-        _position++;
-        return current;
     }
 
     public Parser(string input)
@@ -47,7 +33,7 @@ internal class Parser
         while (parsing)
         {
             var token = Current;
-            
+
             switch (token.Type)
             {
 
@@ -76,28 +62,34 @@ internal class Parser
 
     }
 
-    private Expression ParseBinaryExpression()
+    private Expression ParseBinaryExpression(int previousPrecedence = 0)
     {
-        var primary = ParsePrimaryExpression();
-        if (Current.Type is TokenType.Operator)
+        Expression primary;
+        var unaryOperatorPrecedence = Current.UnaryOperatorPrecedence();
+        if (unaryOperatorPrecedence != 0 && unaryOperatorPrecedence >= previousPrecedence)
         {
-            var opToken = Current;
+            var token = Current;
             _position++;
-            var right = ParseExpression();
-            return new BinaryExpression(primary, right, opToken.Value);
+            var operand = ParseBinaryExpression(unaryOperatorPrecedence);
+            primary = new UnaryExpression(token.Value, operand);
+        }
+        else
+        {
+            primary = ParsePrimaryExpression();
         }
 
-        if (Current.Type is TokenType.CompoundOperator)
+        while (true)
         {
-            var opToken = Current;
-            if (Current.Value is "++" or "--")
+            var operatorPrecedence = Current.BinaryOperatorPrecedence();
+            if (operatorPrecedence == 0 || operatorPrecedence <= previousPrecedence)
             {
-                // special case ?
+                break;
             }
 
+            var token = Current;
             _position++;
-            var right = ParseExpression();
-            return new BinaryExpression(primary, right, opToken.Value);
+            var right = ParseBinaryExpression(operatorPrecedence);
+            primary = new BinaryExpression(primary, right, token.Value);
         }
 
         return primary;
@@ -112,7 +104,7 @@ internal class Parser
             _position++;
             return new LiteralExpression(current.Type, current.Value);
         }
-        
+
         if (current.Type == TokenType.Identifier)
         {
             _position++;
@@ -142,7 +134,7 @@ internal class Parser
             if (Peek(2).Type == TokenType.LeftCurlyBracer)
             {
                 _position += 2;
-                
+
                 var members = ParseMembers();
                 // struct definition
                 if (Current.Type != TokenType.RightCurlyBracer)
@@ -182,14 +174,14 @@ internal class ParserException : Exception
 {
     public ParserException(string message) : base(message)
     {
-        
+
     }
 }
 
 [DebuggerDisplay("{ToString()}")]
 public abstract class SyntaxNode
 {
-    public virtual void PrettyPrint(int indentation = 0){}
+    public virtual void PrettyPrint(int indentation = 0) { }
 }
 
 public sealed class StructSyntaxNode : SyntaxNode

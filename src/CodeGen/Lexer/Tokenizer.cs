@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using CodeGen.Logging;
 
 namespace CodeGen.Lexer;
 
@@ -41,8 +42,7 @@ internal class Tokenizer
                         Operator(ref cursor, ref token);
                     }
                     break;
-
-                case '*' or '!' or '+' or '-' or '^' or '&' or '=' or '?' or '~' or ':' or '<' or '>' or '%' or '|' or '~':
+                case '*' or '!' or '+' or '-' or '^' or '&' or '=' or '?' or '~' or ':' or '<' or '>' or '%' or '|':
                     Operator(ref cursor, ref token);
                     break;
                 case ',':
@@ -242,51 +242,17 @@ internal class Tokenizer
 
     private static void Operator(ref Cursor cursor, ref Token token)
     {
-        //NOTE(Jens): The handling for compound operators must change, this currently supports everything like *& and <+
-        //static bool IsOperator(char c) => c is '^' or '?' or '~' or ':' or '%' or '|' or ',' or '~' || IsCompoundOperator(c);
-        static bool IsCompoundOperator(char c) => c is '!' or '+' or '-' or '&' or '=' or '<' or '>' or '|' or '*' or '/' or '^';
-
-        var current = cursor.Current;
-        if (current == '-' && cursor.Peek() == '>')
+        //Longest operator is 3 characters
+        Span<char> characterStack = stackalloc char[3];
+        for (var i = 0; i < 3; ++i)
         {
-            token.Type = TokenType.Pointer;
-            cursor.Advance();
+            characterStack[i] = cursor.Peek(i);
         }
-        else if (current == ':')
+        if (OperatorTable.TryGetOperator(characterStack, out var op))
         {
-            if (cursor.Peek() == ':')
-            {
-                token.Type = TokenType.ColonColon;
-                cursor.Advance();
-            }
-            else
-            {
-                token.Type = TokenType.Colon;
-            }
-        }
-        else if (current == '=')
-        {
-            if (cursor.Peek() == '=')
-            {
-                token.Type = TokenType.EqualEqual;
-                cursor.Advance();
-            }
-            else
-            {
-                token.Type = TokenType.Equal;
-            }
-        }
-        else if (IsCompoundOperator(current) && IsCompoundOperator(cursor.Peek()))
-        {
-            // TOOD: support cases like <<=, >>=, ||=, &&=
-            token.Type = TokenType.CompoundOperator;
-            token.Value = $"{current}{cursor.Peek()}";
-            cursor.Advance();
-        }
-        else
-        {
-            token.Type = TokenType.Operator;
-            token.Value = current.ToString(); // can this be cached in constants?
+            token.Value = op.Value;
+            token.Type = op.Type;
+            cursor.Advance((uint)(token.Value.Length - 1));
         }
     }
 

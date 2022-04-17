@@ -21,6 +21,5 @@
 
   <ItemGroup>
     <Folder Include="IO\" />
-    <Folder Include="Lexer\" />
   </ItemGroup>
 </Project>
