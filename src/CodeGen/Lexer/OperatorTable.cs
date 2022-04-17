@@ -60,7 +60,6 @@ internal class OperatorTable
                 new(TokenType.Pipe, "|"),
                 new(TokenType.PipeEqual, "|="),
                 new(TokenType.PipePipe, "||"),
-                new(TokenType.PipePipeEqual, "||="),
                 new(TokenType.Question, "?"),
                 new(TokenType.Hash, "#"),
                 new(TokenType.HashHash, "##"),

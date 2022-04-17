@@ -90,7 +90,6 @@ internal enum TokenType
     Pipe,
     PipeEqual,
     PipePipe,
-    PipePipeEqual,
     Question,
     // These are not used by the operator parser yet (Used in PreProcessor parsing)
     Hash,

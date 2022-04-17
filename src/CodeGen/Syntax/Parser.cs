@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using CodeGen.Lexer;
@@ -56,9 +55,37 @@ internal class Parser
 
     private Expression ParseExpression()
     {
-        var binary = ParseBinaryExpression();
+        var assigment = ParseAssignmentExpression();
 
-        return binary;
+        return assigment;
+
+    }
+
+    private Expression ParseAssignmentExpression()
+    {
+        var expression = ParseBinaryExpression();
+        switch (Current.Type)
+        {
+            case TokenType.AmpEqual:
+            case TokenType.PipeEqual:
+            case TokenType.Equal:
+            case TokenType.GreaterEqual:
+            case TokenType.LessEqual:
+            case TokenType.BangEqual:
+            case TokenType.MinusEqual:
+            case TokenType.PlusEqual:
+            case TokenType.StarEqual:
+            case TokenType.SlashEqual:
+            case TokenType.PercentEqual:
+            case TokenType.CaretEqual:
+                var token = Current;
+                _position++;
+                var right = ParseExpression();
+                expression = new AssigmentExpression(expression, right, token.Value);
+                break;
+        }
+
+        return expression;
 
     }
 
