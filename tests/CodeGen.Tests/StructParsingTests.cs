@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 namespace CodeGen.Tests;
 
+[Ignore("Not implemented yet")]
 internal class StructParsingTests
 {
     [Test]

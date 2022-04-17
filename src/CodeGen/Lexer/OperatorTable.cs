@@ -43,7 +43,7 @@ internal class OperatorTable
                 new(TokenType.Bang, "!"),
                 new(TokenType.BangEqual, "!="),
                 new(TokenType.Slash, "/"),
-                new(TokenType.SlashEqual, "/"),
+                new(TokenType.SlashEqual, "/="),
                 new(TokenType.Percent, "%"),
                 new(TokenType.PercentEqual, "%="),
                 new(TokenType.Less, "<"),
@@ -86,17 +86,5 @@ internal class OperatorTable
         }
         return false;
     }
-    public static Operator? GetOperator(ReadOnlySpan<char> characters)
-    {
-        for (var i = 0; i < _operators.Length; ++i)
-        {
-            if (characters.Equals(_operators[i].Value, StringComparison.Ordinal))
-            {
-                return _operators[i];
-            }
-        }
-        return null;
-    }
-
 }
 

@@ -33,7 +33,7 @@ internal static class TokenTypeInfo
     {
         switch (token.Type)
         {
-
+            //NOTE(Jens): should this contain operator-equal? they are inactivated now.
             case TokenType.Star:
             case TokenType.Slash:
             case TokenType.Percent:
@@ -44,25 +44,25 @@ internal static class TokenTypeInfo
                 return 8;
             
             case TokenType.LessLess:
-            case TokenType.LessLessEqual:
+            //case TokenType.LessLessEqual:
             case TokenType.GreaterGreater:
-            case TokenType.GreaterGreaterEqual:
+            //case TokenType.GreaterGreaterEqual:
                 return 7;
             
             case TokenType.Less:
-            case TokenType.LessEqual:
+            //case TokenType.LessEqual:
             case TokenType.Greater:
-            case TokenType.GreaterEqual:
+            //case TokenType.GreaterEqual:
                 return 6;
 
             case TokenType.Amp:
-            case TokenType.AmpEqual:
+            //case TokenType.AmpEqual:
                 return 5;
             case TokenType.Caret:
-            case TokenType.CaretEqual:
+            //case TokenType.CaretEqual:
                 return 4;
             case TokenType.Pipe:
-            case TokenType.PipeEqual:
+            //case TokenType.PipeEqual:
                 return 3;
             case TokenType.AmpAmp:
                 return 2;

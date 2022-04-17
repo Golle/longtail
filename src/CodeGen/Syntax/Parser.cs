@@ -69,8 +69,8 @@ internal class Parser
             case TokenType.AmpEqual:
             case TokenType.PipeEqual:
             case TokenType.Equal:
-            case TokenType.GreaterEqual:
-            case TokenType.LessEqual:
+            case TokenType.GreaterGreaterEqual:
+            case TokenType.LessLessEqual:
             case TokenType.BangEqual:
             case TokenType.MinusEqual:
             case TokenType.PlusEqual:

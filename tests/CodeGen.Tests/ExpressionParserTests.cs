@@ -12,10 +12,12 @@ internal class ExpressionParserTests
     [TestCase("*")]
     [TestCase("/")]
     [TestCase("%")]
+    [TestCase("^")]
     [TestCase("|")]
     [TestCase("&")]
-    [TestCase("^")]
-    public void Parse_SimpleOperator_ReturnExpression(string op)
+    [TestCase("&&")]
+    [TestCase("||")]
+    public void Parse_BinaryOperator_ReturnExpression(string op)
     {
         var code = $"1 {op} 2";
 
@@ -29,8 +31,7 @@ internal class ExpressionParserTests
         Assert.That(result.Operator, Is.EqualTo(op));
     }
 
-    [TestCase("&&")]
-    [TestCase("||")]
+    [TestCase("=")]
     [TestCase("+=")]
     [TestCase("-=")]
     [TestCase("*=")]
@@ -38,18 +39,37 @@ internal class ExpressionParserTests
     [TestCase("^=")]
     [TestCase("|=")]
     [TestCase("&=")]
-    public void Parse_CompoundOperator_ReturnExpression(string op)
+    [TestCase("!=")]
+    [TestCase(">>=")]
+    [TestCase("<<=")]
+    public void Parse_AssigmentOperator_ReturnExpression(string op)
     {
-        var code = $"1 {op} 2";
+        var code = $"a {op} 2";
 
-        var result = (BinaryExpression)new Parser(code).Parse().GetChildren().SingleOrDefault()!;
-        var left = (LiteralExpression)result.Left;
+        var result = (AssigmentExpression)new Parser(code).Parse().GetChildren().SingleOrDefault()!;
+        var left = (IdentifierExpression)result.Left;
         var right = (LiteralExpression)result.Right;
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(left.Value, Is.EqualTo("1"));
+        Assert.That(left.Value, Is.EqualTo("a"));
         Assert.That(right.Value, Is.EqualTo("2"));
         Assert.That(result.Operator, Is.EqualTo(op));
+    }
+
+    [TestCase("!")]
+    [TestCase("++")]
+    [TestCase("--")]
+    [TestCase("~")]
+    [TestCase("*")]
+    [TestCase("&")]
+    public void Parse_UnaryExpression_ReturnExpression(string unary)
+    {
+        var code = $"{unary}a";
+        var result = (UnaryExpression)new Parser(code).Parse().GetChildren().SingleOrDefault()!;
+        var right = (IdentifierExpression)result.Expression;
+
+        Assert.That(right.Value, Is.EqualTo("a"));
+        Assert.That(result.Operator, Is.EqualTo(unary));
     }
 
     [Test]
