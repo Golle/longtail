@@ -5,7 +5,7 @@ namespace CodeGen.Syntax;
 internal static class TokenTypeInfo
 {
 
-    public static int UnaryOperatorPrecedence(this Token token)
+    public static int UnaryOperatorPrecedence(this in Token token)
     {
         switch (token.Type)
         {
@@ -29,7 +29,7 @@ internal static class TokenTypeInfo
 
 
     // https://en.cppreference.com/w/cpp/language/operator_precedence
-    public static int BinaryOperatorPrecedence(this Token token)
+    public static int BinaryOperatorPrecedence(this in Token token)
     {
         switch (token.Type)
         {
