@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using CodeGen.Lexer;
 using CodeGen.Syntax.Expressions;
+using CodeGen.Syntax.Statements;
 
 namespace CodeGen.Syntax;
 
@@ -45,12 +46,65 @@ internal class Parser
                     parsing = false;
                     break;
                 default:
-                    nodes.Add(ParseExpression());
+                    nodes.Add(ParseGlobalStatement());
                     break;
             }
             _position++;
         }
         return new SyntaxTree(nodes.ToArray());
+    }
+
+
+    private SyntaxNode ParseGlobalStatement()
+    {
+        var statement = ParseStatement();
+
+        return statement;
+    }
+
+    private Statement ParseStatement()
+    {
+        var statement = ParseDeclarationStatement();
+        if (statement == null)
+        {
+            statement = new ExpressionStatement(ParseExpression());
+        }
+        // Not sure where to handle this
+        if (Current.Type != TokenType.Semicolon)
+        {
+            throw new ParserException($"Expected {TokenType.Semicolon} at the end of the expression but found a {Current.Type}");
+        }
+        _position++;
+
+        return statement;
+    }
+
+    private Statement? ParseDeclarationStatement()
+    {
+        // int a;
+        // int b = 0;
+        // int c = Func();
+        // int d = 1+2;
+        //NOTE(Jens) 2 identifiers without any operators etc, assume variable (probably functions as well, but keep it simple for now)
+        if (Current.Type == TokenType.Identifier && Peek(1).Type == TokenType.Identifier)
+        {
+            var type = Current.Value;
+            _position++;
+            var identifier = Current.Value;
+            _position++;
+            if (Current.Type == TokenType.Semicolon)
+            {
+                return new VariableDeclarationStatement(type, identifier, null);
+            }
+            if (Current.Type != TokenType.Equal)
+            {
+                throw new ParserException($"Expected {TokenType.Equal} operator but found {Current.Type}");
+            }
+            _position++;
+            return new VariableDeclarationStatement(type, identifier, ParseExpression());
+        }
+        return null;
+
     }
 
     private Expression ParseExpression()

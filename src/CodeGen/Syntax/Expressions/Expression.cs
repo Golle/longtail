@@ -1,6 +1,4 @@
-﻿using CodeGen.Lexer;
-
-namespace CodeGen.Syntax.Expressions;
+﻿namespace CodeGen.Syntax.Expressions;
 
 public abstract class Expression : SyntaxNode
 {

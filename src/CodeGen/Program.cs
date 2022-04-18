@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using CodeGen;
 using CodeGen.CodeWriter;
 using CodeGen.Lexer;
@@ -20,6 +21,7 @@ Console.WriteLine("Welcome to the interpreter!");
 
 while (true)
 {
+    await Task.Delay(50);
     Console.Write("> ");
     var line = Console.ReadLine();
     if (line == null)
@@ -56,15 +58,22 @@ while (true)
         }
     }
 
-    var result = new Parser(line)
-        .Parse();
-
-    foreach (var syntaxNode in result.GetChildren())
+    try
     {
-        syntaxNode.PrettyPrint();
+        var result = new Parser(line)
+            .Parse();
+
+        foreach (var syntaxNode in result.GetChildren())
+        {
+            syntaxNode.PrettyPrint();
+        }
+
+        Console.WriteLine("End of file reached.");
     }
-    
-    Console.WriteLine("End of file reached.");
+    catch (ParserException e)
+    {
+        Logger.Error($"Parser failed with message {e.Message}");
+    }
 }
 
 
