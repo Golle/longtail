@@ -26,6 +26,24 @@ internal enum TokenType
     DllImport,
     DllExport,
     
+
+    // Statements
+    If,
+    Else,
+    When,
+    For,
+    Switch,
+    Case,
+    Default,
+    Continue,
+    Break,
+    Do,
+    //Union,
+    Return, 
+    Goto,
+    Try,
+    Catch,
+    Throw,
     
     // Scopes
     LeftParenthesis,

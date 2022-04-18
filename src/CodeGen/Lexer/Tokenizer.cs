@@ -186,7 +186,7 @@ internal class Tokenizer
             cursor.Advance();
             identifer[i++] = cursor.Current;
         }
-
+        
         token.Value = new string(identifer[..i]);
     }
 
@@ -214,7 +214,16 @@ internal class Tokenizer
                 throw new NotSupportedException("Max Identifer size reached.");
             }
         }
-        (token.Type, token.Value) = CppKeywords.Translate(identifier[..i]);
+
+        if (StatementsTable.TryGetStatement(identifier[..i], out var statement))
+        {
+            token.Type = statement.Type;
+            token.Value = statement.Value;
+        }
+        else
+        {
+            (token.Type, token.Value) = CppKeywords.Translate(identifier[..i]);
+        }
     }
 
     private static void Comment(ref Cursor cursor, ref Token token)

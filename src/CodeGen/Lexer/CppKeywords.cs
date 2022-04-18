@@ -5,7 +5,6 @@ namespace CodeGen.Lexer;
 
 internal static class CppKeywords
 {
-    private static readonly string[] Statements = { "if", "else", "when", "for", "switch", "case", "default", "continue", "break", "do", "union", "return", "goto", "try", "catch", "throw"};
     //private static readonly string[] PrimitiveTypes = { "unsigned", "signed", "void", "bool", "int", "long", "short", "char", "float", "double" };
     private static readonly string[] ClassModifiers = { "public", "protected", "private" };
     private static readonly string[] Modifiers = { "explicit", "volatile", "friend", "final", "static", "extern", "noexcept", "virtual", "const", "inline" };
@@ -27,10 +26,7 @@ internal static class CppKeywords
     private const string StaticAssert = "static_assert";
     private const string CPlusPlus = "__cplusplus";
 
-
-
     private static readonly string[] CallTypes = { "__cdecl", "__stdcall", "__fastcall" };
-
 
     public static (TokenType, string) Translate(ReadOnlySpan<char> identifier)
     {
@@ -84,10 +80,10 @@ internal static class CppKeywords
             return (TokenType.DllExport, string.Empty);
         }
 
-        if (MatchesAny(Statements, identifier, out var statement))
-        {
-            return (TokenType.Statement, statement);
-        }
+        //if (MatchesAny(Statements, identifier, out var statement))
+        //{
+        //    return (TokenType.Statement, statement);
+        //}
 
         //if (MatchesAny(PrimitiveTypes, identifier, out var type))
         //{
