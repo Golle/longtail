@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -81,21 +82,45 @@ internal class Parser
 
     private Statement? ParseDeclarationStatement()
     {
-        // int a;
-        // int b = 0;
-        // int c = Func();
-        // int d = 1+2;
-        //NOTE(Jens) 2 identifiers without any operators etc, assume variable (probably functions as well, but keep it simple for now)
+        //NOTE(Jens) 2 identifiers without any modifiers , assume variable (probably functions as well, but keep it simple for now)
         if (Current.Type == TokenType.Identifier && Peek(1).Type == TokenType.Identifier)
         {
             var type = Current.Value;
-            _position++;
-            var identifier = Current.Value;
-            _position++;
+            var identifier = Peek(1).Value;
+            _position += 2;
+            // Variable declaration
             if (Current.Type == TokenType.Semicolon)
             {
                 return new VariableDeclarationStatement(type, identifier, null);
             }
+
+            // Function declaration
+            if (Current.Type == TokenType.LeftParenthesis)
+            {
+                _position++; // Consume LeftParentheshis
+
+                var arguments = ParseArgumentList();
+                if (Current.Type != TokenType.RightParenthesis)
+                {
+                    throw new ParserException($"Expected {TokenType.RightParenthesis} operator but found {Current.Type}");
+                }
+                _position++;
+                // Function declaration without a body
+                if (Current.Type == TokenType.Semicolon)
+                {
+                    return new FunctionDeclarationStatement(type, identifier, arguments);
+                }
+
+                if (Current.Type == TokenType.LeftCurlyBracer)
+                {
+                    throw new NotImplementedException("Function body parsing has not been implemented yet");
+                }
+
+                throw new ParserException($"Expected {TokenType.LeftCurlyBracer} or {TokenType.Semicolon} operator but found {Current.Type}");
+            }
+
+
+            // no matches assume variable declaration with a expression, ex int a = 10;
             if (Current.Type != TokenType.Equal)
             {
                 throw new ParserException($"Expected {TokenType.Equal} operator but found {Current.Type}");
@@ -105,6 +130,39 @@ internal class Parser
         }
         return null;
 
+    }
+
+    private FunctionDeclarationArgument[] ParseArgumentList()
+    {
+        // NOTE(jens): keep it simple now and only support the most basic types (single identifer + name)
+        //TODO: use array pool
+
+        List<FunctionDeclarationArgument> arguments = new();
+        while (Current.Type != TokenType.RightParenthesis)
+        {
+            var type = Peek(0);
+            var identifier = Peek(1);
+            var name = string.Empty;
+            // support empty type declarations, ex func(void, int);
+            if (identifier.Type == TokenType.Identifier)
+            {
+                name = identifier.Value;
+                _position += 2;
+            }
+            else
+            {
+                _position++;
+            }
+
+            arguments.Add(new FunctionDeclarationArgument(type.Value, name));
+            if (Current.Type != TokenType.Comma)
+            {
+                break;
+            }
+            _position++;
+        }
+
+        return arguments.ToArray();
     }
 
     private Expression ParseExpression()
