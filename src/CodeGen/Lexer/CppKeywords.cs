@@ -5,11 +5,10 @@ namespace CodeGen.Lexer;
 
 internal static class CppKeywords
 {
-    //private static readonly string[] PrimitiveTypes = { "unsigned", "signed", "void", "bool", "int", "long", "short", "char", "float", "double" };
     private static readonly string[] ClassModifiers = { "public", "protected", "private" };
-    private static readonly string[] Modifiers = { "explicit", "volatile", "friend", "final", "static", "extern", "noexcept", "virtual", "const", "inline" };
+    private static readonly string[] Modifiers = { "explicit", "volatile", "friend", "final", "virtual", "noexcept", "inline" };
     private static readonly string[] Others = { "constexpr", "__unaligned", "__extension__" };
-    private static readonly string[] Booleans = {"true", "false", "TRUE", "FALSE"};
+    private static readonly string[] Booleans = { "true", "false", "TRUE", "FALSE" };
     private static readonly string[] Null = { "nullptr", "NULL" };
 
     private const string Class = "class";
@@ -25,6 +24,10 @@ internal static class CppKeywords
     private const string Auto = "auto";
     private const string StaticAssert = "static_assert";
     private const string CPlusPlus = "__cplusplus";
+
+    private const string Static = "static";
+    private const string Const = "const";
+    private const string Extern = "extern";
 
     private static readonly string[] CallTypes = { "__cdecl", "__stdcall", "__fastcall" };
 
@@ -80,16 +83,6 @@ internal static class CppKeywords
             return (TokenType.DllExport, string.Empty);
         }
 
-        //if (MatchesAny(Statements, identifier, out var statement))
-        //{
-        //    return (TokenType.Statement, statement);
-        //}
-
-        //if (MatchesAny(PrimitiveTypes, identifier, out var type))
-        //{
-        //    return (TokenType.PrimitiveType, type);
-        //}
-
         if (MatchesAny(ClassModifiers, identifier, out var modifier))
         {
             return (TokenType.ClassModifier, modifier);
@@ -139,6 +132,22 @@ internal static class CppKeywords
         {
             return (TokenType.CPlusPlus, string.Empty);
         }
+
+        if (IsMatch(Const, identifier))
+        {
+            return (TokenType.Const, string.Empty);
+        }
+
+        if (IsMatch(Extern, identifier))
+        {
+            return (TokenType.Extern, string.Empty);
+        }
+        
+        if (IsMatch(Static, identifier))
+        {
+            return (TokenType.Static, string.Empty);
+        }
+
         //if (IsMatch(Auto, identifier))
         //{
         //    // TODO: if we want something special to happen implement this.
@@ -146,6 +155,4 @@ internal static class CppKeywords
         //}
         return (TokenType.Identifier, new string(identifier));
     }
-
-
 }

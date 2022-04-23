@@ -13,6 +13,19 @@ internal enum TokenType
     //If, Else, When, For, Switch, Case, Default, Continue, Break, Do, Return, Union, Goto, Try, Catch, Throw, NOTE(Jens); Should we use more explicit tokens?
     Statement,
     
+
+    // Built in types
+    Signed,
+    Unsigned,
+    Int,
+    Long,
+    Short,
+    Char,
+    Bool,
+    Double,
+    Float,
+    Void,
+
     // Function/type modifiers etc
     DeclSpec,
     ForceInline,
@@ -21,7 +34,11 @@ internal enum TokenType
     FunctionModifier,
     CPPKeyword,
     VariadicArgument,
-    
+
+    Static,
+    Extern,
+    Const,
+
     // DLL
     DllImport,
     DllExport,
@@ -134,4 +151,5 @@ internal enum TokenType
     // EOF/EOD
     EndOfDirective, // End of preprocessor directive
     EndOfFile,// End of the file
+    
 }

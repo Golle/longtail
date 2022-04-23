@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using CodeGen.Logging;
 
 namespace CodeGen.Lexer;
 
@@ -215,14 +214,21 @@ internal class Tokenizer
             }
         }
 
-        if (StatementsTable.TryGetStatement(identifier[..i], out var statement))
+
+        var span = identifier[..i];
+        if (BuiltInTypesTable.TryGetType(span, out var type))
+        {
+            token.Type = type.Type;
+            token.Value = type.Value;
+        }
+        else if(StatementsTable.TryGetStatement(span, out var statement))
         {
             token.Type = statement.Type;
             token.Value = statement.Value;
         }
         else
         {
-            (token.Type, token.Value) = CppKeywords.Translate(identifier[..i]);
+            (token.Type, token.Value) = CppKeywords.Translate(span);
         }
     }
 
