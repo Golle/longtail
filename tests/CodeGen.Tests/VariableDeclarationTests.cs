@@ -10,15 +10,50 @@ namespace CodeGen.Tests;
 internal class VariableDeclarationTests
 {
     [Test]
-    public void Parse_EmptyDecklaration_ReturnStatement()
+    public void Parse_EmptyDeclaration_ReturnStatement()
     {
         var code = "int a;";
 
         var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var type = (BuiltInTypeExpression)statement.Type;
 
-        Assert.That(statement.Type, Is.EqualTo("int"));
+        Assert.That(type.Types.Single(), Is.EqualTo(TokenType.Int));
         Assert.That(statement.Identifier, Is.EqualTo("a"));
         Assert.That(statement.AssignmentExpression, Is.Null);
+    }
+
+    [Test]
+    public void Parse_AdvancedTypeDeclaration_ReturnStatement()
+    {
+        var code = "unsigned long int ** a;";
+
+        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var pointer1 = (PointerTypeExpression)statement.Type;
+        var pointer2 = (PointerTypeExpression)pointer1.Expression;
+        var type = (BuiltInTypeExpression)pointer2.Expression;
+
+        Assert.That(type.Types[0], Is.EqualTo(TokenType.Unsigned));
+        Assert.That(type.Types[1], Is.EqualTo(TokenType.Long));
+        Assert.That(type.Types[2], Is.EqualTo(TokenType.Int));
+        Assert.That(statement.Identifier, Is.EqualTo("a"));
+        Assert.That(statement.AssignmentExpression, Is.Null);
+    }
+
+    [Test]
+    public void Parse_AdvancedTypeDeclarationAssignment_ReturnStatement()
+    {
+        var code = "unsigned int * a = 1;";
+
+        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var literal = (LiteralExpression)statement.AssignmentExpression!;
+        var pointer = (PointerTypeExpression)statement.Type;
+        var type = (BuiltInTypeExpression)pointer.Expression;
+
+        Assert.That(type.Types[0], Is.EqualTo(TokenType.Unsigned));
+        Assert.That(type.Types[1], Is.EqualTo(TokenType.Int));
+        Assert.That(statement.Identifier, Is.EqualTo("a"));
+        Assert.That(literal.Type, Is.EqualTo(TokenType.Number));
+        Assert.That(literal.Value, Is.EqualTo("1"));
     }
 
     [Test]
@@ -28,8 +63,9 @@ internal class VariableDeclarationTests
 
         var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var literal = (LiteralExpression)statement.AssignmentExpression!;
+        var type = (BuiltInTypeExpression)statement.Type;
 
-        Assert.That(statement.Type, Is.EqualTo("int"));
+        Assert.That(type.Types.Single(), Is.EqualTo(TokenType.Int));
         Assert.That(statement.Identifier, Is.EqualTo("a"));
         Assert.That(literal.Value, Is.EqualTo("1"));
         Assert.That(literal.Type, Is.EqualTo(TokenType.Number));
@@ -44,8 +80,9 @@ internal class VariableDeclarationTests
         var binary = (BinaryExpression)statement.AssignmentExpression!;
         var left = (IdentifierExpression)binary.Left;
         var right = (LiteralExpression)binary.Right;
+        var type = (BuiltInTypeExpression)statement.Type;
 
-        Assert.That(statement.Type, Is.EqualTo("int"));
+        Assert.That(type.Types.Single(), Is.EqualTo(TokenType.Int));
         Assert.That(statement.Identifier, Is.EqualTo("a"));
         Assert.That(binary.Operator, Is.EqualTo("+"));
         Assert.That(left.Value, Is.EqualTo("b"));

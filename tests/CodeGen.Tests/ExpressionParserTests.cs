@@ -22,7 +22,6 @@ internal class ExpressionParserTests
     {
         var code = $"1 {op} 2;";
 
-
         var statement = (ExpressionStatement)new Parser(code).Parse().GetChildren().Single();
         var binary = (BinaryExpression)statement.Expression;
         var left = (LiteralExpression)binary.Left;

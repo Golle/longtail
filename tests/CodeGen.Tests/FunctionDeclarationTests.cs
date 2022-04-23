@@ -1,5 +1,7 @@
 ﻿using System.Linq;
+using CodeGen.Lexer;
 using CodeGen.Syntax;
+using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
@@ -13,8 +15,9 @@ internal class FunctionDeclarationTests
         const string code = "void func();";
 
         var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var returnType = (BuiltInTypeExpression)statement.ReturnType;
 
-        Assert.That(statement.ReturnType, Is.EqualTo("void"));
+        Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
         Assert.That(statement.Body, Is.Null);
         Assert.That(statement.Name, Is.EqualTo("func"));
         Assert.That(statement.Arguments, Is.Empty);
@@ -27,8 +30,9 @@ internal class FunctionDeclarationTests
 
         var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var argument = statement.Arguments.Single();
+        var returnType = (BuiltInTypeExpression)statement.ReturnType;
 
-        Assert.That(statement.ReturnType, Is.EqualTo("int"));
+        Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Int));
         Assert.That(statement.Name, Is.EqualTo("func"));
         Assert.That(argument.Type, Is.EqualTo("long"));
         Assert.That(argument.Name, Is.EqualTo("a"));
@@ -43,8 +47,9 @@ internal class FunctionDeclarationTests
         var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var argument1 = statement.Arguments[0];
         var argument2 = statement.Arguments[1];
+        var returnType = (BuiltInTypeExpression)statement.ReturnType;
 
-        Assert.That(statement.ReturnType, Is.EqualTo("int"));
+        Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Int));
         Assert.That(statement.Name, Is.EqualTo("func"));
         Assert.That(argument1.Type, Is.EqualTo("long"));
         Assert.That(argument1.Name, Is.EqualTo("a"));
@@ -60,8 +65,9 @@ internal class FunctionDeclarationTests
 
         var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var argument = statement.Arguments[0];
+        var returnType = (BuiltInTypeExpression)statement.ReturnType;
 
-        Assert.That(statement.ReturnType, Is.EqualTo("void"));
+        Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
         Assert.That(statement.Name, Is.EqualTo("func"));
         Assert.That(argument.Type, Is.EqualTo("void"));
         Assert.That(argument.Name, Is.EqualTo(string.Empty));
@@ -75,8 +81,9 @@ internal class FunctionDeclarationTests
         var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var argument1 = statement.Arguments[0];
         var argument2 = statement.Arguments[1];
+        var returnType = (BuiltInTypeExpression)statement.ReturnType;
 
-        Assert.That(statement.ReturnType, Is.EqualTo("void"));
+        Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
         Assert.That(statement.Name, Is.EqualTo("func"));
         Assert.That(argument1.Type, Is.EqualTo("void"));
         Assert.That(argument1.Name, Is.EqualTo(string.Empty));

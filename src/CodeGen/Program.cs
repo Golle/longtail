@@ -1,10 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using CodeGen;
-using CodeGen.CodeWriter;
-using CodeGen.Lexer;
 using CodeGen.Logging;
 using CodeGen.Syntax;
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -65,11 +64,50 @@ internal class Parser
 
     private Statement ParseStatement()
     {
-        var statement = ParseDeclarationStatement();
-        if (statement == null)
+        Statement statement;
+        var expression = ParseExpression(); //NOTE(Jens) This is not a perfect solution since it will allow bad syntax, like const (1+2) unsigned *& A()
+        if (Current.Type == TokenType.Identifier)
         {
-            statement = new ExpressionStatement(ParseExpression());
+            var identifier = Current.Value;
+            var next = Peek(1);
+            if (next.Type == TokenType.Semicolon)
+            {
+                _position++;
+                statement = new VariableDeclarationStatement(expression, identifier, null);
+            }
+            else if (next.Type == TokenType.LeftParenthesis)
+            {
+                _position += 2;
+                var arguments = ParseArgumentList();
+                if (Current.Type != TokenType.RightParenthesis)
+                {
+                    throw new ParserException($"Expected {TokenType.RightParenthesis} operator but found {Current.Type}");
+                }
+                _position++;
+                if (Current.Type == TokenType.Semicolon)
+                {
+                    statement =new FunctionDeclarationStatement(expression, identifier, arguments);
+                }
+                else if (Current.Type == TokenType.LeftCurlyBracer)
+                {
+                    throw new NotImplementedException("Function body parsing has not been implemented yet");
+                }
+                else
+                {
+                    throw new ParserException($"Invalid token found {Current.Type}");
+                }
+            }
+            else
+            {
+                _position+=2;
+                statement = new VariableDeclarationStatement(expression, identifier, ParseExpression());
+            }
         }
+        else
+        {
+            statement = new ExpressionStatement(expression);
+        }
+        
         // Not sure where to handle this
         if (Current.Type != TokenType.Semicolon)
         {
@@ -79,64 +117,11 @@ internal class Parser
 
         return statement;
     }
-
-    private Statement? ParseDeclarationStatement()
-    {
-        //NOTE(Jens) 2 identifiers without any modifiers , assume variable (probably functions as well, but keep it simple for now)
-        if (Current.Type == TokenType.Identifier && Peek(1).Type == TokenType.Identifier)
-        {
-            var type = Current.Value;
-            var identifier = Peek(1).Value;
-            _position += 2;
-            // Variable declaration
-            if (Current.Type == TokenType.Semicolon)
-            {
-                return new VariableDeclarationStatement(type, identifier, null);
-            }
-
-            // Function declaration
-            if (Current.Type == TokenType.LeftParenthesis)
-            {
-                _position++; // Consume LeftParentheshis
-
-                var arguments = ParseArgumentList();
-                if (Current.Type != TokenType.RightParenthesis)
-                {
-                    throw new ParserException($"Expected {TokenType.RightParenthesis} operator but found {Current.Type}");
-                }
-                _position++;
-                // Function declaration without a body
-                if (Current.Type == TokenType.Semicolon)
-                {
-                    return new FunctionDeclarationStatement(type, identifier, arguments);
-                }
-
-                if (Current.Type == TokenType.LeftCurlyBracer)
-                {
-                    throw new NotImplementedException("Function body parsing has not been implemented yet");
-                }
-
-                throw new ParserException($"Expected {TokenType.LeftCurlyBracer} or {TokenType.Semicolon} operator but found {Current.Type}");
-            }
-
-
-            // no matches assume variable declaration with a expression, ex int a = 10;
-            if (Current.Type != TokenType.Equal)
-            {
-                throw new ParserException($"Expected {TokenType.Equal} operator but found {Current.Type}");
-            }
-            _position++;
-            return new VariableDeclarationStatement(type, identifier, ParseExpression());
-        }
-        return null;
-
-    }
-
+    
     private FunctionDeclarationArgument[] ParseArgumentList()
     {
         // NOTE(jens): keep it simple now and only support the most basic types (single identifer + name)
         //TODO: use array pool
-
         List<FunctionDeclarationArgument> arguments = new();
         while (Current.Type != TokenType.RightParenthesis)
         {
@@ -170,7 +155,6 @@ internal class Parser
         var assigment = ParseAssignmentExpression();
 
         return assigment;
-
     }
 
     private Expression ParseAssignmentExpression()
@@ -262,7 +246,54 @@ internal class Parser
             return new ParenthesizedExpression(inside);
         }
 
+        if (current.Type == TokenType.Const)
+        {
+            _position++;
+            return new ConstExpression(ParsePrimaryExpression());
+        }
+        if (IsBuiltInType(current.Type))
+        {
+            var modifierCount = 0;
+            Span<TokenType> typeModifiers = stackalloc TokenType[10];
+
+            while (IsBuiltInType(Current.Type))
+            {
+                typeModifiers[modifierCount++] = Current.Type;
+                _position++;
+            }
+            Expression expr = new BuiltInTypeExpression(typeModifiers[..modifierCount]);
+            while (true)
+            {
+                if (Current.Type == TokenType.Star)
+                {
+                    expr = new PointerTypeExpression(expr);
+                }
+                else if (Current.Type == TokenType.Amp)
+                {
+                    expr = new ReferenceTypeExpression(expr);
+                }
+                else
+                {
+                    break;
+                }
+                _position++;
+            }
+            return expr;
+        }
+
         throw new ParserException($"Primary expression for token type {current.Type} has not been implemented. FIX IT!");
+
+        static bool IsBuiltInType(TokenType type) => type is
+            TokenType.Signed or
+            TokenType.Unsigned or
+            TokenType.Int or
+            TokenType.Long or
+            TokenType.Char or
+            TokenType.Bool or
+            TokenType.Float or
+            TokenType.Double or
+            TokenType.Void
+            ;
     }
 
     private SyntaxNode ParseStruct()

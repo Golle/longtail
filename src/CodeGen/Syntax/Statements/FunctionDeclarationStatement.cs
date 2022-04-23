@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Linq;
+using CodeGen.Syntax.Expressions;
 
 namespace CodeGen.Syntax.Statements;
 internal record struct FunctionDeclarationArgument(string Type, string Name);
 internal class FunctionDeclarationStatement : Statement
 {
-    public string ReturnType { get; }
+    public Expression ReturnType { get; }
     public string Name { get; }
     public FunctionDeclarationArgument[] Arguments { get; }
     public Statement? Body { get; }
 
-    public FunctionDeclarationStatement(string returnType, string name, FunctionDeclarationArgument[] arguments, Statement? body = null)
+    public FunctionDeclarationStatement(Expression returnType, string name, FunctionDeclarationArgument[] arguments, Statement? body = null)
     {
         ReturnType = returnType;
         Name = name;
