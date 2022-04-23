@@ -262,6 +262,8 @@ internal class Parser
                 _position++;
             }
             Expression expr = new BuiltInTypeExpression(typeModifiers[..modifierCount]);
+
+            // NOTE(Jens): we might want to move this, so we can support custom type pointers as well
             while (true)
             {
                 if (Current.Type == TokenType.Star)
