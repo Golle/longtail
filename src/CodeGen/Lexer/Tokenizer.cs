@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace CodeGen.Lexer;
 
@@ -19,12 +20,16 @@ internal class Tokenizer
     {
         Cursor cursor = new(input);
         List<Token> tokens = new(100_000);
+        var isPreProcessorLine = false;
         do
         {
             var token = new Token(cursor.Line, cursor.Column);
 
             switch (cursor.Current)
             {
+                case '\r':
+                    // Completely ignore \r
+                    continue;
                 case '"':
                     StringLiteral(ref cursor, ref token);
                     break;
@@ -62,20 +67,45 @@ internal class Tokenizer
                     }
                     break;
                 case '\\':
+                    if (isPreProcessorLine)
+                    {
+                        var count = 1;
+                        while (cursor.Peek(count) == ' ')
+                        {
+                            count++;
+                        }
+                        
+                        // NOTE(Jens): this might skip an additional line
+                        if (cursor.Peek(count) is '\n' or '\r')
+                        {
+                            cursor.Advance(count);
+                        }
+                        if (cursor.Peek() is '\n' or '\r')
+                        {
+                            cursor.Advance();
+                        }
+                        continue;
+                    }
                     token.Type = TokenType.Backslash;
                     break;
                 case '{' or '}' or '[' or ']' or '(' or ')':
                     token.Type = Bracket(cursor.Current);
                     break;
-                case '\n' or '\r':
-                    if (cursor.Peek() is '\n' or '\r')
+                case '\n':
+                    if (isPreProcessorLine)
                     {
-                        cursor.Advance();
+                        // Replace new line with preprocessor end
+                        token.Type = TokenType.PreProcessorEnd;
+                        isPreProcessorLine = false;
                     }
-                    token.Type = TokenType.NewLine;
+                    else
+                    {
+                        token.Type = TokenType.NewLine;
+                    }
                     break;
                 case '#':
                     PreProcessor(ref cursor, ref token);
+                    isPreProcessorLine = true;
                     break;
                 case >= '0' and <= '9':
                     NumberLiteral(ref cursor, ref token);
@@ -99,7 +129,6 @@ internal class Tokenizer
             {
                 tokens.Add(token);
             }
-
         } while (cursor.Advance());
 
         tokens.Add(new Token(cursor.Line, cursor.Column)
@@ -189,7 +218,7 @@ internal class Tokenizer
             cursor.Advance();
             identifer[i++] = cursor.Current;
         }
-        
+
         token.Value = new string(identifer[..i]);
     }
 
@@ -225,7 +254,7 @@ internal class Tokenizer
             token.Type = type.Type;
             token.Value = type.Value;
         }
-        else if(StatementsTable.TryGetStatement(span, out var statement))
+        else if (StatementsTable.TryGetStatement(span, out var statement))
         {
             token.Type = statement.Type;
             token.Value = statement.Value;
@@ -243,10 +272,10 @@ internal class Tokenizer
         {
             while (cursor.Current is not '\n')
             {
-                if(!cursor.Advance())
+                if (!cursor.Advance())
                 {
-                     // End of file reached.
-                     return;
+                    // End of file reached.
+                    return;
                 }
             }
         }
@@ -275,7 +304,7 @@ internal class Tokenizer
         {
             token.Value = op.Value;
             token.Type = op.Type;
-            cursor.Advance((uint)(token.Value.Length - 1));
+            cursor.Advance(token.Value.Length - 1);
         }
     }
 

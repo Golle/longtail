@@ -29,7 +29,7 @@ internal ref struct Cursor
         return _input[_position + offset];
     }
 
-    public bool Advance(uint count)
+    public bool Advance(int count)
     {
         for (var i = 0; i < count; ++i)
         {

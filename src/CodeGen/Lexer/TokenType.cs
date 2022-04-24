@@ -147,9 +147,11 @@ internal enum TokenType
     Comment,
     StaticAssert,
     PreProcessor,
+    PreProcessorEnd,
 
     // EOF/EOD
     EndOfDirective, // End of preprocessor directive
     EndOfFile,// End of the file
+
     
 }

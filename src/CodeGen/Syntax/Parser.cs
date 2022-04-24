@@ -22,7 +22,8 @@ internal class Parser
 
     public Parser(string input)
     {
-        _tokens = new Tokenizer().Tokenize(input)
+        _tokens = new Tokenizer()
+            .Tokenize(input)
             .Where(t => t.Type is not TokenType.NewLine)
             .ToArray();
     }
@@ -54,7 +55,6 @@ internal class Parser
                     nodes.Add(ParseGlobalStatement());
                     break;
             }
-            //_position++;
         }
         return new SyntaxTree(nodes.ToArray());
     }
