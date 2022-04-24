@@ -9,6 +9,11 @@ public class ConsoleLogWriter : ILogWriter
     public ValueTask OnMessage(LogMessage logMessage)
     {
         static string DateTimeNow() => DateTime.Now.ToString("HH:mm:ss.fff", new DateTimeFormatInfo());
+        if (logMessage.Level == LogLevel.Raw)
+        {
+            Console.WriteLine(logMessage.Message);
+            return ValueTask.CompletedTask;
+        }
         var color = logMessage.Level switch
         {
             LogLevel.Debug or LogLevel.Trace => ConsoleColor.Cyan,

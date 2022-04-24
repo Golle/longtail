@@ -10,7 +10,9 @@ public enum LogLevel
     Info,
     Debug,
     Warning,
-    Trace
+    Trace,
+    
+    Raw
 }
 
 public struct LogMessage
@@ -34,6 +36,7 @@ public static class Logger
         _channel.Writer.Complete();
     }
 
+    public static void Raw(string message) => Log(LogLevel.Raw, message);
     public static void Trace(string message) => Log(LogLevel.Trace, message);
     public static void Error(string message) => Log(LogLevel.Error, message);
     public static void Error(string message, Exception e) =>
@@ -42,9 +45,9 @@ public static class Logger
     public static void Warning(string message) => Log(LogLevel.Warning, message);
     private static void Log(LogLevel level, string message) =>
         _channel.Writer.TryWrite(new LogMessage(level, message));
-
     public static IDisposable Start() => new LoggerLifetime(new ConsoleLogWriter());
     public static IDisposable Start(ILogWriter logWriter) => new LoggerLifetime(logWriter);
+
     private class LoggerLifetime : IDisposable
     {
         private readonly Task _logTask;

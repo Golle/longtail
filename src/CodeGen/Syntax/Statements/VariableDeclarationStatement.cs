@@ -25,10 +25,10 @@ internal class VariableDeclarationStatement : Statement
         return $"{Type} {Identifier};";
     }
 
-    public override void PrettyPrint(int indentation = 0)
+    public override void PrettyPrint(IPrettyPrint print, int indentation)
     {
-        Console.WriteLine($"{new string(' ', indentation)}{GetType().Name} ({Identifier})");
-        Type.PrettyPrint(indentation + 2);
-        AssignmentExpression?.PrettyPrint(indentation + 2);
+        print.Write($"{GetType().Name} ({Identifier})", indentation);
+        Type.PrettyPrint(print, indentation + 2);
+        AssignmentExpression?.PrettyPrint(print, indentation + 2);
     }
 }

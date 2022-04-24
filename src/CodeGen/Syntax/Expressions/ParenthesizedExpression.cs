@@ -13,9 +13,9 @@ internal class ParenthesizedExpression : Expression
 
     public override string ToString() => $"({Inner})";
 
-    public override void PrettyPrint(int indentation = 0)
+    public override void PrettyPrint(IPrettyPrint print, int indentation = 0)
     {
-        Console.WriteLine($"{new string(' ', indentation)}{GetType().Name}");
-        Inner.PrettyPrint(indentation + 2);
+        print.Write($"{GetType().Name}", indentation);
+        Inner.PrettyPrint(print, indentation + 2);
     }
 }

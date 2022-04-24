@@ -14,8 +14,8 @@ internal class BuiltInTypeExpression : Expression
 
     public override string ToString() => string.Join(' ', Types.Select(t => t));
 
-    public override void PrettyPrint(int indentation = 0)
+    public override void PrettyPrint(IPrettyPrint print, int indentation = 0)
     {
-        Console.WriteLine($"{new string(' ', indentation)}{GetType().Name} ({ToString()})");
+        print.Write($"{GetType().Name} ({ToString()})", indentation);
     }
 }

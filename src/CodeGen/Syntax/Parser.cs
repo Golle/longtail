@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CodeGen.Lexer;
+using CodeGen.Logging;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 
@@ -36,9 +37,11 @@ internal class Parser
         while (parsing)
         {
             var token = Current;
-
             switch (token.Type)
             {
+                case TokenType.PreProcessor:
+                    SkipPreProcessor();
+                    break;
                 case TokenType.Struct:
                     if (!IsStructDefinition())
                     {
@@ -57,6 +60,37 @@ internal class Parser
             }
         }
         return new SyntaxTree(nodes.ToArray());
+    }
+
+    private void SkipPreProcessor()
+    {
+        //NOTE(Jens): this is a temporary solution to enable us to parse the C code from the headerfile whileignoring any preprocessor includes, defines or if statements.
+        if (Current.Value == "if")
+        {
+            Logger.Trace($"Found if on line: {Current.Line} Column: {Current.Column}");
+            _position++;
+            while (!(Current.Type == TokenType.PreProcessor && Current.Value == "endif"))
+            {
+                if (Current.Type == TokenType.EndOfFile)
+                {
+                    throw new ParserException("Failed to find #endif before end of file");
+                }
+                if (Current.Type == TokenType.PreProcessor && Current.Value == "if")
+                {
+                    SkipPreProcessor();
+                }
+                _position++;
+            }
+            Logger.Trace($"Found endif on line: {Current.Line} Column: {Current.Column}");
+            _position++;
+        }
+
+        while (Current.Type != TokenType.PreProcessorEnd)
+        {
+            _position++;
+        }
+        // Advance past the end token
+        _position++;
     }
 
     private bool IsStructDefinition()
@@ -99,6 +133,7 @@ internal class Parser
             if (next.Type == TokenType.Semicolon)
             {
                 _position++;
+                Logger.Trace($"Variable declaration: {identifier}");
                 statement = new VariableDeclarationStatement(expression, identifier, null);
             }
             else if (next.Type == TokenType.LeftParenthesis)
@@ -112,6 +147,7 @@ internal class Parser
                 _position++;
                 if (Current.Type == TokenType.Semicolon)
                 {
+                    Logger.Trace($"Function declaration: {identifier}");
                     statement = new FunctionDeclarationStatement(expression, identifier, arguments);
                 }
                 else if (Current.Type == TokenType.LeftCurlyBracer)
@@ -407,7 +443,7 @@ internal class ParserException : Exception
 [DebuggerDisplay("{ToString()}")]
 public abstract class SyntaxNode
 {
-    public virtual void PrettyPrint(int indentation = 0) { }
+    public virtual void PrettyPrint(IPrettyPrint print, int indentation = 0) { }
 }
 
 public sealed class StructSyntaxNode : SyntaxNode

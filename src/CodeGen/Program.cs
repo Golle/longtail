@@ -62,8 +62,8 @@ while (true)
         Console.WriteLine("Syntax tree.");
         foreach (var syntaxNode in result.GetChildren())
         {
-            syntaxNode.PrettyPrint();
-            Console.WriteLine();
+            syntaxNode.PrettyPrint(new SyntaxConsoleWriter());
+            Logger.Raw(Environment.NewLine);
         }
 
         Console.WriteLine("End of file reached.");
