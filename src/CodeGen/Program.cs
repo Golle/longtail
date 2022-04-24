@@ -59,10 +59,11 @@ while (true)
     {
         var result = new Parser(line)
             .Parse();
-
+        Console.WriteLine("Syntax tree.");
         foreach (var syntaxNode in result.GetChildren())
         {
             syntaxNode.PrettyPrint();
+            Console.WriteLine();
         }
 
         Console.WriteLine("End of file reached.");

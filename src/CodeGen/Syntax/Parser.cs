@@ -22,7 +22,9 @@ internal class Parser
 
     public Parser(string input)
     {
-        _tokens = new Tokenizer().Tokenize(input).ToArray();
+        _tokens = new Tokenizer().Tokenize(input)
+            .Where(t => t.Type is not TokenType.NewLine)
+            .ToArray();
     }
 
     public SyntaxTree Parse()
@@ -36,8 +38,11 @@ internal class Parser
 
             switch (token.Type)
             {
-
                 case TokenType.Struct:
+                    if (!IsStructDefinition())
+                    {
+                        goto default;
+                    }
                     nodes.Add(ParseStruct());
                     break;
 
@@ -49,9 +54,30 @@ internal class Parser
                     nodes.Add(ParseGlobalStatement());
                     break;
             }
-            _position++;
+            //_position++;
         }
         return new SyntaxTree(nodes.ToArray());
+    }
+
+    private bool IsStructDefinition()
+    {
+        for (var i = 1; i < 10; ++i)
+        {
+            var token = Peek(i).Type;
+            // pointer or a paranthesis indicates that its not a struct
+            if (token is TokenType.Star or TokenType.LeftParenthesis)
+            {
+                return false;
+            }
+
+            // found a curly bracer or a semicolon, this is a struct definition
+            if (token is TokenType.LeftCurlyBracer or TokenType.Semicolon)
+            {
+                return true;
+            }
+        }
+        // nothing found after 10 steps, this is not expected.
+        throw new ParserException("Could not find a token that can determine if it's a struct definition or struct return type.");
     }
 
 
@@ -120,13 +146,11 @@ internal class Parser
 
     private FunctionDeclarationArgument[] ParseArgumentList()
     {
-        // NOTE(jens): keep it simple now and only support the most basic types (single identifer + name)
         //TODO: use array pool
         List<FunctionDeclarationArgument> arguments = new();
         while (Current.Type != TokenType.RightParenthesis)
         {
             var expr = TryParseTypeExpression() ?? throw new ParserException("Failed to parse method arguments");
-            
             var name = string.Empty;
             // support empty type declarations, ex func(void, int);
             if (Current.Type == TokenType.Identifier)
@@ -217,14 +241,14 @@ internal class Parser
     private Expression ParsePrimaryExpression()
     {
         var current = Current;
-        
+
         //Any literal token, just return
         if (current.Type is TokenType.Boolean or TokenType.String or TokenType.Number or TokenType.Character)
         {
             _position++;
             return new LiteralExpression(current.Type, current.Value);
         }
-        
+
         // Parenthesis
         if (current.Type == TokenType.LeftParenthesis)
         {
@@ -237,7 +261,7 @@ internal class Parser
             _position++;
             return new ParenthesizedExpression(inside);
         }
-        
+
         return TryParseTypeExpression() ?? throw new ParserException($"Primary expression for token type {current.Type} has not been implemented. FIX IT!");
     }
 

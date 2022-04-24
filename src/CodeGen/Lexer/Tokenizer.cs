@@ -91,6 +91,10 @@ internal class Tokenizer
                     break;
             }
 
+            if (_skipComments && token.Type == TokenType.Comment)
+            {
+                continue;
+            }
             if (token.Type != TokenType.Unknown) // Ignore space, tabs etc that does't affect the code
             {
                 tokens.Add(token);
@@ -237,9 +241,13 @@ internal class Tokenizer
         token.Type = TokenType.Comment;
         if (cursor.Peek() == '/') // inline comment
         {
-            while (cursor.Current != '\n')
+            while (cursor.Current is not '\n')
             {
-                cursor.Advance();
+                if(!cursor.Advance())
+                {
+                     // End of file reached.
+                     return;
+                }
             }
         }
         else // block comment
