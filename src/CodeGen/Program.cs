@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using CodeGen;
@@ -28,7 +29,7 @@ while (true)
 
     if (line.Length == 0)
     {
-        //line = File.ReadAllText(@"O:\tmp\longtail\src\longtail.h");
+        line = File.ReadAllText(@"O:\tmp\sample.h");
     }
     else if (line.StartsWith("#longtail"))
     {
@@ -57,8 +58,10 @@ while (true)
 
     try
     {
+        var timer = Stopwatch.StartNew();
         var result = new Parser(line)
             .Parse();
+        timer.Stop();
         Console.WriteLine("Syntax tree.");
         foreach (var syntaxNode in result.GetChildren())
         {
@@ -66,7 +69,7 @@ while (true)
             Logger.Raw(Environment.NewLine);
         }
 
-        Console.WriteLine("End of file reached.");
+        Logger.Raw($"End of file reached. ({timer.Elapsed.TotalMilliseconds:0.##} ms)");
     }
     catch (ParserException e)
     {

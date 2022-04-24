@@ -1,11 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using CodeGen.Syntax.Expressions;
 
 namespace CodeGen.Syntax.Statements;
 
 internal record struct FunctionDeclarationArgument(Expression Type, string Name);
-
 internal class FunctionDeclarationStatement : Statement
 {
     public Expression ReturnType { get; }
@@ -25,7 +23,7 @@ internal class FunctionDeclarationStatement : Statement
 
     public override void PrettyPrint(IPrettyPrint print, int indentation = 0)
     {
-        print.Write(GetType().Name, indentation);
+        print.Write($"{GetType().Name} ({Name})", indentation);
         print.Write("Return type:", indentation + 2);
         ReturnType.PrettyPrint(print, indentation + 4);
         print.Write("Arguments:", indentation + 2);

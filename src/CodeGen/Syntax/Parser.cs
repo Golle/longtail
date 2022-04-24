@@ -42,13 +42,6 @@ internal class Parser
                 case TokenType.PreProcessor:
                     SkipPreProcessor();
                     break;
-                case TokenType.Struct:
-                    if (!IsStructDefinition())
-                    {
-                        goto default;
-                    }
-                    nodes.Add(ParseStruct());
-                    break;
 
                 case TokenType.EndOfFile:
                 case TokenType.Invalid:
@@ -93,6 +86,25 @@ internal class Parser
         _position++;
     }
 
+    private SyntaxNode ParseGlobalStatement()
+    {
+        Statement statement;
+        if (Current.Type == TokenType.Struct && IsStructDefinition())
+        {
+            statement = ParseStructDeclaration();
+        }
+        else
+        {
+            statement = ParseStatement();
+        }
+
+        while (Current.Type == TokenType.Semicolon)
+        {
+            _position++;
+        }
+        return statement;
+    }
+
     private bool IsStructDefinition()
     {
         for (var i = 1; i < 10; ++i)
@@ -114,13 +126,6 @@ internal class Parser
         throw new ParserException("Could not find a token that can determine if it's a struct definition or struct return type.");
     }
 
-
-    private SyntaxNode ParseGlobalStatement()
-    {
-        var statement = ParseStatement();
-
-        return statement;
-    }
 
     private Statement ParseStatement()
     {
@@ -388,47 +393,70 @@ internal class Parser
         return expr;
     }
 
-    private SyntaxNode ParseStruct()
+    private Statement ParseStructDeclaration()
     {
-        var next = Peek(1);
-        if (next.Type == TokenType.Identifier)
+        _position++;
+        if (Current.Type != TokenType.Identifier)
         {
-            if (Peek(2).Type == TokenType.LeftCurlyBracer)
-            {
-                _position += 2;
-
-                var members = ParseMembers();
-                // struct definition
-                if (Current.Type != TokenType.RightCurlyBracer)
-                {
-                    throw new ParserException($"Expected {TokenType.RightCurlyBracer} but found {Current.Type}");
-                }
-            }
-            else if (Peek(2).Type == TokenType.Semicolon)
-            {
-                _position += 2;
-                return new StructSyntaxNode(next.Value);
-                // forward declaration
-            }
-
+            throw new ParserException($"Expected {TokenType.Identifier} when parsing a struct but found {Current.Type}");
         }
-        throw new ParserException($"Expected {TokenType.Identifier} but found {next.Type}");
+        var name = Current.Value;
+        _position++;
+        
+        // Full struct definition
+        if (Current.Type == TokenType.LeftCurlyBracer)
+        {
+            _position++;
+            var members = ParseMembers();
+            
+            // struct definition
+            if (Current.Type != TokenType.RightCurlyBracer)
+            {
+                throw new ParserException($"Expected {TokenType.RightCurlyBracer} but found {Current.Type}");
+            }
+            _position++;
+            return new StructDeclarationStatement(name, members);
+        }
+
+        // forward declaration
+        if (Current.Type == TokenType.Semicolon)
+        {
+            _position++;
+            return new StructDeclarationStatement(name);
+        }
+
+        throw new ParserException($"Expected {TokenType.LeftCurlyBracer} or {TokenType.Semicolon} but found {Current.Type}");
     }
 
-    private SyntaxNode[] ParseMembers()
+    private StructMember[] ParseMembers()
     {
-        throw new InvalidOperationException();
-        //List<SyntaxNode> fields = new();
-        //while (Current.Type != TokenType.RightCurlyBracer)
-        //{
-        //    var field = ParseField();
-        //    var type = Current;
-        //    if (Peek(1).Type == TokenType.Identifier)
-        //    {
+        List<StructMember> members = new();
+        while (true)
+        {
+            if (Current.Type == TokenType.RightCurlyBracer)
+            {
+                return members.ToArray();
+            }
 
-        //    }
-        //}
+            var type = TryParseTypeExpression();
+            if (type == null)
+            {
+                throw new ParserException("Failed to read members for struct.");
+            }
 
+            if (Current.Type != TokenType.Identifier)
+            {
+                throw new ParserException($"Expected {TokenType.Identifier} but found {Current.Type} when defining a member in a struct.");
+            }
+
+            members.Add(new StructMember(type, Current.Value));
+            _position++;
+            if (Current.Type != TokenType.Semicolon)
+            {
+                throw new ParserException($"Expected {TokenType.Semicolon} but found {Current.Type} when closing the struct member definition.");
+            }
+            _position++;
+        }
     }
 }
 
@@ -443,16 +471,8 @@ internal class ParserException : Exception
 [DebuggerDisplay("{ToString()}")]
 public abstract class SyntaxNode
 {
-    public virtual void PrettyPrint(IPrettyPrint print, int indentation = 0) { }
-}
-
-public sealed class StructSyntaxNode : SyntaxNode
-{
-    public string Name { get; }
-    public bool Complete { get; }
-    public StructSyntaxNode(string name)
+    public virtual void PrettyPrint(IPrettyPrint print, int indentation = 0)
     {
-        Name = name;
-        Complete = false;
+        print.Write($"{nameof(PrettyPrint)} has not been implemented for {GetType().Name}", indentation);
     }
 }
