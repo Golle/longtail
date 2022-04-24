@@ -11,6 +11,7 @@ internal class IdentifierExpression : Expression
         Value = value;
     }
 
+    public override string ToString() => Value;
     public override void PrettyPrint(int indentation = 0)
     {
         Console.WriteLine($"{new string(' ', indentation)}{GetType().Name} ({Value})");

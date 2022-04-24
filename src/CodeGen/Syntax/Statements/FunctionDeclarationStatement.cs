@@ -3,7 +3,7 @@ using System.Linq;
 using CodeGen.Syntax.Expressions;
 
 namespace CodeGen.Syntax.Statements;
-internal record struct FunctionDeclarationArgument(string Type, string Name);
+internal record struct FunctionDeclarationArgument(Expression Type, string Name);
 internal class FunctionDeclarationStatement : Statement
 {
     public Expression ReturnType { get; }
@@ -24,6 +24,7 @@ internal class FunctionDeclarationStatement : Statement
     public override void PrettyPrint(int indentation = 0)
     {
         Console.WriteLine($"{new string(' ', indentation)}{GetType().Name} ({ToString()})");
+        ReturnType.PrettyPrint(indentation + 2);
         Body?.PrettyPrint(indentation + 2);
     }
 }

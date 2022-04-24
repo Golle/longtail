@@ -86,7 +86,7 @@ internal class Parser
                 _position++;
                 if (Current.Type == TokenType.Semicolon)
                 {
-                    statement =new FunctionDeclarationStatement(expression, identifier, arguments);
+                    statement = new FunctionDeclarationStatement(expression, identifier, arguments);
                 }
                 else if (Current.Type == TokenType.LeftCurlyBracer)
                 {
@@ -99,7 +99,7 @@ internal class Parser
             }
             else
             {
-                _position+=2;
+                _position += 2;
                 statement = new VariableDeclarationStatement(expression, identifier, ParseExpression());
             }
         }
@@ -107,7 +107,7 @@ internal class Parser
         {
             statement = new ExpressionStatement(expression);
         }
-        
+
         // Not sure where to handle this
         if (Current.Type != TokenType.Semicolon)
         {
@@ -117,7 +117,7 @@ internal class Parser
 
         return statement;
     }
-    
+
     private FunctionDeclarationArgument[] ParseArgumentList()
     {
         // NOTE(jens): keep it simple now and only support the most basic types (single identifer + name)
@@ -125,21 +125,17 @@ internal class Parser
         List<FunctionDeclarationArgument> arguments = new();
         while (Current.Type != TokenType.RightParenthesis)
         {
-            var type = Peek(0);
-            var identifier = Peek(1);
+            var expr = TryParseTypeExpression() ?? throw new ParserException("Failed to parse method arguments");
+            
             var name = string.Empty;
             // support empty type declarations, ex func(void, int);
-            if (identifier.Type == TokenType.Identifier)
+            if (Current.Type == TokenType.Identifier)
             {
-                name = identifier.Value;
-                _position += 2;
-            }
-            else
-            {
+                name = Current.Value;
                 _position++;
             }
 
-            arguments.Add(new FunctionDeclarationArgument(type.Value, name));
+            arguments.Add(new FunctionDeclarationArgument(expr, name));
             if (Current.Type != TokenType.Comma)
             {
                 break;
@@ -221,19 +217,15 @@ internal class Parser
     private Expression ParsePrimaryExpression()
     {
         var current = Current;
-
+        
+        //Any literal token, just return
         if (current.Type is TokenType.Boolean or TokenType.String or TokenType.Number or TokenType.Character)
         {
             _position++;
             return new LiteralExpression(current.Type, current.Value);
         }
-
-        if (current.Type == TokenType.Identifier)
-        {
-            _position++;
-            return new IdentifierExpression(current.Value);
-        }
-
+        
+        // Parenthesis
         if (current.Type == TokenType.LeftParenthesis)
         {
             _position++;
@@ -245,57 +237,95 @@ internal class Parser
             _position++;
             return new ParenthesizedExpression(inside);
         }
+        
+        return TryParseTypeExpression() ?? throw new ParserException($"Primary expression for token type {current.Type} has not been implemented. FIX IT!");
+    }
 
-        if (current.Type == TokenType.Const)
+    private static bool IsBuiltInType(TokenType type) => type is
+        TokenType.Signed or
+        TokenType.Unsigned or
+        TokenType.Int or
+        TokenType.Long or
+        TokenType.Char or
+        TokenType.Bool or
+        TokenType.Float or
+        TokenType.Double or
+        TokenType.Void
+    ;
+
+    private Expression? TryParseTypeExpression()
+    {
+        // if the expression starts with const, wrap it and return.
+        if (Current.Type == TokenType.Const)
         {
             _position++;
-            return new ConstExpression(ParsePrimaryExpression());
+            var expression = TryParseTypeExpression() ?? throw new ParserException("Failed to parse type after const expression");
+            return new ConstExpression(expression);
         }
-        if (IsBuiltInType(current.Type))
+
+        if (Current.Type == TokenType.Struct)
+        {
+            _position++;
+            var expression = TryParseTypeExpression() ?? throw new ParserException("Failed to parse type after struct keyword");
+            return new StructExpression(expression);
+        }
+
+        //NOTE(Jens): for C99 we don't need class support, implement this if we need it
+        //if (Current.Type == TokenType.Class)
+        //{
+
+        //}
+
+
+        Expression? expr;
+        // Identifier is probably a custom type
+        if (Current.Type == TokenType.Identifier)
+        {
+            expr = new IdentifierExpression(Current.Value);
+            _position++;
+        }
+        // Built in types 
+        else if (IsBuiltInType(Current.Type))
         {
             var modifierCount = 0;
             Span<TokenType> typeModifiers = stackalloc TokenType[10];
-
             while (IsBuiltInType(Current.Type))
             {
                 typeModifiers[modifierCount++] = Current.Type;
                 _position++;
             }
-            Expression expr = new BuiltInTypeExpression(typeModifiers[..modifierCount]);
-
-            // NOTE(Jens): we might want to move this, so we can support custom type pointers as well
-            while (true)
-            {
-                if (Current.Type == TokenType.Star)
-                {
-                    expr = new PointerTypeExpression(expr);
-                }
-                else if (Current.Type == TokenType.Amp)
-                {
-                    expr = new ReferenceTypeExpression(expr);
-                }
-                else
-                {
-                    break;
-                }
-                _position++;
-            }
-            return expr;
+            expr = new BuiltInTypeExpression(typeModifiers[..modifierCount]);
         }
+        else
+        {
+            return null;
+        }
+        return ParsePointerOrReferenceExpression(expr);
+    }
 
-        throw new ParserException($"Primary expression for token type {current.Type} has not been implemented. FIX IT!");
-
-        static bool IsBuiltInType(TokenType type) => type is
-            TokenType.Signed or
-            TokenType.Unsigned or
-            TokenType.Int or
-            TokenType.Long or
-            TokenType.Char or
-            TokenType.Bool or
-            TokenType.Float or
-            TokenType.Double or
-            TokenType.Void
-            ;
+    private Expression ParsePointerOrReferenceExpression(Expression expr)
+    {
+        while (true)
+        {
+            if (Current.Type == TokenType.Star)
+            {
+                expr = new PointerTypeExpression(expr);
+            }
+            else if (Current.Type == TokenType.Amp)
+            {
+                expr = new ReferenceTypeExpression(expr);
+            }
+            else if (Current.Type == TokenType.Const)
+            {
+                expr = new ConstExpression(expr);
+            }
+            else
+            {
+                break;
+            }
+            _position++;
+        }
+        return expr;
     }
 
     private SyntaxNode ParseStruct()
