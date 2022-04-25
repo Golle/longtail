@@ -88,16 +88,7 @@ internal class Parser
 
     private SyntaxNode ParseGlobalStatement()
     {
-        Statement statement;
-        if (Current.Type == TokenType.Struct && IsStructDefinition())
-        {
-            statement = ParseStructDeclaration();
-        }
-        else
-        {
-            statement = ParseStatement();
-        }
-
+        var statement = ParseTypedefStatement();
         while (Current.Type == TokenType.Semicolon)
         {
             _position++;
@@ -105,8 +96,78 @@ internal class Parser
         return statement;
     }
 
-    private bool IsStructDefinition()
+    private Statement ParseTypedefStatement()
     {
+        if (Current.Type != TokenType.Typedef)
+        {
+            return ParseStatement();
+        }
+
+
+        Statement statement;
+        _position++;
+        if (IsStructDeclaration())
+        {
+            statement = ParseStructDeclaration();
+            throw new NotImplementedException("Missing identifier reads");
+        }
+        else
+        {
+            var expression = TryParseTypeExpression() ?? throw new ParserException("Failed to parse the typedef.");
+
+            // Function pointer declaration
+            if (Current.Type is TokenType.LeftParenthesis && Peek(1).Type == TokenType.Star)
+            {
+                _position += 2;
+                if (Current.Type != TokenType.Identifier)
+                {
+                    throw new ParserException($"Expected {TokenType.Identifier} but found {Current.Type} when parsing the typedef function pointer.");
+                }
+
+                var name = Current.Value;
+                _position+=3; // Skip "Name)(" in the function pointer declaration
+                var arguments = ParseArgumentList();
+                _position++;
+                //NOTE(Jens): this is treating a function pointer as a function declaration.
+                //NOTE(Jens): we could add another type for function pointers to make it more clear? or just use the typedef
+                return new TypedefStatement(name, new FunctionDeclarationStatement(expression, name, arguments));
+            }
+
+            if(Current.Type == TokenType.Identifier)
+            {
+                var name = Current.Value;
+                _position++;
+                statement = new TypedefStatement(name, new ExpressionStatement(expression));
+            }
+            else
+            {
+                throw new ParserException($"Expected {TokenType.Identifier} or {TokenType.LeftParenthesis} but found {Current.Type} when parsing typedef");
+            }
+        }
+        return statement;
+    }
+
+    private Statement ParseStatement()
+    {
+        Statement statement;
+        if (Current.Type == TokenType.Struct && IsStructDeclaration())
+        {
+            statement = ParseStructDeclaration();
+        }
+        else
+        {
+            statement = ParseExpressionStatement();
+        }
+
+        return statement;
+    }
+
+    private bool IsStructDeclaration()
+    {
+        if (Current.Type != TokenType.Struct)
+        {
+            return false;
+        }
         for (var i = 1; i < 10; ++i)
         {
             var token = Peek(i).Type;
@@ -127,7 +188,7 @@ internal class Parser
     }
 
 
-    private Statement ParseStatement()
+    private Statement ParseExpressionStatement()
     {
         Statement statement;
         var expression = ParseExpression(); //NOTE(Jens) This is not a perfect solution since it will allow bad syntax, like const (1+2) unsigned *& A()
@@ -395,6 +456,8 @@ internal class Parser
 
     private Statement ParseStructDeclaration()
     {
+
+        //TODO: add anonymous types
         _position++;
         if (Current.Type != TokenType.Identifier)
         {
@@ -402,13 +465,13 @@ internal class Parser
         }
         var name = Current.Value;
         _position++;
-        
+
         // Full struct definition
         if (Current.Type == TokenType.LeftCurlyBracer)
         {
             _position++;
             var members = ParseMembers();
-            
+
             // struct definition
             if (Current.Type != TokenType.RightCurlyBracer)
             {
