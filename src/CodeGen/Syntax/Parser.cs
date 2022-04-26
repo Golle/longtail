@@ -108,8 +108,8 @@ internal class Parser
         _position++;
         if (IsStructDeclaration())
         {
-            statement = ParseStructDeclaration();
-            throw new NotImplementedException("Missing identifier reads");
+            //statement = ParseStructDeclaration();
+            throw new NotImplementedException("We should support 'typedef struct {} name', but it's not required at the moment.");
         }
         else
         {
@@ -129,7 +129,7 @@ internal class Parser
                 var arguments = ParseArgumentList();
                 _position++;
                 //NOTE(Jens): this is treating a function pointer as a function declaration.
-                //NOTE(Jens): we could add another type for function pointers to make it more clear? or just use the typedef
+                //NOTE(Jens): we could add another type for function pointers to make it more clear? What ever makes the C# code gen easier.
                 return new TypedefStatement(name, new FunctionDeclarationStatement(expression, name, arguments));
             }
 
