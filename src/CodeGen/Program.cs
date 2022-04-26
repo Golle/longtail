@@ -9,12 +9,6 @@ using CodeGen.Syntax;
 
 using var _ = Logger.Start();
 
-var sampleCode = @"
-struct 
-
-";
-
-
 Console.WriteLine("Welcome to the interpreter!");
 
 while (true)
@@ -33,8 +27,9 @@ while (true)
     }
     else if (line.StartsWith("#longtail"))
     {
-        line = new LongtailPreParser(@"O:\tmp\longtail")
-            .Run();
+        line = File.ReadAllText(@"o:\tmp\longtail\src\longtail.h").Replace("LONGTAIL_EXPORT", string.Empty);
+        //line = new LongtailPreParser(@"O:\tmp\longtail")
+        //    .Run();
     }
     else if (line.StartsWith("#file"))
     {

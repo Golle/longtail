@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using CodeGen.Lexer;
@@ -130,7 +131,10 @@ internal class Parser
                 _position++;
                 //NOTE(Jens): this is treating a function pointer as a function declaration.
                 //NOTE(Jens): we could add another type for function pointers to make it more clear? What ever makes the C# code gen easier.
-                return new TypedefStatement(name, new FunctionDeclarationStatement(expression, name, arguments));
+                return new FunctionDeclarationStatement(expression, name, arguments);
+                
+                //NOTE(Jens): do we want the typedef wrapper for function pointers? it's the only way to define a function pointer right so maybe we can discard the typedef?
+                //return new TypedefStatement(name, new FunctionDeclarationStatement(expression, name, arguments));
             }
 
             if(Current.Type == TokenType.Identifier)
@@ -154,12 +158,64 @@ internal class Parser
         {
             statement = ParseStructDeclaration();
         }
+        else if (Current.Type == TokenType.Enum)
+        {
+            statement = ParseEnumStatement();
+        }
         else
         {
             statement = ParseExpressionStatement();
         }
 
         return statement;
+    }
+
+    private Statement ParseEnumStatement()
+    {
+
+        _position++;
+        var name = string.Empty;
+        //anonymous enums are possible, this will support both
+        if (Current.Type == TokenType.Identifier)
+        {
+            name = Current.Value;
+            _position++;
+        }
+
+        if (Current.Type != TokenType.LeftCurlyBracer)
+        {
+            throw new ParserException($"Expected {TokenType.LeftCurlyBracer} but found {Current.Type} when parsing an enum");
+        }
+        _position++;
+        List<Expression> members = new();
+
+        while (Current.Type != TokenType.EndOfFile)
+        {
+            if (Current.Type == TokenType.RightCurlyBracer)
+            {
+                break;
+            }
+            if (Current.Type == TokenType.Comma)
+            {
+                _position++;
+            }
+            //NOTE(Jens): this will support weird syntax, but it's ok since we should not parse anything that has not been verified.
+            members.Add(ParseExpression());
+        }
+        
+        //Trailing commas are possible in Enum declarations
+        if (Current.Type == TokenType.Comma)
+        {
+            _position++;
+        }
+
+        if (Current.Type != TokenType.RightCurlyBracer)
+        {
+            throw new ParserException($"Expected {TokenType.RightCurlyBracer} but found {Current.Type} when parsing an enum");
+        }
+        _position++;
+
+        return new EnumDeclarationStatement(name, members.ToArray());
     }
 
     private bool IsStructDeclaration()
@@ -364,7 +420,7 @@ internal class Parser
             return new ParenthesizedExpression(inside);
         }
 
-        return TryParseTypeExpression() ?? throw new ParserException($"Primary expression for token type {current.Type} has not been implemented. FIX IT!");
+        return TryParseTypeExpression() ?? throw new ParserException($"Primary expression for token type {current.Type} has not been implemented. FIX IT! {Current.Line}::{current.Column}");
     }
 
     private static bool IsBuiltInType(TokenType type) => type is
