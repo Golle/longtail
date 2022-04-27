@@ -30,11 +30,12 @@ internal class FunctionPointerParserTests
 
         var functionDeclaration = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var argument = functionDeclaration.Arguments.Single();
+        var variable = (IdentifierExpression)argument.Variable;
         var argumentType = (BuiltInTypeExpression)argument.Type;
         var returnType = (BuiltInTypeExpression)functionDeclaration.ReturnType;
 
         Assert.That(functionDeclaration.Name, Is.EqualTo("func"));
-        Assert.That(argument.Name, Is.EqualTo("a"));
+        Assert.That(variable.Value, Is.EqualTo("a"));
         Assert.That(argumentType.Types.Single(), Is.EqualTo(TokenType.Unsigned));
         Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
         Assert.That(functionDeclaration.Body, Is.Null);

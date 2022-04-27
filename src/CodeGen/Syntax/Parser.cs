@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using CodeGen.Lexer;
 using CodeGen.Logging;
 using CodeGen.Syntax.Expressions;
@@ -297,22 +298,35 @@ internal class Parser
         return statement;
     }
 
-    private FunctionDeclarationArgument[] ParseArgumentList()
+    private VariableDeclarationStatement[] ParseArgumentList()
     {
-        //TODO: use array pool
-        List<FunctionDeclarationArgument> arguments = new();
+        //TODO: use array pool?
+        List<VariableDeclarationStatement> arguments = new();
         while (Current.Type != TokenType.RightParenthesis)
         {
-            var expr = TryParseTypeExpression() ?? throw new ParserException("Failed to parse method arguments");
-            var name = string.Empty;
-            // support empty type declarations, ex func(void, int);
+            //Note(Jens): this supports weird syntax, but its probably fine for our use case
+            var expr = ParseExpression();
+
+            Expression identifier;
+            //Named parameter
             if (Current.Type == TokenType.Identifier)
             {
-                name = Current.Value;
-                _position++;
+                identifier = ParseAccessorExpression();
             }
+            else
+            {
+                identifier = new IdentifierExpression("");
+            }
+            arguments.Add(new VariableDeclarationStatement(expr, identifier));
+            //var expr = TryParseTypeExpression() ?? throw new ParserException("Failed to parse method arguments");
+            //var name = string.Empty;
+            //// support empty type declarations, ex func(void, int);
+            //if (Current.Type == TokenType.Identifier)
+            //{
+            //    name = Current.Value;
+            //    _position++;
+            //}
 
-            arguments.Add(new FunctionDeclarationArgument(expr, name));
             if (Current.Type != TokenType.Comma)
             {
                 break;
@@ -361,18 +375,19 @@ internal class Parser
     private Expression ParseAccessorExpression()
     {
         var expression = ParseBinaryExpression();
-
-
         if (Current.Type == TokenType.LeftSquareBracket)
         {
             _position++;
-            var inside = ParseExpression();
+            Expression? inside = null;
             if (Current.Type != TokenType.RightSquareBracket)
             {
-                throw new ParserException($"Expected {TokenType.RightSquareBracket} but found {Current.Type} on Line: {Current.Line} Column: {Current.Column}");
+                inside = ParseExpression();
+                if (Current.Type != TokenType.RightSquareBracket)
+                {
+                    throw new ParserException($"Expected {TokenType.RightSquareBracket} but found {Current.Type} on Line: {Current.Line} Column: {Current.Column}");
+                }
             }
             _position++;
-
             return new ArrayExpression(expression, inside);
         }
         //switch (Current.Type)
@@ -603,7 +618,7 @@ internal class Parser
             _position++;
             if (Current.Type != TokenType.Semicolon)
             {
-                throw new ParserException($"Expected {TokenType.Semicolon} but found {Current.Type} when closing the struct member definition.");
+                throw new ParserException($"Expected {TokenType.Semicolon} but found {Current.Type} when closing the struct member definition. Line: {Current.Line} Column: {Current.Column}");
             }
             _position++;
         }

@@ -3,8 +3,8 @@
 internal class ArrayExpression : Expression
 {
     public Expression Left { get; }
-    public Expression Expression { get; }
-    public ArrayExpression(Expression left, Expression expression)
+    public Expression? Expression { get; }
+    public ArrayExpression(Expression left, Expression? expression)
     {
         Left = left;
         Expression = expression;
@@ -16,6 +16,6 @@ internal class ArrayExpression : Expression
     {
         print.Write($"{GetType().Name}", indentation);
         Left.PrettyPrint(print, indentation + 2);
-        Expression.PrettyPrint(print, indentation + 2);
+        Expression?.PrettyPrint(print, indentation + 2);
     }
 }
