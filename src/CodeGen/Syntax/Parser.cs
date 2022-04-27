@@ -58,7 +58,7 @@ internal class Parser
     private void SkipPreProcessor()
     {
         //NOTE(Jens): this is a temporary solution to enable us to parse the C code from the headerfile whileignoring any preprocessor includes, defines or if statements.
-        if (Current.Value is "if" or  "ifdef" or "ifndef" )
+        if (Current.Value is "if" or "ifdef" or "ifndef")
         {
             Logger.Trace($"Found {Current} on line: {Current.Line} Column: {Current.Column}");
             _position++;
@@ -125,18 +125,18 @@ internal class Parser
                 }
 
                 var name = Current.Value;
-                _position+=3; // Skip "Name)(" in the function pointer declaration
+                _position += 3; // Skip "Name)(" in the function pointer declaration
                 var arguments = ParseArgumentList();
                 _position++;
                 //NOTE(Jens): this is treating a function pointer as a function declaration.
                 //NOTE(Jens): we could add another type for function pointers to make it more clear? What ever makes the C# code gen easier.
                 return new FunctionDeclarationStatement(expression, name, arguments);
-                
+
                 //NOTE(Jens): do we want the typedef wrapper for function pointers? it's the only way to define a function pointer right so maybe we can discard the typedef?
                 //return new TypedefStatement(name, new FunctionDeclarationStatement(expression, name, arguments));
             }
 
-            if(Current.Type == TokenType.Identifier)
+            if (Current.Type == TokenType.Identifier)
             {
                 var name = Current.Value;
                 _position++;
@@ -201,7 +201,7 @@ internal class Parser
             //NOTE(Jens): this will support weird syntax, but it's ok since we should not parse anything that has not been verified.
             members.Add(ParseExpression());
         }
-        
+
         //Trailing commas are possible in Enum declarations
         if (Current.Type == TokenType.Comma)
         {
@@ -247,7 +247,7 @@ internal class Parser
     {
         Statement statement;
         //NOTE(Jens) This is not a perfect solution since it will allow bad syntax, like const (1+2) unsigned *& A()
-        var expression = ParseExpression(); 
+        var expression = ParseExpression();
         if (Current.Type == TokenType.Identifier)
         {
             if (Peek(1).Type == TokenType.LeftParenthesis)
@@ -281,60 +281,6 @@ internal class Parser
                 var variable = ParseExpression();
                 statement = new VariableDeclarationStatement(expression, variable);
             }
-
-
-            
-            //var identifier = Current.Value;
-            //var next = Peek(1);
-            //if (next.Type == TokenType.Semicolon)
-            //{
-            //    // Variable declaration
-            //    _position++;
-            //    Logger.Trace($"Variable declaration: {identifier}");
-            //    statement = new VariableDeclarationStatement(expression, identifier, null);
-            //}
-            //else if (next.Type == TokenType.LeftParenthesis)
-            //{
-                
-            //}
-            //else if (next.Type == TokenType.LeftSquareBracket)
-            //{
-            //    // Array declaration/assignment
-            //    _position += 2;
-            //    var accessor = ParseExpression();
-            //    if (Current.Type != TokenType.RightSquareBracket)
-            //    {
-            //        throw new ParserException($"Expected {TokenType.RightSquareBracket} but found {Current.Type} on line: {Current.Line} Column: {Current.Column}");
-            //    }
-            //    _position++;
-                
-            //    if (Current.Type == TokenType.Semicolon)
-            //    {
-            //        // Declaration
-            //        statement = new ArrayDeclarationStatement(expression, identifier, accessor);
-            //    }
-
-            //    else if(Current.Type == TokenType.Equal)
-            //    {
-            //        // Assignment
-
-            //    }
-                
-            //}
-            //else
-            //{
-            //    /*
-            //     * int a; int a = 1;
-            //     * int*a; int *a = 1;
-            //     * int &a; int &a = 1;
-            //     * int a[1]; int a[1] = {10};
-            //     */
-                
-            //    // Variable declaration with assignment?
-            //    //var ex = ParseExpression();
-            //    _position += 2;
-            //    statement = new VariableDeclarationStatement(expression, identifier, ParseExpression());
-            //}
         }
         else
         {
@@ -416,19 +362,34 @@ internal class Parser
     {
         var expression = ParseBinaryExpression();
 
-        switch (Current.Type)
+
+        if (Current.Type == TokenType.LeftSquareBracket)
         {
-            case TokenType.LeftSquareBracket:
+            _position++;
+            var inside = ParseExpression();
+            if (Current.Type != TokenType.RightSquareBracket)
+            {
+                throw new ParserException($"Expected {TokenType.RightSquareBracket} but found {Current.Type} on Line: {Current.Line} Column: {Current.Column}");
+            }
+            _position++;
 
-                break;
-            case TokenType.LeftParenthesis:
-
-                break;
-            case TokenType.Punctuation:
-                break;
-            case TokenType.Pointer:
-                break;
+            return new ArrayExpression(expression, inside);
         }
+        //switch (Current.Type)
+        //{
+        //    case TokenType.LeftSquareBracket:
+
+
+
+        //        break;
+        //    case TokenType.LeftParenthesis:
+
+        //        break;
+        //    case TokenType.Punctuation:
+        //        break;
+        //    case TokenType.Pointer:
+        //        break;
+        //}
 
         return expression;
     }
@@ -665,3 +626,4 @@ public abstract class SyntaxNode
         print.Write($"{nameof(PrettyPrint)} has not been implemented for {GetType().Name}", indentation);
     }
 }
+

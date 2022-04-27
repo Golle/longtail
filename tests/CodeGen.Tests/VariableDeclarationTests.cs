@@ -95,4 +95,6 @@ internal class VariableDeclarationTests
         Assert.That(right.Type, Is.EqualTo(TokenType.Number));
         Assert.That(right.Value, Is.EqualTo("2"));
     }
+
+
 }
