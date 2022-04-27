@@ -1,34 +1,23 @@
-﻿using System;
-using CodeGen.Syntax.Expressions;
+﻿using CodeGen.Syntax.Expressions;
 
 namespace CodeGen.Syntax.Statements;
 
 internal class VariableDeclarationStatement : Statement
 {
     public Expression Type { get; } //Note(Jens): Replace this with types when we support that (or that could be a different pass?)
-    public string Identifier { get; }
-    public Expression? AssignmentExpression { get; }
-    public VariableDeclarationStatement(Expression type, string identifier, Expression? assignmentExpression)
+    public Expression Variable { get; }
+    public VariableDeclarationStatement(Expression type, Expression variable)
     {
         Type = type;
-        Identifier = identifier;
-        AssignmentExpression = assignmentExpression;
+        Variable = variable;
     }
 
+    public override string ToString() => $"{Type} {Variable};";
 
-    public override string ToString()
+    public override void PrettyPrint(IPrettyPrint print, int indentation = 0)
     {
-        if (AssignmentExpression != null)
-        {
-            return $"{Type} {Identifier} = {AssignmentExpression};";
-        }
-        return $"{Type} {Identifier};";
-    }
-
-    public override void PrettyPrint(IPrettyPrint print, int indentation)
-    {
-        print.Write($"{GetType().Name} ({Identifier})", indentation);
+        print.Write($"{GetType().Name} ({Variable.GetType().Name})", indentation);
         Type.PrettyPrint(print, indentation + 2);
-        AssignmentExpression?.PrettyPrint(print, indentation + 2);
+        Variable.PrettyPrint(print, indentation + 2);
     }
 }

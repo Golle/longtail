@@ -16,10 +16,10 @@ internal class VariableDeclarationTests
 
         var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var type = (BuiltInTypeExpression)statement.Type;
+        var variable = (IdentifierExpression)statement.Variable;
 
         Assert.That(type.Types.Single(), Is.EqualTo(TokenType.Int));
-        Assert.That(statement.Identifier, Is.EqualTo("a"));
-        Assert.That(statement.AssignmentExpression, Is.Null);
+        Assert.That(variable.Value, Is.EqualTo("a"));
     }
 
     [Test]
@@ -31,12 +31,12 @@ internal class VariableDeclarationTests
         var pointer1 = (PointerTypeExpression)statement.Type;
         var pointer2 = (PointerTypeExpression)pointer1.Expression;
         var type = (BuiltInTypeExpression)pointer2.Expression;
+        var variable = (IdentifierExpression)statement.Variable;
 
         Assert.That(type.Types[0], Is.EqualTo(TokenType.Unsigned));
         Assert.That(type.Types[1], Is.EqualTo(TokenType.Long));
         Assert.That(type.Types[2], Is.EqualTo(TokenType.Int));
-        Assert.That(statement.Identifier, Is.EqualTo("a"));
-        Assert.That(statement.AssignmentExpression, Is.Null);
+        Assert.That(variable.Value, Is.EqualTo("a"));
     }
 
     [Test]
@@ -45,13 +45,15 @@ internal class VariableDeclarationTests
         var code = "unsigned int * a = 1;";
 
         var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
-        var literal = (LiteralExpression)statement.AssignmentExpression!;
+        var assignment = (AssigmentExpression)statement.Variable;
+        var literal = (LiteralExpression)assignment.Right;
+        var identifier = (IdentifierExpression)assignment.Left;
         var pointer = (PointerTypeExpression)statement.Type;
         var type = (BuiltInTypeExpression)pointer.Expression;
 
         Assert.That(type.Types[0], Is.EqualTo(TokenType.Unsigned));
         Assert.That(type.Types[1], Is.EqualTo(TokenType.Int));
-        Assert.That(statement.Identifier, Is.EqualTo("a"));
+        Assert.That(identifier.Value, Is.EqualTo("a"));
         Assert.That(literal.Type, Is.EqualTo(TokenType.Number));
         Assert.That(literal.Value, Is.EqualTo("1"));
     }
@@ -62,11 +64,13 @@ internal class VariableDeclarationTests
         var code = "int a = 1;";
 
         var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
-        var literal = (LiteralExpression)statement.AssignmentExpression!;
+        var assignment = (AssigmentExpression)statement.Variable;
+        var literal = (LiteralExpression)assignment.Right;
+        var identifier = (IdentifierExpression)assignment.Left;
         var type = (BuiltInTypeExpression)statement.Type;
 
         Assert.That(type.Types.Single(), Is.EqualTo(TokenType.Int));
-        Assert.That(statement.Identifier, Is.EqualTo("a"));
+        Assert.That(identifier.Value, Is.EqualTo("a"));
         Assert.That(literal.Value, Is.EqualTo("1"));
         Assert.That(literal.Type, Is.EqualTo(TokenType.Number));
     }
@@ -77,13 +81,15 @@ internal class VariableDeclarationTests
         var code = "int a = b + 2;";
 
         var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
-        var binary = (BinaryExpression)statement.AssignmentExpression!;
+        var assignment = (AssigmentExpression)statement.Variable;
+        var binary = (BinaryExpression)assignment.Right;
+        var variable = (IdentifierExpression)assignment.Left;
         var left = (IdentifierExpression)binary.Left;
         var right = (LiteralExpression)binary.Right;
         var type = (BuiltInTypeExpression)statement.Type;
 
         Assert.That(type.Types.Single(), Is.EqualTo(TokenType.Int));
-        Assert.That(statement.Identifier, Is.EqualTo("a"));
+        Assert.That(variable.Value, Is.EqualTo("a"));
         Assert.That(binary.Operator, Is.EqualTo("+"));
         Assert.That(left.Value, Is.EqualTo("b"));
         Assert.That(right.Type, Is.EqualTo(TokenType.Number));

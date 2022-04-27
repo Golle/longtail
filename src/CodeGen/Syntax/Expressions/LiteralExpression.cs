@@ -13,6 +13,8 @@ internal sealed class LiteralExpression : Expression
         Value = value;
     }
 
+    public override string ToString() => Value;
+
     public override void PrettyPrint(IPrettyPrint print, int indentation = 0)
     {
         print.Write($"{GetType().Name} ({Type}:{Value})", indentation);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using CodeGen.Lexer;
@@ -59,9 +58,9 @@ internal class Parser
     private void SkipPreProcessor()
     {
         //NOTE(Jens): this is a temporary solution to enable us to parse the C code from the headerfile whileignoring any preprocessor includes, defines or if statements.
-        if (Current.Value == "if")
+        if (Current.Value is "if" or  "ifdef" or "ifndef" )
         {
-            Logger.Trace($"Found if on line: {Current.Line} Column: {Current.Column}");
+            Logger.Trace($"Found {Current} on line: {Current.Line} Column: {Current.Column}");
             _position++;
             while (!(Current.Type == TokenType.PreProcessor && Current.Value == "endif"))
             {
@@ -247,19 +246,14 @@ internal class Parser
     private Statement ParseExpressionStatement()
     {
         Statement statement;
-        var expression = ParseExpression(); //NOTE(Jens) This is not a perfect solution since it will allow bad syntax, like const (1+2) unsigned *& A()
+        //NOTE(Jens) This is not a perfect solution since it will allow bad syntax, like const (1+2) unsigned *& A()
+        var expression = ParseExpression(); 
         if (Current.Type == TokenType.Identifier)
         {
-            var identifier = Current.Value;
-            var next = Peek(1);
-            if (next.Type == TokenType.Semicolon)
+            if (Peek(1).Type == TokenType.LeftParenthesis)
             {
-                _position++;
-                Logger.Trace($"Variable declaration: {identifier}");
-                statement = new VariableDeclarationStatement(expression, identifier, null);
-            }
-            else if (next.Type == TokenType.LeftParenthesis)
-            {
+                var identifier = Current.Value;
+                // Function declaration
                 _position += 2;
                 var arguments = ParseArgumentList();
                 if (Current.Type != TokenType.RightParenthesis)
@@ -283,9 +277,64 @@ internal class Parser
             }
             else
             {
-                _position += 2;
-                statement = new VariableDeclarationStatement(expression, identifier, ParseExpression());
+                // variable declaration
+                var variable = ParseExpression();
+                statement = new VariableDeclarationStatement(expression, variable);
             }
+
+
+            
+            //var identifier = Current.Value;
+            //var next = Peek(1);
+            //if (next.Type == TokenType.Semicolon)
+            //{
+            //    // Variable declaration
+            //    _position++;
+            //    Logger.Trace($"Variable declaration: {identifier}");
+            //    statement = new VariableDeclarationStatement(expression, identifier, null);
+            //}
+            //else if (next.Type == TokenType.LeftParenthesis)
+            //{
+                
+            //}
+            //else if (next.Type == TokenType.LeftSquareBracket)
+            //{
+            //    // Array declaration/assignment
+            //    _position += 2;
+            //    var accessor = ParseExpression();
+            //    if (Current.Type != TokenType.RightSquareBracket)
+            //    {
+            //        throw new ParserException($"Expected {TokenType.RightSquareBracket} but found {Current.Type} on line: {Current.Line} Column: {Current.Column}");
+            //    }
+            //    _position++;
+                
+            //    if (Current.Type == TokenType.Semicolon)
+            //    {
+            //        // Declaration
+            //        statement = new ArrayDeclarationStatement(expression, identifier, accessor);
+            //    }
+
+            //    else if(Current.Type == TokenType.Equal)
+            //    {
+            //        // Assignment
+
+            //    }
+                
+            //}
+            //else
+            //{
+            //    /*
+            //     * int a; int a = 1;
+            //     * int*a; int *a = 1;
+            //     * int &a; int &a = 1;
+            //     * int a[1]; int a[1] = {10};
+            //     */
+                
+            //    // Variable declaration with assignment?
+            //    //var ex = ParseExpression();
+            //    _position += 2;
+            //    statement = new VariableDeclarationStatement(expression, identifier, ParseExpression());
+            //}
         }
         else
         {
@@ -337,7 +386,7 @@ internal class Parser
 
     private Expression ParseAssignmentExpression()
     {
-        var expression = ParseBinaryExpression();
+        var expression = ParseAccessorExpression();
         switch (Current.Type)
         {
             case TokenType.AmpEqual:
@@ -361,6 +410,27 @@ internal class Parser
 
         return expression;
 
+    }
+
+    private Expression ParseAccessorExpression()
+    {
+        var expression = ParseBinaryExpression();
+
+        switch (Current.Type)
+        {
+            case TokenType.LeftSquareBracket:
+
+                break;
+            case TokenType.LeftParenthesis:
+
+                break;
+            case TokenType.Punctuation:
+                break;
+            case TokenType.Pointer:
+                break;
+        }
+
+        return expression;
     }
 
     private Expression ParseBinaryExpression(int previousPrecedence = 0)
