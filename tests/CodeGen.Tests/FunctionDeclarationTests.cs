@@ -200,4 +200,19 @@ internal class FunctionDeclarationTests
         Assert.That(statement.Name, Is.EqualTo("func"));
         Assert.That(statement.Arguments, Is.Empty);
     }
+
+    [Test]
+    public void Parse_MultipleLinesWithModifier_ReturnFunctionDeclaration()
+    {
+        const string code = "extern __declspec(dllexport) void func(); void func1();";
+
+        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Last();
+        var returnType = (BuiltInTypeExpression)statement.ReturnType;
+
+        Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
+        Assert.That(statement.Modifiers, Is.Empty);
+        Assert.That(statement.Body, Is.Null);
+        Assert.That(statement.Name, Is.EqualTo("func1"));
+        Assert.That(statement.Arguments, Is.Empty);
+    }
 }
