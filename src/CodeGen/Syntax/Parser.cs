@@ -150,6 +150,7 @@ internal class Parser
         return statement;
     }
 
+
     private Statement ParseStatement()
     {
         Statement statement;
@@ -163,7 +164,7 @@ internal class Parser
         }
         else
         {
-            statement = ParseExpressionStatement();
+            statement = ParseDeclspecStatement();
         }
 
         return statement;
@@ -171,7 +172,6 @@ internal class Parser
 
     private Statement ParseEnumStatement()
     {
-
         _position++;
         var name = string.Empty;
         //anonymous enums are possible, this will support both
@@ -242,6 +242,28 @@ internal class Parser
         throw new ParserException("Could not find a token that can determine if it's a struct definition or struct return type.");
     }
 
+    // NOTE(Jens): maybe this can be used for a more general function modifier? 
+    private Statement ParseDeclspecStatement()
+    {
+        if (Current.Type == TokenType.DeclSpec)
+        {
+            _position++;
+            if (Current.Type != TokenType.LeftParenthesis)
+            {
+                throw new ParserException($"Expected {TokenType.LeftParenthesis} but found {Current.Type} when parsing a __declspec statement on Line: {Current.Line} Column: {Current.Column}");
+            }
+            _position++;
+            var declspecType = Current.Type;
+            _position++;
+            if (Current.Type != TokenType.RightParenthesis)
+            {
+                throw new ParserException($"Expected {TokenType.RightParenthesis} but found {Current.Type} when parsing a __declspec statement on Line: {Current.Line} Column: {Current.Column}");
+            }
+            _position++;
+            return new DeclspecStatement(declspecType, ParseExpressionStatement());
+        }
+        return ParseExpressionStatement();
+    }
 
     private Statement ParseExpressionStatement()
     {
@@ -596,7 +618,7 @@ internal class Parser
             }
             var identifier = ParseAccessorExpression();
             members.Add(new VariableDeclarationStatement(type, identifier));
-            
+
             if (Current.Type != TokenType.Semicolon)
             {
                 throw new ParserException($"Expected {TokenType.Semicolon} but found {Current.Type} when closing the struct member definition. Line: {Current.Line} Column: {Current.Column}");
