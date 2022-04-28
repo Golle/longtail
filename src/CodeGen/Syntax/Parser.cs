@@ -15,6 +15,8 @@ internal class Parser
     private readonly Token[] _tokens;
     private int _position;
     private Token Current => Peek(0);
+
+    private List<TokenType> _functionModifiers = new();
     private Token Peek(int steps)
     {
         var position = _position + steps;
@@ -164,7 +166,7 @@ internal class Parser
         }
         else
         {
-            statement = ParseDeclspecStatement();
+            statement = ParseFunctionModifiers();
         }
 
         return statement;
@@ -242,27 +244,43 @@ internal class Parser
         throw new ParserException("Could not find a token that can determine if it's a struct definition or struct return type.");
     }
 
+    
     // NOTE(Jens): maybe this can be used for a more general function modifier? 
-    private Statement ParseDeclspecStatement()
+    private Statement ParseFunctionModifiers()
     {
-        if (Current.Type == TokenType.DeclSpec)
+        while (true)
         {
-            _position++;
-            if (Current.Type != TokenType.LeftParenthesis)
+            if (Current.Type == TokenType.DeclSpec)
             {
-                throw new ParserException($"Expected {TokenType.LeftParenthesis} but found {Current.Type} when parsing a __declspec statement on Line: {Current.Line} Column: {Current.Column}");
+                _position++;
+                if (Current.Type != TokenType.LeftParenthesis)
+                {
+                    throw new ParserException($"Expected {TokenType.LeftParenthesis} but found {Current.Type} when parsing a __declspec statement on Line: {Current.Line} Column: {Current.Column}");
+                }
+                _position++;
+                _functionModifiers.Add(Current.Type);
+                _position++;
+                if (Current.Type != TokenType.RightParenthesis)
+                {
+                    throw new ParserException($"Expected {TokenType.RightParenthesis} but found {Current.Type} when parsing a __declspec statement on Line: {Current.Line} Column: {Current.Column}");
+                }
+                _position++;
+                //return new DeclspecStatement(declspecType, ParseExpressionStatement());
             }
-            _position++;
-            var declspecType = Current.Type;
-            _position++;
-            if (Current.Type != TokenType.RightParenthesis)
+            else if (Current.Type == TokenType.Extern)
             {
-                throw new ParserException($"Expected {TokenType.RightParenthesis} but found {Current.Type} when parsing a __declspec statement on Line: {Current.Line} Column: {Current.Column}");
+                _functionModifiers.Add(Current.Type);
+                _position++;
             }
-            _position++;
-            return new DeclspecStatement(declspecType, ParseExpressionStatement());
+            else
+            {
+                break;
+            }
         }
-        return ParseExpressionStatement();
+        var expression = ParseExpressionStatement();
+        // clear the function modifiers when the expression statement returns.
+        _functionModifiers.Clear();
+        return expression;
     }
 
     private Statement ParseExpressionStatement()
@@ -286,7 +304,7 @@ internal class Parser
                 if (Current.Type == TokenType.Semicolon)
                 {
                     Logger.Trace($"Function declaration: {identifier}");
-                    statement = new FunctionDeclarationStatement(expression, identifier, arguments);
+                    statement = new FunctionDeclarationStatement(expression, identifier, arguments, _functionModifiers.ToArray());
                 }
                 else if (Current.Type == TokenType.LeftCurlyBracer)
                 {

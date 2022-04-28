@@ -168,4 +168,36 @@ internal class FunctionDeclarationTests
         Assert.That(variable.Expression, Is.Null);
         Assert.That(statement.Body, Is.Null);
     }
+
+
+    [Test]
+    public void Parse_SingleModifier_ReturnFunctionDeclaration()
+    {
+        const string code = "extern void func();";
+
+        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var returnType = (BuiltInTypeExpression)statement.ReturnType;
+
+        Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
+        Assert.That(statement.Modifiers.Single(), Is.EqualTo(TokenType.Extern));
+        Assert.That(statement.Body, Is.Null);
+        Assert.That(statement.Name, Is.EqualTo("func"));
+        Assert.That(statement.Arguments, Is.Empty);
+    }
+
+    [Test]
+    public void Parse_MultipleModifiers_ReturnFunctionDeclaration()
+    {
+        const string code = "extern __declspec(dllexport) void func();";
+
+        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var returnType = (BuiltInTypeExpression)statement.ReturnType;
+
+        Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
+        Assert.That(statement.Modifiers[0], Is.EqualTo(TokenType.Extern));
+        Assert.That(statement.Modifiers[1], Is.EqualTo(TokenType.DllExport));
+        Assert.That(statement.Body, Is.Null);
+        Assert.That(statement.Name, Is.EqualTo("func"));
+        Assert.That(statement.Arguments, Is.Empty);
+    }
 }
