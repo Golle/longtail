@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Text;
-using CodeGen.Syntax.Expressions;
 
 namespace CodeGen.Syntax.Statements;
 
-internal record struct StructMember(Expression Type, string Name);
 internal class StructDeclarationStatement : Statement
 {
     public string Name { get; }
-    public StructMember[] Members { get; }
+    public VariableDeclarationStatement[] Members { get; }
     public bool ForwardDeclaration { get; }
-    public StructDeclarationStatement(string name) : this(name, Array.Empty<StructMember>(), true){}
-    public StructDeclarationStatement(string name, StructMember[] members, bool forwardDeclaration = false)
+    public StructDeclarationStatement(string name) : this(name, Array.Empty<VariableDeclarationStatement>(), true){}
+    public StructDeclarationStatement(string name, VariableDeclarationStatement[] members, bool forwardDeclaration = false)
     {
         Name = name;
         Members = members;
@@ -28,9 +26,9 @@ internal class StructDeclarationStatement : Statement
         builder.Append("struct ");
         builder.Append(Name);
         builder.AppendLine(" {");
-        foreach (var (type, name) in Members)
+        foreach (var member in Members)
         {
-            builder.AppendLine($"  {type} {name}");
+            builder.AppendLine($"  {member.ToString()}");
         }
         builder.AppendLine("}");
         return builder.ToString();
@@ -45,10 +43,9 @@ internal class StructDeclarationStatement : Statement
         }
         print.Write($"{GetType().Name} ({Name})", indentation);
         print.Write("Members:", indentation + 2);
-        foreach (var (type, name) in Members)
+        foreach (var member in Members)
         {
-            print.Write($"{name}:", indentation + 4);
-            type.PrettyPrint(print, indentation + 6);
+            member.PrettyPrint(print, indentation + 4);
         }
     }
 }

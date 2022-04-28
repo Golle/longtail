@@ -7,7 +7,6 @@ using NUnit.Framework;
 
 namespace CodeGen.Tests;
 
-//[Ignore("Not implemented yet")]
 internal class StructParsingTests
 {
     [Test]
@@ -29,11 +28,12 @@ internal class StructParsingTests
 
         var result = (StructDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var member = result.Members.Single();
+        var variable = (IdentifierExpression)member.Variable;
         var memberType = (BuiltInTypeExpression)member.Type;
 
         Assert.That(result.ForwardDeclaration, Is.False);
         Assert.That(result.Name, Is.EqualTo("TheStruct"));
-        Assert.That(member.Name, Is.EqualTo("theField"));
+        Assert.That(variable.Value, Is.EqualTo("theField"));
         Assert.That(memberType.Types.Single(), Is.EqualTo(TokenType.Int));
     }
 
@@ -45,15 +45,17 @@ internal class StructParsingTests
 
         var result = (StructDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var member1 = result.Members[0];
+        var variable1 = (IdentifierExpression)member1.Variable;
         var memberType1 = (BuiltInTypeExpression)member1.Type;
         var member2 = result.Members[1];
+        var variable2 = (IdentifierExpression)member2.Variable;
         var memberType2 = (BuiltInTypeExpression)member2.Type;
 
         Assert.That(result.ForwardDeclaration, Is.False);
         Assert.That(result.Name, Is.EqualTo("TheStruct"));
-        Assert.That(member1.Name, Is.EqualTo("first"));
+        Assert.That(variable1.Value, Is.EqualTo("first"));
         Assert.That(memberType1.Types.Single(), Is.EqualTo(TokenType.Int));
-        Assert.That(member2.Name, Is.EqualTo("second"));
+        Assert.That(variable2.Value, Is.EqualTo("second"));
         Assert.That(memberType2.Types.Single(), Is.EqualTo(TokenType.Unsigned));
     }
 
@@ -64,14 +66,36 @@ internal class StructParsingTests
 
         var result = (StructDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
         var member = result.Members.Single();
+        var variable = (IdentifierExpression)member.Variable;
         var pointerType = (PointerTypeExpression)member.Type;
         var memberType = (BuiltInTypeExpression)pointerType.Expression;
 
 
         Assert.That(result.ForwardDeclaration, Is.False);
         Assert.That(result.Name, Is.EqualTo("TheStruct"));
-        Assert.That(member.Name, Is.EqualTo("thePointer"));
+        Assert.That(variable.Value, Is.EqualTo("thePointer"));
         Assert.That(memberType.Types[0], Is.EqualTo(TokenType.Unsigned));
         Assert.That(memberType.Types[1], Is.EqualTo(TokenType.Int));
+    }
+
+    [Test]
+    public void Parse_StructWithSingleArrayMember_ReturnStruct()
+    {
+        const string code = "struct TheStruct{unsigned theArray[1];}";
+
+        var result = (StructDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var member = result.Members.Single();
+        var array = (ArrayExpression)member.Variable;
+        var variable = (IdentifierExpression)array.Left;
+        var accessor = (LiteralExpression)array.Expression!;
+        var memberType = (BuiltInTypeExpression)member.Type;
+
+
+        Assert.That(result.ForwardDeclaration, Is.False);
+        Assert.That(result.Name, Is.EqualTo("TheStruct"));
+        Assert.That(variable.Value, Is.EqualTo("theArray"));
+        Assert.That(accessor.Value, Is.EqualTo("1"));
+        Assert.That(accessor.Type, Is.EqualTo(TokenType.Number));
+        Assert.That(memberType.Types.Single(), Is.EqualTo(TokenType.Unsigned));
     }
 }

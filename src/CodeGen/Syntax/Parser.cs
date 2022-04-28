@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using CodeGen.Lexer;
 using CodeGen.Logging;
 using CodeGen.Syntax.Expressions;
@@ -318,14 +317,6 @@ internal class Parser
                 identifier = new IdentifierExpression("");
             }
             arguments.Add(new VariableDeclarationStatement(expr, identifier));
-            //var expr = TryParseTypeExpression() ?? throw new ParserException("Failed to parse method arguments");
-            //var name = string.Empty;
-            //// support empty type declarations, ex func(void, int);
-            //if (Current.Type == TokenType.Identifier)
-            //{
-            //    name = Current.Value;
-            //    _position++;
-            //}
 
             if (Current.Type != TokenType.Comma)
             {
@@ -558,7 +549,6 @@ internal class Parser
 
     private Statement ParseStructDeclaration()
     {
-
         //TODO: add anonymous types
         _position++;
         if (Current.Type != TokenType.Identifier)
@@ -566,6 +556,7 @@ internal class Parser
             throw new ParserException($"Expected {TokenType.Identifier} when parsing a struct but found {Current.Type}");
         }
         var name = Current.Value;
+        Logger.Trace($"Struct declaration: {name}");
         _position++;
 
         // Full struct definition
@@ -593,35 +584,26 @@ internal class Parser
         throw new ParserException($"Expected {TokenType.LeftCurlyBracer} or {TokenType.Semicolon} but found {Current.Type}");
     }
 
-    private StructMember[] ParseMembers()
+    private VariableDeclarationStatement[] ParseMembers()
     {
-        List<StructMember> members = new();
-        while (true)
+        List<VariableDeclarationStatement> members = new();
+        while (Current.Type != TokenType.RightCurlyBracer)
         {
-            if (Current.Type == TokenType.RightCurlyBracer)
-            {
-                return members.ToArray();
-            }
-
-            var type = TryParseTypeExpression();
-            if (type == null)
-            {
-                throw new ParserException("Failed to read members for struct.");
-            }
-
+            var type = ParseExpression();
             if (Current.Type != TokenType.Identifier)
             {
-                throw new ParserException($"Expected {TokenType.Identifier} but found {Current.Type} when defining a member in a struct.");
+                throw new ParserException($"Expected {TokenType.Identifier} but found {Current.Type} when parsing struct members on Line: {Current.Line} Column: {Current.Column}");
             }
-
-            members.Add(new StructMember(type, Current.Value));
-            _position++;
+            var identifier = ParseAccessorExpression();
+            members.Add(new VariableDeclarationStatement(type, identifier));
+            
             if (Current.Type != TokenType.Semicolon)
             {
                 throw new ParserException($"Expected {TokenType.Semicolon} but found {Current.Type} when closing the struct member definition. Line: {Current.Line} Column: {Current.Column}");
             }
             _position++;
         }
+        return members.ToArray();
     }
 }
 
