@@ -1,10 +1,9 @@
 ﻿using System.Linq;
-using CodeGen.Syntax;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
-namespace CodeGen.Tests;
+namespace CodeGen.Tests.Parser;
 
 internal class ExpressionParserTests
 {
@@ -22,7 +21,7 @@ internal class ExpressionParserTests
     {
         var code = $"1 {op} 2;";
 
-        var statement = (ExpressionStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (ExpressionStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var binary = (BinaryExpression)statement.Expression;
         var left = (LiteralExpression)binary.Left;
         var right = (LiteralExpression)binary.Right;
@@ -47,7 +46,7 @@ internal class ExpressionParserTests
     {
         var code = $"a {op} 2;";
 
-        var statement = (ExpressionStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (ExpressionStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var assignment = (AssigmentExpression)statement.Expression;
         var left = (IdentifierExpression)assignment.Left;
         var right = (LiteralExpression)assignment.Right;
@@ -67,7 +66,7 @@ internal class ExpressionParserTests
     {
         var code = $"{op}a;";
 
-        var statement = (ExpressionStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (ExpressionStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var unary = (UnaryExpression)statement.Expression;
         var right = (IdentifierExpression)unary.Expression;
 
@@ -80,7 +79,7 @@ internal class ExpressionParserTests
     {
         var code = "(1 + 2);";
 
-        var statement = (ExpressionStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (ExpressionStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var parenthesizedExpression = (ParenthesizedExpression)statement.Expression;
         var result = (BinaryExpression)parenthesizedExpression.Inner;
         var left = (LiteralExpression)result.Left;

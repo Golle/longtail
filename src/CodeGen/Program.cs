@@ -6,28 +6,13 @@ using System.Threading.Tasks;
 using CodeGen;
 using CodeGen.Logging;
 using CodeGen.Syntax;
+using CodeGen.Syntax.Binding;
+using CodeGen.Syntax.Statements;
 
 
 using var _ = Logger.Start();
 
 const string LongtailPath = @"O:\tmp\longtail";
-
-//var longtailLibPath = Path.Combine(LongtailPath, "lib");
-//var longtailHeader = Path.Combine(LongtailPath, "src", "longtail.h");
-
-//var headerFiles = Directory.GetDirectories(longtailLibPath, "*", SearchOption.TopDirectoryOnly)
-//    .SelectMany(lib => Directory.GetFiles(lib, "*.h", SearchOption.TopDirectoryOnly))
-//    .ToArray();
-
-
-//foreach (var headerFile in headerFiles)
-//{
-//    Logger.Trace($"Reading contents: {headerFile}");
-//    var t = File.ReadAllText(headerFile);
-//    new Parser(t).Parse();
-//}
-
-//return;
 
 Console.WriteLine("Welcome to the interpreter!");
 
@@ -49,7 +34,7 @@ while (true)
     {
         var headers = new LongtailFileReader(LongtailPath)
             .EnumerateAllHeaders(("LONGTAIL_EXPORT", "__declspec(dllexport)"));
-        foreach (var input in headers)
+        foreach (var input in headers.Take(1))
         {
             Parse(input);
         }
@@ -81,19 +66,52 @@ while (true)
     {
         try
         {
-            var timer = Stopwatch.StartNew();
-            var result = new Parser(input)
-                .Parse();
-            timer.Stop();
-            Console.WriteLine("Syntax tree.");
-            foreach (var syntaxNode in result.GetChildren())
+
+            SyntaxTree tree;
             {
-                syntaxNode.PrettyPrint(new SyntaxConsoleWriter());
-                Logger.Raw(Environment.NewLine);
+                Logger.Info("Parse started");
+                var timer = Stopwatch.StartNew();
+                tree = SyntaxTree.Parse(input);
+                timer.Stop();
+                Logger.Info($"End of file reached. ({timer.Elapsed.TotalMilliseconds:0.##} ms)");
             }
 
-            Logger.Raw($"End of file reached. ({timer.Elapsed.TotalMilliseconds:0.##} ms)");
-            return result;
+            {
+                Logger.Info("Binding started");
+                var timer = Stopwatch.StartNew();
+                new CodeBinder(new TypeLookupTable())
+                    .BindNodes(tree.GetChildren());
+                timer.Stop();
+                Logger.Info($"Binding completed in ({timer.Elapsed.TotalMilliseconds:0.##} ms)");
+            }
+            
+
+            //foreach (var syntaxNode in result.GetChildren())
+            //{
+            //    syntaxNode.PrettyPrint(new SyntaxConsoleWriter());
+            //    Logger.Raw(Environment.NewLine);
+            //}
+
+            //var types = result.GetChildren()
+            //    .GroupBy(c => c.GetType())
+            //    .Select(c => (c.Key.Name, Count: c.Count()))
+            //    .Select(tuple => $"{tuple.Name,-30}{tuple.Count}");
+
+
+            //foreach (var typedef in result.GetChildren().OfType<TypedefStatement>())
+            //{
+            //    typedef.PrettyPrint(new SyntaxConsoleWriter());
+            //}
+
+                
+            //foreach (var type in types)
+            //{
+            //    Logger.Raw(type);
+            //}
+
+
+            
+            return tree;
         }
         catch (ParserException e)
         {

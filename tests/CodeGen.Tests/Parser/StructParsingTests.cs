@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using CodeGen.Lexer;
-using CodeGen.Syntax;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
-namespace CodeGen.Tests;
+namespace CodeGen.Tests.Parser;
 
 internal class StructParsingTests
 {
@@ -14,7 +13,7 @@ internal class StructParsingTests
     {
         const string code = "struct TheStruct;";
 
-        var result = (StructDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var result = (StructDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
 
         Assert.That(result.ForwardDeclaration, Is.True);
         Assert.That(result.Name, Is.EqualTo("TheStruct"));
@@ -26,7 +25,7 @@ internal class StructParsingTests
     {
         const string code = "struct TheStruct{int theField;}";
 
-        var result = (StructDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var result = (StructDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var member = result.Members.Single();
         var variable = (IdentifierExpression)member.Variable;
         var memberType = (BuiltInTypeExpression)member.Type;
@@ -43,7 +42,7 @@ internal class StructParsingTests
     {
         const string code = "struct TheStruct{int first; unsigned second; }";
 
-        var result = (StructDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var result = (StructDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var member1 = result.Members[0];
         var variable1 = (IdentifierExpression)member1.Variable;
         var memberType1 = (BuiltInTypeExpression)member1.Type;
@@ -64,7 +63,7 @@ internal class StructParsingTests
     {
         const string code = "struct TheStruct{unsigned int* thePointer;}";
 
-        var result = (StructDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var result = (StructDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var member = result.Members.Single();
         var variable = (IdentifierExpression)member.Variable;
         var pointerType = (PointerTypeExpression)member.Type;
@@ -83,7 +82,7 @@ internal class StructParsingTests
     {
         const string code = "struct TheStruct{unsigned theArray[1];}";
 
-        var result = (StructDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var result = (StructDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var member = result.Members.Single();
         var array = (ArrayExpression)member.Variable;
         var variable = (IdentifierExpression)array.Left;

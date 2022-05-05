@@ -1,10 +1,9 @@
 ﻿using System.Linq;
-using CodeGen.Syntax;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
-namespace CodeGen.Tests;
+namespace CodeGen.Tests.Parser;
 
 internal class AssignmentOperatorTests
 {
@@ -13,7 +12,7 @@ internal class AssignmentOperatorTests
     {
         const string code = "a = 1;";
 
-        var statement = (ExpressionStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (ExpressionStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var binary = (AssigmentExpression)statement.Expression;
         var left = (IdentifierExpression)binary.Left;
         var right = (LiteralExpression)binary.Right;
@@ -38,7 +37,7 @@ internal class AssignmentOperatorTests
     {
         var code = $"a {op} 1;";
 
-        var statement = (ExpressionStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (ExpressionStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var binary = (AssigmentExpression)statement.Expression;
         var left = (IdentifierExpression)binary.Left;
         var right = (LiteralExpression)binary.Right;

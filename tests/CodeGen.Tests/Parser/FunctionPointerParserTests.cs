@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using CodeGen.Lexer;
-using CodeGen.Syntax;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
-namespace CodeGen.Tests;
+namespace CodeGen.Tests.Parser;
 
 internal class FunctionPointerParserTests
 {
@@ -14,7 +13,7 @@ internal class FunctionPointerParserTests
     {
         const string code = "typedef void (*func)()";
 
-        var functionDeclaration = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var functionDeclaration = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var returnType = (BuiltInTypeExpression)functionDeclaration.ReturnType;
 
         Assert.That(functionDeclaration.Name, Is.EqualTo("func"));
@@ -28,7 +27,7 @@ internal class FunctionPointerParserTests
     {
         const string code = "typedef void (*func)(unsigned a)";
 
-        var functionDeclaration = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var functionDeclaration = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var argument = functionDeclaration.Arguments.Single();
         var variable = (IdentifierExpression)argument.Variable;
         var argumentType = (BuiltInTypeExpression)argument.Type;
@@ -46,7 +45,7 @@ internal class FunctionPointerParserTests
     {
         const string code = "typedef const unsigned long int * (*func)()";
 
-        var functionDeclaration = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var functionDeclaration = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var returnType = (ConstExpression)functionDeclaration.ReturnType;
         var pointer = (PointerTypeExpression)returnType.Expression;
         var type = (BuiltInTypeExpression)pointer.Expression;

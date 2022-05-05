@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using CodeGen.Lexer;
-using CodeGen.Syntax;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
-namespace CodeGen.Tests;
+namespace CodeGen.Tests.Parser;
 
 internal class FunctionDeclarationTests
 {
@@ -14,7 +13,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "void func();";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var returnType = (BuiltInTypeExpression)statement.ReturnType;
 
         Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
@@ -28,7 +27,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "int func(long a);";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var argument = statement.Arguments.Single();
         var argumentType = (BuiltInTypeExpression)argument.Type;
         var variable = (IdentifierExpression)argument.Variable;
@@ -46,7 +45,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "int func(long a, unsigned b);";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var argument1 = statement.Arguments[0];
         var variable1 = (IdentifierExpression)argument1.Variable;
         var argument1Type = (BuiltInTypeExpression)argument1.Type;
@@ -69,7 +68,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "void func(void);";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var argument = statement.Arguments[0];
         var variable = (IdentifierExpression)argument.Variable;
         var argumentType = (BuiltInTypeExpression)argument.Type;
@@ -86,7 +85,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "void func(void, int a);";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var argument1 = statement.Arguments[0];
         var variable1 = (IdentifierExpression)argument1.Variable;
         var argument1Type = (BuiltInTypeExpression)argument1.Type;
@@ -109,7 +108,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "void func(const unsigned long int * a);";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var returnType = (BuiltInTypeExpression)statement.ReturnType;
         var argument = statement.Arguments.Single();
         var variable = (IdentifierExpression)argument.Variable;
@@ -131,7 +130,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "void func(struct A * a);";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var returnType = (BuiltInTypeExpression)statement.ReturnType;
         var argument = statement.Arguments.Single();
         var variable = (IdentifierExpression)argument.Variable;
@@ -152,7 +151,7 @@ internal class FunctionDeclarationTests
         // NOTE(Jens): this might not be the correct Tree we want for this statement. Look into this at some point.
         const string code = "void func(void * a[]);";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var returnType = (BuiltInTypeExpression)statement.ReturnType;
         var argument = statement.Arguments.Single();
         var variable = (ArrayExpression)argument.Variable;
@@ -175,7 +174,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "extern void func();";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var returnType = (BuiltInTypeExpression)statement.ReturnType;
 
         Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
@@ -190,7 +189,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "extern __declspec(dllexport) void func();";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var returnType = (BuiltInTypeExpression)statement.ReturnType;
 
         Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));
@@ -206,7 +205,7 @@ internal class FunctionDeclarationTests
     {
         const string code = "extern __declspec(dllexport) void func(); void func1();";
 
-        var statement = (FunctionDeclarationStatement)new Parser(code).Parse().GetChildren().Last();
+        var statement = (FunctionDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Last();
         var returnType = (BuiltInTypeExpression)statement.ReturnType;
 
         Assert.That(returnType.Types.Single(), Is.EqualTo(TokenType.Void));

@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using CodeGen.Lexer;
-using CodeGen.Syntax;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
-namespace CodeGen.Tests;
+namespace CodeGen.Tests.Parser;
 
 internal class VariableDeclarationTests
 {
@@ -14,7 +13,7 @@ internal class VariableDeclarationTests
     {
         var code = "int a;";
 
-        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (VariableDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var type = (BuiltInTypeExpression)statement.Type;
         var variable = (IdentifierExpression)statement.Variable;
 
@@ -27,7 +26,7 @@ internal class VariableDeclarationTests
     {
         var code = "unsigned long int ** a;";
 
-        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (VariableDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var pointer1 = (PointerTypeExpression)statement.Type;
         var pointer2 = (PointerTypeExpression)pointer1.Expression;
         var type = (BuiltInTypeExpression)pointer2.Expression;
@@ -44,7 +43,7 @@ internal class VariableDeclarationTests
     {
         var code = "unsigned int * a = 1;";
 
-        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (VariableDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var assignment = (AssigmentExpression)statement.Variable;
         var literal = (LiteralExpression)assignment.Right;
         var identifier = (IdentifierExpression)assignment.Left;
@@ -63,7 +62,7 @@ internal class VariableDeclarationTests
     {
         var code = "int a = 1;";
 
-        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (VariableDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var assignment = (AssigmentExpression)statement.Variable;
         var literal = (LiteralExpression)assignment.Right;
         var identifier = (IdentifierExpression)assignment.Left;
@@ -80,7 +79,7 @@ internal class VariableDeclarationTests
     {
         var code = "int a = b + 2;";
 
-        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (VariableDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var assignment = (AssigmentExpression)statement.Variable;
         var binary = (BinaryExpression)assignment.Right;
         var variable = (IdentifierExpression)assignment.Left;

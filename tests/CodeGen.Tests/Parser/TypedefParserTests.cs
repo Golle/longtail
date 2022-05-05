@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using CodeGen.Lexer;
-using CodeGen.Syntax;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
-namespace CodeGen.Tests;
+namespace CodeGen.Tests.Parser;
 
 internal class TypedefParserTests
 {
@@ -20,7 +19,7 @@ internal class TypedefParserTests
     {
         var code = $"typedef {string.Join(' ', types).ToLower()} {name}";
 
-        var typedef = (TypedefStatement)new Parser(code).Parse().GetChildren().Single();
+        var typedef = (TypedefStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var expressionStatement = (ExpressionStatement)typedef.Definition;
         var builtIn = (BuiltInTypeExpression)expressionStatement.Expression;
 

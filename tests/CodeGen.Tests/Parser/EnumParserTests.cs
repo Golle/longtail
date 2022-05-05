@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using CodeGen.Lexer;
-using CodeGen.Syntax;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
-namespace CodeGen.Tests;
+namespace CodeGen.Tests.Parser;
 
 internal class EnumParserTests
 {
@@ -14,7 +13,7 @@ internal class EnumParserTests
     {
         const string code = "enum TheEnum{};";
 
-        var enumDeclaration = (EnumDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var enumDeclaration = (EnumDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
 
         Assert.That(enumDeclaration.Name, Is.EqualTo("TheEnum"));
         Assert.That(enumDeclaration.Members, Is.Empty);
@@ -25,7 +24,7 @@ internal class EnumParserTests
     {
         const string code = "enum TheEnum{ Value };";
 
-        var enumDeclaration = (EnumDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var enumDeclaration = (EnumDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var member = (IdentifierExpression)enumDeclaration.Members.Single();
         
         Assert.That(enumDeclaration.Name, Is.EqualTo("TheEnum"));
@@ -38,7 +37,7 @@ internal class EnumParserTests
     {
         const string code = "enum { Value };";
 
-        var enumDeclaration = (EnumDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var enumDeclaration = (EnumDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var member = (IdentifierExpression)enumDeclaration.Members.Single();
 
         Assert.That(enumDeclaration.Name, Is.EqualTo(string.Empty));
@@ -50,7 +49,7 @@ internal class EnumParserTests
     {
         const string code = "enum TheEnum{ Value1, Value2 };";
 
-        var enumDeclaration = (EnumDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var enumDeclaration = (EnumDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var member1 = (IdentifierExpression)enumDeclaration.Members[0];
         var member2 = (IdentifierExpression)enumDeclaration.Members[1];
 
@@ -64,7 +63,7 @@ internal class EnumParserTests
     {
         const string code = "enum TheEnum{ Value = 1 };";
 
-        var enumDeclaration = (EnumDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var enumDeclaration = (EnumDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var assignment = (AssigmentExpression)enumDeclaration.Members.Single();
         var member = (IdentifierExpression)assignment.Left;
         var literal = (LiteralExpression)assignment.Right;

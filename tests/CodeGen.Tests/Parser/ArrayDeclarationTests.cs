@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using CodeGen.Lexer;
-using CodeGen.Syntax;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
 using NUnit.Framework;
 
-namespace CodeGen.Tests;
+namespace CodeGen.Tests.Parser;
 
 internal class ArrayDeclarationTests
 {
@@ -14,7 +13,7 @@ internal class ArrayDeclarationTests
     {
         const string code = "int a[1];";
 
-        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (VariableDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var type = (BuiltInTypeExpression)statement.Type;
         var array = (ArrayExpression)statement.Variable;
         var variable = (IdentifierExpression)array.Left;
@@ -31,7 +30,7 @@ internal class ArrayDeclarationTests
     {
         const string code = "unsigned int * a[1];";
 
-        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (VariableDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var pointer = (PointerTypeExpression)statement.Type;
         var type = (BuiltInTypeExpression)pointer.Expression;
         var array = (ArrayExpression)statement.Variable;
@@ -50,7 +49,7 @@ internal class ArrayDeclarationTests
     {
         const string code = "unsigned a[(1+2)];";
 
-        var statement = (VariableDeclarationStatement)new Parser(code).Parse().GetChildren().Single();
+        var statement = (VariableDeclarationStatement)new CodeGen.Syntax.Parser(code).Parse().GetChildren().Single();
         var type = (BuiltInTypeExpression)statement.Type;
         var array = (ArrayExpression)statement.Variable;
         var variable = (IdentifierExpression)array.Left;
