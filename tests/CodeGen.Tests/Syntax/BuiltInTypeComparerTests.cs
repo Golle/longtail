@@ -73,11 +73,17 @@ internal class BuiltInTypeComparerTests
         Assert.That(result, Is.False);
     }
 
+    [Test]
+    public void Equals_SameHashCodeDifferentContents_ReturnFalse()
+    {
+        // Computes to the same hash code, but contents are different.
+        var tokens1 = new[] { (TokenType)1, (TokenType)4, (TokenType)8 };
+        var tokens2 = new[] { (TokenType)2, (TokenType)3, (TokenType)8 };
+        
+        var result = new BuiltInTypeComparer().Equals(tokens1, tokens2);
 
-
-
-
-
+        Assert.That(result, Is.False);
+    }
 
     [TestCase(TokenType.Unsigned)]
     [TestCase(TokenType.Int)]
@@ -109,5 +115,4 @@ internal class BuiltInTypeComparerTests
 
         Assert.That(code1, Is.EqualTo(code2));
     }
-
 }

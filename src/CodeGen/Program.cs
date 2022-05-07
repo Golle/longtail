@@ -7,7 +7,6 @@ using CodeGen;
 using CodeGen.Logging;
 using CodeGen.Syntax;
 using CodeGen.Syntax.Binding;
-using CodeGen.Syntax.Statements;
 
 
 using var _ = Logger.Start();
