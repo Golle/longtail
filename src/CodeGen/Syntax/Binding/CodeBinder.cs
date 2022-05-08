@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CodeGen.Lexer;
 using CodeGen.Logging;
 using CodeGen.Syntax.Expressions;
@@ -16,7 +17,7 @@ internal class CodeBinder
         _symbolLookupTable = symbolLookupTable;
     }
 
-    public void BindNodes(IEnumerable<SyntaxNode> nodes)
+    public BoundSyntaxNode[] BindNodes(IEnumerable<SyntaxNode> nodes)
     {
         List<BoundSyntaxNode> boundNodes = new();
         foreach (var syntaxNode in nodes)
@@ -41,10 +42,11 @@ internal class CodeBinder
                         var type = LookupSymbol(expression.Expression);
                         _symbolLookupTable.AddTypedef(statement.Name, type);
                     }
-                    
+
                     break;
             }
         }
+        return boundNodes.ToArray();
     }
 
     private BoundVariableDeclaration BindVariableDeclarationStatement(VariableDeclarationStatement statement)
@@ -57,7 +59,7 @@ internal class CodeBinder
 
     private BoundExpression BindExpression(Expression expression)
     {
-        var a = expression switch
+        var boundExpression = expression switch
         {
             BinaryExpression binary => new BoundBinaryExpression(binary, BindExpression(binary.Left), BindExpression(binary.Right), binary.Operator),
             AssigmentExpression assignment => new BoundAssignmentExpression(assignment, BindExpression(assignment.Left), BindExpression(assignment.Right), assignment.Operator),
@@ -65,25 +67,13 @@ internal class CodeBinder
             IdentifierExpression identifier => new BoundIdentifierExpression(identifier, identifier.Value),
             _ => throw new NotImplementedException($"Binding for {expression.GetType()} has not been implemented.")
         };
-
-        return a;
+        return boundExpression;
     }
 
     private BoundExpression BindLiteral(LiteralExpression literal)
     {
         var typeSymbol = _symbolLookupTable.Find(literal.Type) ?? throw new BinderException($"No type symbol found for token {literal.Type}.");
         return new BoundLiteralExpression(literal, typeSymbol, literal.Value);
-    }
-
-    private TypeSymbol BindPointerType(PointerTypeExpression pointerType)
-    {
-        var type = pointerType.Expression switch
-        {
-            PointerTypeExpression pointer => BindPointerType(pointer),
-            BuiltInTypeExpression builtInType => LookupBuiltInType(builtInType),
-            _ => throw new NotImplementedException($"Binding for {pointerType.Expression.GetType()} has not been implemented.")
-        };
-        return type;
     }
 
     private BoundStructDeclaration BindStructDeclaration(StructDeclarationStatement statement)
@@ -97,15 +87,25 @@ internal class CodeBinder
 
     private BoundFunctionDeclaration BindFunctionDeclaration(FunctionDeclarationStatement statement)
     {
+        var functionArguments = statement.Arguments.Select(a =>
+            {
+                var identifier = a.Variable as IdentifierExpression ?? throw new NotSupportedException($"{a.Variable.GetType()} is not supported as the variable declaration.");
+                var symbol = LookupSymbol(a.Type);
+                return new FunctionArgument(identifier.Value, symbol);
+            })
+            .ToArray();
+
         var returnType = LookupSymbol(statement.ReturnType);
 
-        return new BoundFunctionDeclaration(statement);
+        var symbol = new FunctionSymbol(statement.Name, returnType, functionArguments);
+        _symbolLookupTable.RegisterType(symbol);
+        return new BoundFunctionDeclaration(statement, symbol);
     }
 
     private Symbol LookupSymbol(Expression expression) =>
         expression switch
         {
-            StructExpression structExpression => LookupStructExpressionSymbol(structExpression),
+            StructExpression structExpression => LookupStructExpressionSymbol(structExpression.Expression),
             PointerTypeExpression pointer => new PointerTypeSymbol(LookupSymbol(pointer.Expression)),
             ReferenceTypeExpression reference => new ReferenceTypeSymbol(LookupSymbol(reference.Expression)),
             BuiltInTypeExpression builtIn => LookupBuiltInType(builtIn),
@@ -114,21 +114,21 @@ internal class CodeBinder
             _ => throw new NotImplementedException($"Binding for symbol {expression.GetType()} has not been implemented.")
         };
 
-    private Symbol LookupStructExpressionSymbol(StructExpression structExpression)
+    private Symbol LookupStructExpressionSymbol(Expression structExpression)
     {
-        if (structExpression.Expression is PointerTypeExpression { Expression: IdentifierExpression identifier } pointer)
+        return structExpression switch
         {
-            var symbol = _symbolLookupTable.Find(identifier.Value);
-            if (symbol == null)
-            {
-                // NOTE(Jens): Special case where the typedef struct has not been defined anywhere else. For example typedef struct Struct* StructH;
-                var structSymbol = new StructTypeSymbol(identifier.Value);
-                _symbolLookupTable.RegisterType(structSymbol);
-                return structSymbol;
-            }
-            return symbol;
+            PointerTypeExpression pointer => new PointerTypeSymbol(LookupStructExpressionSymbol(pointer.Expression)),
+            IdentifierExpression identifier1 => _symbolLookupTable.Find(identifier1.Value) ?? CreateStrutType(identifier1.Value),
+            _ => throw new BinderException($"Unexpected struct expression type: {structExpression.GetType()}")
+        };
+        Symbol CreateStrutType(string identifier)
+        {
+            // NOTE(Jens): Special case where the typedef struct has not been defined anywhere else. For example typedef struct Struct* StructH;
+            var structSymbol = new StructTypeSymbol(identifier);
+            _symbolLookupTable.RegisterType(structSymbol);
+            return structSymbol;
         }
-        throw new BinderException($"Unexpected struct expression type: {structExpression.Expression.GetType()}");
     }
 
     private PrimitiveTypeSymbol LookupBuiltInType(BuiltInTypeExpression builtInType) =>
@@ -136,4 +136,28 @@ internal class CodeBinder
 
     private Symbol LookupType(IdentifierExpression identifier) =>
         _symbolLookupTable.Find(identifier.Value) ?? throw new BinderException($"Failed to find symbol definition for {identifier.Value}");
+}
+
+internal class FunctionArgument
+{
+    public string Name { get; }
+    public Symbol Symbol { get; }
+
+    public FunctionArgument(string name, Symbol symbol)
+    {
+        Name = name;
+        Symbol = symbol;
+    }
+}
+
+internal class FunctionSymbol : TypeSymbol
+{
+    public Symbol ReturnType { get; }
+    public FunctionArgument[] Arguments { get; }
+    public FunctionSymbol(string name, Symbol returnType, FunctionArgument[] arguments) 
+        : base(name)
+    {
+        ReturnType = returnType;
+        Arguments = arguments;
+    }
 }

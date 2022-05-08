@@ -92,8 +92,14 @@ while (true)
                         .AddTypedef("uint16_t", TokenType.Unsigned, TokenType.Short)
                         .AddTypedef("size_t", TokenType.Unsigned, TokenType.Long, TokenType.Long) // This is for x64
                     ;
-                new CodeBinder(lookupTable)
+                var nodes = new CodeBinder(lookupTable)
                     .BindNodes(tree.GetChildren());
+
+
+                foreach (var boundSyntaxNode in nodes)
+                {
+                    Logger.Info(boundSyntaxNode.ToString() ?? string.Empty);
+                }
                 timer.Stop();
                 Logger.Info($"Binding completed in ({timer.Elapsed.TotalMilliseconds:0.##} ms)");
             }

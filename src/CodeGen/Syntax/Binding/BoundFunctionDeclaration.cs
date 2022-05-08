@@ -1,13 +1,13 @@
 ﻿using CodeGen.Syntax.Statements;
-using CodeGen.Syntax.Symbols;
 
 namespace CodeGen.Syntax.Binding;
 
 internal class BoundFunctionDeclaration : BoundStatement
 {
-    public TypeSymbol ReturnType { get; }
-    public BoundFunctionDeclaration(Statement statement) 
+    public FunctionSymbol FunctionSymbol { get; }
+    public BoundFunctionDeclaration(Statement statement, FunctionSymbol functionSymbol) 
         : base(statement)
     {
+        FunctionSymbol = functionSymbol;
     }
 }
