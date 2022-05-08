@@ -50,18 +50,6 @@ internal class BuiltInTypeComparer : IEqualityComparer<TokenType[]>
             }
         }
         return true;
-
-        var result = 0;
-        for (var i = 0; i < x.Length; ++i)
-        {
-            unchecked
-            {
-                result = x[i] - y[i];
-            }
-        }
-
-        
-        return result == 0;
     }
 
     public int GetHashCode(TokenType[] obj)

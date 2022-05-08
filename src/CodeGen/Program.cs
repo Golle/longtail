@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CodeGen;
+using CodeGen.Lexer;
 using CodeGen.Logging;
 using CodeGen.Syntax;
 using CodeGen.Syntax.Binding;
@@ -73,23 +74,31 @@ while (true)
                 tree = SyntaxTree.Parse(input);
                 timer.Stop();
                 Logger.Info($"End of file reached. ({timer.Elapsed.TotalMilliseconds:0.##} ms)");
+
+                //foreach (var syntaxNode in tree.GetChildren())
+                //{
+                //    syntaxNode.PrettyPrint(new SyntaxConsoleWriter());
+                //    Logger.Raw(Environment.NewLine);
+                //}
             }
 
             {
                 Logger.Info("Binding started");
                 var timer = Stopwatch.StartNew();
-                new CodeBinder(new TypeLookupTable())
+
+                var lookupTable = new SymbolLookupTable()
+                        .AddTypedef("uint64_t", TokenType.Unsigned, TokenType.Long, TokenType.Long)
+                        .AddTypedef("uint32_t", TokenType.Unsigned, TokenType.Int)
+                        .AddTypedef("uint16_t", TokenType.Unsigned, TokenType.Short)
+                        .AddTypedef("size_t", TokenType.Unsigned, TokenType.Long, TokenType.Long) // This is for x64
+                    ;
+                new CodeBinder(lookupTable)
                     .BindNodes(tree.GetChildren());
                 timer.Stop();
                 Logger.Info($"Binding completed in ({timer.Elapsed.TotalMilliseconds:0.##} ms)");
             }
-            
 
-            //foreach (var syntaxNode in result.GetChildren())
-            //{
-            //    syntaxNode.PrettyPrint(new SyntaxConsoleWriter());
-            //    Logger.Raw(Environment.NewLine);
-            //}
+
 
             //var types = result.GetChildren()
             //    .GroupBy(c => c.GetType())
@@ -102,14 +111,14 @@ while (true)
             //    typedef.PrettyPrint(new SyntaxConsoleWriter());
             //}
 
-                
+
             //foreach (var type in types)
             //{
             //    Logger.Raw(type);
             //}
 
 
-            
+
             return tree;
         }
         catch (ParserException e)

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CodeGen.Syntax.Expressions;
+﻿namespace CodeGen.Syntax.Expressions;
 
 internal class StructExpression : Expression
 {
