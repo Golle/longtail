@@ -81,7 +81,7 @@ internal class SymbolLookupTable
     public Symbol? Find(string identifier) => _userDefinedTypes.TryGetValue(identifier, out var type) ? type : null;
 
 
-    public void RegisterType(TypeSymbol type, bool overwrite = false)
+    public void AddType(TypeSymbol type, bool overwrite = false)
     {
 
         if (!_userDefinedTypes.TryAdd(type.Name, type))

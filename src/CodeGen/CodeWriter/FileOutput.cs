@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using CodeGen.Logging;
 
@@ -33,6 +34,36 @@ internal class FileOutput
 
         await stream.WriteLineAsync($"internal struct {fileDefinition.Name} {{ }}");
         await stream.FlushAsync();
+    }
+
+    public async Task WriteEnum(string fileName, EnumCode enumCode, bool resetFile = true)
+    {
+        var path = Path.Combine(_basePath, fileName);
+        await using var fileStream = File.OpenWrite(path);
+        await using var stream = new StreamWriter(fileStream);
+        if (resetFile)
+        {
+            fileStream.SetLength(0);
+        }
+        else
+        {
+            fileStream.Seek(0, SeekOrigin.End);
+        }
+
+        var builder = new StringBuilder();
+        builder.AppendLine($"internal enum {enumCode.Name}");
+        builder.AppendLine("{");
+        foreach (var (name, value) in enumCode.Members)
+        {
+            builder.Append($"\t{name}");
+            if (value != null)
+            {
+                builder.Append($" = {value}");
+            }
+            builder.AppendLine(",");
+        }
+        builder.AppendLine("}");
+        await stream.WriteAsync(builder.ToString());
     }
 }
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CodeGen;
+using CodeGen.CodeWriter;
 using CodeGen.Lexer;
 using CodeGen.Logging;
 using CodeGen.Syntax;
@@ -28,7 +29,7 @@ while (true)
 
     if (line.Length == 0)
     {
-        Parse(File.ReadAllText(@"O:\tmp\sample.h"));
+        await Parse(File.ReadAllText(@"O:\tmp\sample.h"));
     }
     else if (line.StartsWith("#longtail"))
     {
@@ -36,7 +37,7 @@ while (true)
             .EnumerateAllHeaders(("LONGTAIL_EXPORT", "__declspec(dllexport)"));
         foreach (var input in headers.Take(1))
         {
-            Parse(input);
+            await Parse(input);
         }
     }
     else if (line.StartsWith("#file"))
@@ -50,7 +51,7 @@ while (true)
 
         if (File.Exists(splits[1]))
         {
-            Parse(File.ReadAllText(splits[1]));
+            await Parse(File.ReadAllText(splits[1]));
         }
         else
         {
@@ -59,10 +60,10 @@ while (true)
     }
     else
     {
-        Parse(line);
+        await Parse(line);
     }
 
-    static SyntaxTree? Parse(string input)
+    static async Task<SyntaxTree?> Parse(string input)
     {
         try
         {
@@ -82,6 +83,7 @@ while (true)
                 //}
             }
 
+            BoundSyntaxNode[] nodes;
             {
                 Logger.Info("Binding started");
                 var timer = Stopwatch.StartNew();
@@ -92,16 +94,45 @@ while (true)
                         .AddTypedef("uint16_t", TokenType.Unsigned, TokenType.Short)
                         .AddTypedef("size_t", TokenType.Unsigned, TokenType.Long, TokenType.Long) // This is for x64
                     ;
-                var nodes = new CodeBinder(lookupTable)
+                nodes = new CodeBinder(lookupTable)
                     .BindNodes(tree.GetChildren());
 
 
-                foreach (var boundSyntaxNode in nodes)
-                {
-                    Logger.Info(boundSyntaxNode.ToString() ?? string.Empty);
-                }
+                //foreach (var boundSyntaxNode in nodes)
+                //{
+                //    Logger.Info(boundSyntaxNode.ToString() ?? string.Empty);
+                //}
+
+
                 timer.Stop();
                 Logger.Info($"Binding completed in ({timer.Elapsed.TotalMilliseconds:0.##} ms)");
+            }
+
+            CSharpCode[] code;
+            {
+                Logger.Info("Code gen started");
+                var timer = Stopwatch.StartNew();
+                code = new CSharpCodeGen()
+                    .GenerateCode(nodes);
+
+                timer.Stop();
+                Logger.Info($"Binding completed in ({timer.Elapsed.TotalMilliseconds:0.##} ms)");
+
+            }
+
+
+            {
+
+                var output = new FileOutput(@"O:\tmp\");
+                var reset = true;
+                foreach (var cSharpCode in code)
+                {
+                    if (cSharpCode is EnumCode enumCode)
+                    {
+                        await output.WriteEnum("sample.cs", enumCode, reset);
+                    }
+                    reset = false;
+                }
             }
 
 

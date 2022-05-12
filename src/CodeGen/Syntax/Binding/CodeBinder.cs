@@ -36,17 +36,49 @@ internal class CodeBinder
                     boundNodes.Add(BindVariableDeclarationStatement(statement));
                     break;
                 case TypedefStatement statement:
-
                     if (statement.Definition is ExpressionStatement expression)
                     {
                         var type = LookupSymbol(expression.Expression);
                         _symbolLookupTable.AddTypedef(statement.Name, type);
                     }
+                    else
+                    {
+                        Logger.Warning($"No handling implemented for typedef {statement.Definition.GetType().Name}");
+                    }
 
+                    break;
+                case EnumDeclarationStatement statement:
+                    boundNodes.Add(BindEnumStatement(statement));
+                    break;
+                default:
+                    Logger.Warning($"No handling implemented for {syntaxNode.GetType().Name}");
                     break;
             }
         }
         return boundNodes.ToArray();
+    }
+
+    private BoundSyntaxNode BindEnumStatement(EnumDeclarationStatement statement)
+    {
+        var enumType = new EnumTypeSymbol(statement.Name);
+        if (!string.IsNullOrWhiteSpace(statement.Name))
+        {
+            // only added named enums (does not exist in longtail and its a c++ feature)
+            _symbolLookupTable.AddType(enumType);
+        }
+
+        // TODO(Jens): these values are not referenced anywhere in the longtail header file so we don't have to register them as types right now
+        var boundMembers = statement
+            .Members
+            .Select(m => m switch
+            {
+                AssigmentExpression assignment => new BoundAssignmentExpression(assignment, BindExpression(assignment.Left), BindExpression(assignment.Right), assignment.Operator),
+                IdentifierExpression identifier => (BoundExpression)new BoundIdentifierExpression(identifier, identifier.Value),
+                _ => throw new NotImplementedException($"Binding for enum member of type {m.GetType()} has not been implemented.")
+            })
+            .ToArray();
+
+        return new BoundEnumDeclaration(statement, enumType, boundMembers);
     }
 
     private BoundVariableDeclaration BindVariableDeclarationStatement(VariableDeclarationStatement statement)
@@ -79,7 +111,7 @@ internal class CodeBinder
     private BoundStructDeclaration BindStructDeclaration(StructDeclarationStatement statement)
     {
         var type = new StructTypeSymbol(statement.Name);
-        _symbolLookupTable.RegisterType(type, !statement.ForwardDeclaration);
+        _symbolLookupTable.AddType(type, !statement.ForwardDeclaration);
 
         // TODO: Add members
         return new BoundStructDeclaration(statement, type);
@@ -89,16 +121,30 @@ internal class CodeBinder
     {
         var functionArguments = statement.Arguments.Select(a =>
             {
-                var identifier = a.Variable as IdentifierExpression ?? throw new NotSupportedException($"{a.Variable.GetType()} is not supported as the variable declaration.");
                 var symbol = LookupSymbol(a.Type);
-                return new FunctionArgument(identifier.Value, symbol);
+                if (a.Variable is ArrayExpression array)
+                {
+                    if (array.Expression != null)
+                    {
+                        throw new NotSupportedException("Fixed size arrays are not supported in function arguments");
+                    }
+
+                    //NOTE(Jens): Treat type[] as pointer
+                    var identifier = array.Left as IdentifierExpression ?? throw new BinderException($"Expected {nameof(IdentifierExpression)} but found {array.Left.GetType().Name}");
+                    return new FunctionArgument(identifier.Value, new PointerTypeSymbol(symbol));
+                }
+                else if (a.Variable is IdentifierExpression identifier)
+                {
+                    return new FunctionArgument(identifier.Value, symbol);
+                }
+                throw new NotSupportedException($"{a.Variable.GetType()} is not supported as the variable declaration.");
             })
             .ToArray();
 
         var returnType = LookupSymbol(statement.ReturnType);
 
         var symbol = new FunctionSymbol(statement.Name, returnType, functionArguments);
-        _symbolLookupTable.RegisterType(symbol);
+        _symbolLookupTable.AddType(symbol);
         return new BoundFunctionDeclaration(statement, symbol);
     }
 
@@ -126,7 +172,7 @@ internal class CodeBinder
         {
             // NOTE(Jens): Special case where the typedef struct has not been defined anywhere else. For example typedef struct Struct* StructH;
             var structSymbol = new StructTypeSymbol(identifier);
-            _symbolLookupTable.RegisterType(structSymbol);
+            _symbolLookupTable.AddType(structSymbol);
             return structSymbol;
         }
     }
@@ -154,7 +200,7 @@ internal class FunctionSymbol : TypeSymbol
 {
     public Symbol ReturnType { get; }
     public FunctionArgument[] Arguments { get; }
-    public FunctionSymbol(string name, Symbol returnType, FunctionArgument[] arguments) 
+    public FunctionSymbol(string name, Symbol returnType, FunctionArgument[] arguments)
         : base(name)
     {
         ReturnType = returnType;
