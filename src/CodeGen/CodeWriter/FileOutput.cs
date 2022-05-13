@@ -65,6 +65,31 @@ internal class FileOutput
         builder.AppendLine("}");
         await stream.WriteAsync(builder.ToString());
     }
+
+    public async Task WriteStruct(string fileName, StructCode structCode, bool resetFile = true)
+    {
+        var path = Path.Combine(_basePath, fileName);
+        await using var fileStream = File.OpenWrite(path);
+        await using var stream = new StreamWriter(fileStream);
+        if (resetFile)
+        {
+            fileStream.SetLength(0);
+        }
+        else
+        {
+            fileStream.Seek(0, SeekOrigin.End);
+        }
+
+        var builder = new StringBuilder();
+        builder.AppendLine($"internal unsafe struct {structCode.Name}");
+        builder.AppendLine("{");
+        foreach (var (name, value) in structCode.Members)
+        {
+            builder.AppendLine($"\tpublic {value} {name};");
+        }
+        builder.AppendLine("}");
+        await stream.WriteAsync(builder.ToString());
+    }
 }
 
 

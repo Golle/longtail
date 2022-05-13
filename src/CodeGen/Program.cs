@@ -132,6 +132,10 @@ while (true)
                     {
                         await output.WriteEnum("sample.cs", enumCode, reset);
                     }
+                    else if (cSharpCode is StructCode structCode)
+                    {
+                        await output.WriteStruct("sample.cs", structCode, reset);
+                    }
                     reset = false;
                 }
             }

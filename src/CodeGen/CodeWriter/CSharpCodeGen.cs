@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using CodeGen.Syntax.Binding;
 
 namespace CodeGen.CodeWriter;
@@ -9,6 +10,10 @@ internal record CSharpCode;
 
 internal record EnumCode(string Name, EnumMember[] Members) : CSharpCode;
 internal record EnumMember(string Name, string? Value = null);
+
+internal record StructCode(string Name, StructMember[] Members) : CSharpCode;
+internal record StructMember(string Name, string? Value = null);
+
 
 internal class CSharpCodeGen
 {
@@ -27,11 +32,25 @@ internal class CSharpCodeGen
                 case BoundEnumDeclaration enumDecl:
                     _code.Add(GenerateEnumCode(enumDecl));
                     break;
+                case BoundStructDeclaration structDecl:
+                    _code.Add(GenerateStructCode(structDecl));
+                    break;
             }
         }
 
         return _code.ToArray();
     }
+
+    private CSharpCode GenerateStructCode(BoundStructDeclaration structDecl)
+    {
+        var members = structDecl.Type.Members
+            .Select(m => new StructMember(m.Name))
+            .ToArray();
+        return new StructCode(structDecl.Type.Name, members);
+
+    }
+
+
 
     private static CSharpCode GenerateEnumCode(BoundEnumDeclaration enumDecl)
     {
