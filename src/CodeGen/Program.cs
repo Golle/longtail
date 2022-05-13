@@ -92,6 +92,7 @@ while (true)
                         .AddTypedef("uint64_t", TokenType.Unsigned, TokenType.Long, TokenType.Long)
                         .AddTypedef("uint32_t", TokenType.Unsigned, TokenType.Int)
                         .AddTypedef("uint16_t", TokenType.Unsigned, TokenType.Short)
+                        .AddTypedef("uint8_t", TokenType.Char)
                         .AddTypedef("size_t", TokenType.Unsigned, TokenType.Long, TokenType.Long) // This is for x64
                     ;
                 nodes = new CodeBinder(lookupTable)

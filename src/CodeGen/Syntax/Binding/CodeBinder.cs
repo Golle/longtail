@@ -110,12 +110,34 @@ internal class CodeBinder
 
     private BoundStructDeclaration BindStructDeclaration(StructDeclarationStatement statement)
     {
-        var type = new StructTypeSymbol(statement.Name);
+        var members = statement
+            .Members
+            .Select(m =>
+            {
+                var type = LookupSymbol(m.Type);
+                if (m.Variable is ArrayExpression array)
+                {
+                    var initializer = BindExpression(array.Expression!);
+                    
+                    // NOTE(JEns): assume identifier expression here.
+                    return new ArrayStructMember(((IdentifierExpression)array.Left).Value, type, initializer);
+                }
+
+                if (m.Variable is IdentifierExpression identifier)
+                {
+                    return new StructMember(identifier.Value, type);
+                }
+
+                throw new BinderException($"{m.Variable.GetType().Name} is not supported");
+            })
+            .ToArray();
+
+        var type = new StructTypeSymbol(statement.Name, members);
         _symbolLookupTable.AddType(type, !statement.ForwardDeclaration);
 
-        // TODO: Add members
         return new BoundStructDeclaration(statement, type);
     }
+
 
     private BoundFunctionDeclaration BindFunctionDeclaration(FunctionDeclarationStatement statement)
     {
@@ -171,7 +193,7 @@ internal class CodeBinder
         Symbol CreateStrutType(string identifier)
         {
             // NOTE(Jens): Special case where the typedef struct has not been defined anywhere else. For example typedef struct Struct* StructH;
-            var structSymbol = new StructTypeSymbol(identifier);
+            var structSymbol = new StructTypeSymbol(identifier, Array.Empty<StructMember>());
             _symbolLookupTable.AddType(structSymbol);
             return structSymbol;
         }
@@ -182,28 +204,4 @@ internal class CodeBinder
 
     private Symbol LookupType(IdentifierExpression identifier) =>
         _symbolLookupTable.Find(identifier.Value) ?? throw new BinderException($"Failed to find symbol definition for {identifier.Value}");
-}
-
-internal class FunctionArgument
-{
-    public string Name { get; }
-    public Symbol Symbol { get; }
-
-    public FunctionArgument(string name, Symbol symbol)
-    {
-        Name = name;
-        Symbol = symbol;
-    }
-}
-
-internal class FunctionSymbol : TypeSymbol
-{
-    public Symbol ReturnType { get; }
-    public FunctionArgument[] Arguments { get; }
-    public FunctionSymbol(string name, Symbol returnType, FunctionArgument[] arguments)
-        : base(name)
-    {
-        ReturnType = returnType;
-        Arguments = arguments;
-    }
 }
