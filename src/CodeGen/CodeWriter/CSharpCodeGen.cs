@@ -16,13 +16,11 @@ internal record EnumMember(string Name, string? Value = null);
 internal record StructCode(string Name, StructMember[] Members) : CSharpCode;
 internal record StructMember(string Name, string Type);
 
+internal record FunctionCode(string Name, string ReturnType, Argument[] Arguments) : CSharpCode;
+internal record Argument(string Type, string Name);
 
 internal class CSharpCodeGen
 {
-    public CSharpCodeGen()
-    {
-    }
-
     public CSharpCode[] GenerateCode(BoundSyntaxNode[] nodes)
     {
         List<CSharpCode> _code = new();
@@ -41,10 +39,36 @@ internal class CSharpCodeGen
                         _code.Add(GenerateStructCode(structDecl));
                     }
                     break;
+                case BoundFunctionDeclaration functionDecl:
+                    if (functionDecl.FunctionSymbol is not FunctionPointerSymbol)
+                    {
+                        _code.Add(GenerateFunctionCode(functionDecl));
+                    }
+                    break;
+                default:
+                    Logger.Error($"{boundSyntaxNode.GetType().Name} is not being handled.");
+                    break;
             }
         }
 
         return _code.ToArray();
+    }
+
+    private CSharpCode GenerateFunctionCode(BoundFunctionDeclaration functionDecl)
+    {
+        var export = functionDecl.FunctionSymbol.Export;
+        if (!export)
+        {
+            Logger.Error($"Found a function that is not marked with DllExport, not sure what to do? {functionDecl.FunctionSymbol.Name}");
+        }
+
+        var symbol = functionDecl.FunctionSymbol;
+        var arguments = symbol
+            .Arguments
+            .Select(a => new Argument(TypeToString(a.Symbol), a.Name))
+            .ToArray();
+
+        return new FunctionCode(symbol.Name, TypeToString(symbol.ReturnType), arguments);
     }
 
     private static CSharpCode GenerateStructCode(BoundStructDeclaration structDecl)
@@ -59,18 +83,7 @@ internal class CSharpCodeGen
         return new StructCode(structDecl.Type.Name, members);
     }
 
-    //private static string TypeToString(Symbol symbol)
-    //{
-    //    var value = symbol switch
-    //    {
-    //        FunctionSymbol function => FunctionToDelegate(function),
-    //        StructTypeSymbol structType => structType.Name,
-    //        ConstSymbol constSymbol => TypeToString(constSymbol.Type),
-    //        _ => throw new NotSupportedException($"{symbol.GetType().Name} has not been implemented as a valid member type.")
-    //    };
-    //}
-
-    private static string TypeToString(Symbol symbol) =>
+   private static string TypeToString(Symbol symbol) =>
         symbol switch
         {
             FunctionSymbol function => FunctionToDelegate(function),
@@ -78,7 +91,7 @@ internal class CSharpCodeGen
             PointerTypeSymbol pointer => $"{TypeToString(pointer.Type)}*",
             PrimitiveTypeSymbol primitive => PrimitiveToString(primitive),
             TypeSymbol type => type.Name,
-            ConstSymbol constSymbol => TypeToString(constSymbol.Type), // const is not supported here i c#, lets just return the containing type
+            ConstSymbol constSymbol => TypeToString(constSymbol.Type), // const is not supported here in c#, lets just return the containing type
             _ => throw new NotSupportedException($"{symbol.GetType().Name} is not supported in {nameof(TypeToString)}")
         };
 
@@ -106,7 +119,7 @@ internal class CSharpCodeGen
         foreach (var functionArgument in function.Arguments)
         {
             builder.Append(TypeToString(functionArgument.Symbol));
-            builder.Append(',');
+            builder.Append(", ");
         }
         builder.Append(TypeToString(function.ReturnType));
         builder.Append('>');

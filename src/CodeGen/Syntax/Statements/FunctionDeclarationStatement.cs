@@ -7,24 +7,26 @@ namespace CodeGen.Syntax.Statements;
 
 internal class FunctionDeclarationStatement : Statement
 {
+    public bool IsFunctionPointer { get; }
     public Expression ReturnType { get; }
     public string Name { get; }
     public VariableDeclarationStatement[] Arguments { get; }
     public TokenType[] Modifiers { get; }
     public Statement? Body { get; }
 
-    public FunctionDeclarationStatement(Expression returnType, string name, VariableDeclarationStatement[] arguments, Statement? body = null)
-    : this(returnType, name, arguments, Array.Empty<TokenType>(), body)
+    public FunctionDeclarationStatement(Expression returnType, string name, VariableDeclarationStatement[] arguments, Statement? body = null, bool isFunctionPointer = false)
+    : this(returnType, name, arguments, Array.Empty<TokenType>(), body, isFunctionPointer)
     {
     }
 
-    public FunctionDeclarationStatement(Expression returnType, string name, VariableDeclarationStatement[] arguments, TokenType[] modifiers, Statement? body = null)
+    public FunctionDeclarationStatement(Expression returnType, string name, VariableDeclarationStatement[] arguments, TokenType[] modifiers, Statement? body = null, bool isFunctionPointer = false)
     {
         ReturnType = returnType;
         Name = name;
         Arguments = arguments;
         Modifiers = modifiers;
         Body = body;
+        IsFunctionPointer = isFunctionPointer;
     }
 
     public override string ToString() => $"{string.Join(' ', Modifiers)} {ReturnType} {Name}({string.Join(' ', Arguments.Select(a => $"{a.Type}"))})";

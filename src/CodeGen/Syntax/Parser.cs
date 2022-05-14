@@ -132,7 +132,7 @@ internal class Parser
                 _position++;
                 //NOTE(Jens): this is treating a function pointer as a function declaration.
                 //NOTE(Jens): we could add another type for function pointers to make it more clear? What ever makes the C# code gen easier.
-                return new FunctionDeclarationStatement(expression, name, arguments);
+                return new FunctionDeclarationStatement(expression, name, arguments, isFunctionPointer: true);
 
                 //NOTE(Jens): do we want the typedef wrapper for function pointers? it's the only way to define a function pointer right so maybe we can discard the typedef?
                 //return new TypedefStatement(name, new FunctionDeclarationStatement(expression, name, arguments));

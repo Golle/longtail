@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CodeGen.Lexer;
 using CodeGen.Logging;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
@@ -164,7 +165,10 @@ internal class CodeBinder
 
         var returnType = LookupSymbol(statement.ReturnType);
 
-        var symbol = new FunctionSymbol(statement.Name, returnType, functionArguments);
+        var symbol = statement.IsFunctionPointer
+            ? new FunctionPointerSymbol(statement.Name, returnType, functionArguments)
+            : new FunctionSymbol(statement.Name, returnType, functionArguments, statement.Modifiers.Contains(TokenType.DllExport));
+
         _symbolLookupTable.AddType(symbol);
         return new BoundFunctionDeclaration(statement, symbol);
     }

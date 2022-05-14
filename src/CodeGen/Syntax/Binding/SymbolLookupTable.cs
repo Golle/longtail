@@ -8,8 +8,6 @@ namespace CodeGen.Syntax.Binding;
 
 internal class SymbolLookupTable
 {
-    private List<Symbol> _symbols = new();
-
     private readonly Dictionary<TokenType[], PrimitiveTypeSymbol> _primitiveTypes = new(new BuiltInTypeComparer());
     private readonly Dictionary<TokenType, TypeSymbol> _types = new();
     private readonly Dictionary<string, Symbol> _userDefinedTypes = new();

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using CodeGen.Logging;
 
 namespace CodeGen.CodeWriter;
 
@@ -12,43 +14,15 @@ internal class FileOutput
     public FileOutput(string basePath)
     {
         _basePath = basePath;
+        Directory.CreateDirectory(_basePath);
     }
 
-    public async Task WriteClass(CSharpFileDefinition fileDefinition)
-    {
-        var path = Path.Combine(_basePath, fileDefinition.Namespace.Replace('.', Path.DirectorySeparatorChar), $"{fileDefinition.Name}.cs");
-        var directory = Path.GetDirectoryName(path) ?? throw new InvalidOperationException($"Failed to get the directory name of {path}");
-        if (!Directory.Exists(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        Logger.Info($"Wring class {fileDefinition.Name} to {path}");
-        await using var stream = new StreamWriter(File.OpenWrite(path));
-        foreach (var usings in fileDefinition.Usings)
-        {
-            await stream.WriteLineAsync($"using {usings};");
-        }
-        await stream.WriteLineAsync("//This is just a comment.");
-        await stream.WriteLineAsync($"namespace {fileDefinition.Namespace};");
-
-        await stream.WriteLineAsync($"internal struct {fileDefinition.Name} {{ }}");
-        await stream.FlushAsync();
-    }
-
-    public async Task WriteEnum(string fileName, EnumCode enumCode, bool resetFile = true)
+    public async Task WriteEnum(string fileName, EnumCode enumCode)
     {
         var path = Path.Combine(_basePath, fileName);
         await using var fileStream = File.OpenWrite(path);
         await using var stream = new StreamWriter(fileStream);
-        if (resetFile)
-        {
-            fileStream.SetLength(0);
-        }
-        else
-        {
-            fileStream.Seek(0, SeekOrigin.End);
-        }
+        fileStream.Seek(0, SeekOrigin.End);
 
         var builder = new StringBuilder();
         builder.AppendLine($"internal enum {enumCode.Name}");
@@ -66,19 +40,12 @@ internal class FileOutput
         await stream.WriteAsync(builder.ToString());
     }
 
-    public async Task WriteStruct(string fileName, StructCode structCode, bool resetFile = true)
+    public async Task WriteStruct(string fileName, StructCode structCode)
     {
         var path = Path.Combine(_basePath, fileName);
         await using var fileStream = File.OpenWrite(path);
         await using var stream = new StreamWriter(fileStream);
-        if (resetFile)
-        {
-            fileStream.SetLength(0);
-        }
-        else
-        {
-            fileStream.Seek(0, SeekOrigin.End);
-        }
+        fileStream.Seek(0, SeekOrigin.End);
 
         var builder = new StringBuilder();
         builder.AppendLine($"internal unsafe struct {structCode.Name}");
@@ -90,18 +57,40 @@ internal class FileOutput
         builder.AppendLine("}");
         await stream.WriteAsync(builder.ToString());
     }
-}
 
-
-internal class CSharpFileDefinition
-{
-    public string Name { get; }
-    public string[] Usings { get; }
-    public string Namespace { get; }
-    public CSharpFileDefinition(string name, string[] usings, string ns)
+    public async Task WriteExternFunctions(string fileName, CallingConvention callingConvention, string dllName, string className, IEnumerable<FunctionCode> functions)
     {
-        Name = name;
-        Usings = usings;
-        Namespace = ns;
+        var builder = new StringBuilder();
+        var path = Path.Combine(_basePath, fileName);
+        await using var fileStream = File.OpenWrite(path);
+        await using var stream = new StreamWriter(fileStream);
+        fileStream.Seek(0, SeekOrigin.End);
+
+        builder.AppendLine("using System.Runtime.InteropServices;");
+        builder.AppendLine($"internal unsafe partial class {className}");
+        builder.AppendLine("{");
+
+        foreach (var function in functions)
+        {
+            builder.AppendLine($"\t[DllImport(\"{dllName}\", CallingConvention = CallingConvention.{callingConvention})]");
+            builder.Append($"\tpublic static extern {function.ReturnType} {function.Name}");
+            if (function.Arguments.Length == 0)
+            {
+                builder.AppendLine("();");
+            }
+            else
+            {
+
+                var arguments = string.Join($",{Environment.NewLine}", function.Arguments.Select(a => $"\t\t{a.Type} {a.Name}"));
+                builder.AppendLine("(");
+                builder.AppendLine(arguments);
+                builder.AppendLine("\t);");
+                builder.AppendLine();
+            }
+        }
+
+        builder.AppendLine("}");
+
+        await stream.WriteAsync(builder.ToString());
     }
 }

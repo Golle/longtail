@@ -15,4 +15,8 @@
     <NoWarn>1701;1702;0649</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Generated\" />
+  </ItemGroup>
+
 </Project>
