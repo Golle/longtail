@@ -67,12 +67,15 @@ internal class FileOutput
         fileStream.Seek(0, SeekOrigin.End);
 
         builder.AppendLine("using System.Runtime.InteropServices;");
+        builder.AppendLine();
         builder.AppendLine($"internal unsafe partial class {className}");
         builder.AppendLine("{");
+        builder.AppendLine($"\tprivate const string DllName = \"{dllName}\";");
+        builder.AppendLine();
 
         foreach (var function in functions)
         {
-            builder.AppendLine($"\t[DllImport(\"{dllName}\", CallingConvention = CallingConvention.{callingConvention})]");
+            builder.AppendLine($"\t[DllImport(DllName, CallingConvention = CallingConvention.{callingConvention})]");
             builder.Append($"\tpublic static extern {function.ReturnType} {function.Name}");
             if (function.Arguments.Length == 0)
             {

@@ -1,14 +1,17 @@
 using System.Runtime.InteropServices;
+
 internal unsafe partial class LongtailLibrary
 {
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	private const string DllName = "longtail";
+
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_DisposeAPI(
 		Longtail_API* api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetCancelAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CancelAPI* Longtail_MakeCancelAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
@@ -18,40 +21,40 @@ internal unsafe partial class LongtailLibrary
 		delegate* unmanaged[Cdecl]<Longtail_CancelAPI*, Longtail_CancelAPI_CancelToken*, int> dispose_token_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CancelAPI_CreateToken(
 		Longtail_CancelAPI* cancel_api,
 		Longtail_CancelAPI_CancelToken** out_token
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CancelAPI_Cancel(
 		Longtail_CancelAPI* cancel_api,
 		Longtail_CancelAPI_CancelToken* token
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CancelAPI_DisposeToken(
 		Longtail_CancelAPI* cancel_api,
 		Longtail_CancelAPI_CancelToken* token
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CancelAPI_IsCancelled(
 		Longtail_CancelAPI* cancel_api,
 		Longtail_CancelAPI_CancelToken* token
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetPathFilterAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_PathFilterAPI* Longtail_MakePathFilterAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_PathFilterAPI*, byte*, byte*, byte*, int, ulong, ushort, int> include_filter_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_PathFilter_Include(
 		Longtail_PathFilterAPI* path_filter_api,
 		byte* root_path,
@@ -62,9 +65,9 @@ internal unsafe partial class LongtailLibrary
 		ushort permissions
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetHashAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_HashAPI* Longtail_MakeHashAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
@@ -75,18 +78,18 @@ internal unsafe partial class LongtailLibrary
 		delegate* unmanaged[Cdecl]<Longtail_HashAPI*, uint, void*, ulong*, int> hash_buffer_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_Hash_GetIdentifier(
 		Longtail_HashAPI* hash_api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Hash_BeginContext(
 		Longtail_HashAPI* hash_api,
 		Longtail_HashAPI_Context** out_context
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_Hash_Hash(
 		Longtail_HashAPI* hash_api,
 		Longtail_HashAPI_Context* context,
@@ -94,13 +97,13 @@ internal unsafe partial class LongtailLibrary
 		void* data
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_Hash_EndContext(
 		Longtail_HashAPI* hash_api,
 		Longtail_HashAPI_Context* context
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Hash_HashBuffer(
 		Longtail_HashAPI* hash_api,
 		uint length,
@@ -108,25 +111,25 @@ internal unsafe partial class LongtailLibrary
 		ulong* out_hash
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetHashRegistrySize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_HashRegistryAPI* Longtail_MakeHashRegistryAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_HashRegistryAPI*, uint, Longtail_HashAPI**, int> get_hash_api_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_GetHashRegistry_GetHashAPI(
 		Longtail_HashRegistryAPI* hash_registry,
 		uint hash_type,
 		Longtail_HashAPI** out_compression_api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetCompressionAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CompressionAPI* Longtail_MakeCompressionAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
@@ -135,16 +138,16 @@ internal unsafe partial class LongtailLibrary
 		delegate* unmanaged[Cdecl]<Longtail_CompressionAPI*, byte*, byte*, ulong, ulong, ulong*, int> decompress_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetCompressionRegistryAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CompressionRegistryAPI* Longtail_MakeCompressionRegistryAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_CompressionRegistryAPI*, uint, Longtail_CompressionAPI**, uint*, int> get_compression_api_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_GetCompressionRegistry_GetCompressionAPI(
 		Longtail_CompressionRegistryAPI* compression_registry,
 		uint compression_type,
@@ -152,9 +155,9 @@ internal unsafe partial class LongtailLibrary
 		uint* out_settings_id
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetStorageAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_StorageAPI* Longtail_MakeStorageAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
@@ -185,21 +188,21 @@ internal unsafe partial class LongtailLibrary
 		delegate* unmanaged[Cdecl]<Longtail_StorageAPI*, Longtail_StorageAPI_FileMap*, void> unmap_file_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_OpenReadFile(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		Longtail_StorageAPI_OpenFile** out_open_file
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_GetSize(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_OpenFile* f,
 		ulong* out_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_Read(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_OpenFile* f,
@@ -208,7 +211,7 @@ internal unsafe partial class LongtailLibrary
 		void* output
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_OpenWriteFile(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
@@ -216,7 +219,7 @@ internal unsafe partial class LongtailLibrary
 		Longtail_StorageAPI_OpenFile** out_open_file
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_Write(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_OpenFile* f,
@@ -225,123 +228,123 @@ internal unsafe partial class LongtailLibrary
 		void* input
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_SetSize(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_OpenFile* f,
 		ulong length
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_SetPermissions(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		ushort permissions
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_GetPermissions(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		ushort* out_permissions
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_Storage_CloseFile(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_OpenFile* f
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_CreateDir(
 		Longtail_StorageAPI* storage_api,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_RenameFile(
 		Longtail_StorageAPI* storage_api,
 		byte* source_path,
 		byte* target_path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern byte* Longtail_Storage_ConcatPath(
 		Longtail_StorageAPI* storage_api,
 		byte* root_path,
 		byte* sub_path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_IsDir(
 		Longtail_StorageAPI* storage_api,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_IsFile(
 		Longtail_StorageAPI* storage_api,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_RemoveDir(
 		Longtail_StorageAPI* storage_api,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_RemoveFile(
 		Longtail_StorageAPI* storage_api,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_StartFind(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		Longtail_StorageAPI_Iterator** out_iterator
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_FindNext(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_Iterator* iterator
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_Storage_CloseFind(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_Iterator* iterator
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_GetEntryProperties(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_Iterator* iterator,
 		Longtail_StorageAPI_EntryProperties* out_properties
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_LockFile(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		Longtail_StorageAPI_LockFile** out_lock_file
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_UnlockFile(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_LockFile* lock_file
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern byte* Longtail_Storage_GetParentPath(
 		Longtail_StorageAPI* storage_api,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Storage_MapFile(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_OpenFile* f,
@@ -351,31 +354,31 @@ internal unsafe partial class LongtailLibrary
 		void** out_data_ptr
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_Storage_UnmapFile(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StorageAPI_FileMap* m
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetProgressAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_ProgressAPI* Longtail_MakeProgressAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_ProgressAPI*, uint, uint, void> on_progress_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_Progress_OnProgress(
 		Longtail_ProgressAPI* progressAPI,
 		uint total_count,
 		uint done_count
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetJobAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_JobAPI* Longtail_MakeJobAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
@@ -389,19 +392,19 @@ internal unsafe partial class LongtailLibrary
 		delegate* unmanaged[Cdecl]<Longtail_JobAPI*, uint*, uint*, int> get_max_batch_count_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_Job_GetWorkerCount(
 		Longtail_JobAPI* job_api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Job_ReserveJobs(
 		Longtail_JobAPI* job_api,
 		uint job_count,
 		void** out_job_group
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Job_CreateJobs(
 		Longtail_JobAPI* job_api,
 		void* job_group,
@@ -414,7 +417,7 @@ internal unsafe partial class LongtailLibrary
 		void** out_jobs
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Job_AddDependecies(
 		Longtail_JobAPI* job_api,
 		uint job_count,
@@ -423,14 +426,14 @@ internal unsafe partial class LongtailLibrary
 		void* dependency_jobs
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Job_ReadyJobs(
 		Longtail_JobAPI* job_api,
 		uint job_count,
 		void* jobs
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Job_WaitForAllJobs(
 		Longtail_JobAPI* job_api,
 		void* job_group,
@@ -439,22 +442,22 @@ internal unsafe partial class LongtailLibrary
 		Longtail_CancelAPI_CancelToken* optional_cancel_token
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Job_ResumeJob(
 		Longtail_JobAPI* job_api,
 		uint job_id
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Job_GetMaxBatchCount(
 		Longtail_JobAPI* job_api,
 		uint* out_max_job_batch_count,
 		uint* out_max_dependency_batch_count
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetChunkerAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_ChunkerAPI* Longtail_MakeChunkerAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
@@ -465,13 +468,13 @@ internal unsafe partial class LongtailLibrary
 		delegate* unmanaged[Cdecl]<Longtail_ChunkerAPI*, Longtail_ChunkerAPI_Chunker*, void*, ulong, void**, int> next_chunk_from_buffer
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Chunker_GetMinChunkSize(
 		Longtail_ChunkerAPI* chunker_api,
 		uint* out_min_chunk_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Chunker_CreateChunker(
 		Longtail_ChunkerAPI* chunker_api,
 		uint min_chunk_size,
@@ -480,7 +483,7 @@ internal unsafe partial class LongtailLibrary
 		Longtail_ChunkerAPI_Chunker** out_chunker
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Chunker_NextChunk(
 		Longtail_ChunkerAPI* chunker_api,
 		Longtail_ChunkerAPI_Chunker* chunker,
@@ -489,13 +492,13 @@ internal unsafe partial class LongtailLibrary
 		Longtail_Chunker_ChunkRange* out_chunk_range
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Chunker_DisposeChunker(
 		Longtail_ChunkerAPI* chunker_api,
 		Longtail_ChunkerAPI_Chunker* chunker
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_Chunker_NextChunkFromBuffer(
 		Longtail_ChunkerAPI* chunker_api,
 		Longtail_ChunkerAPI_Chunker* chunker,
@@ -504,79 +507,79 @@ internal unsafe partial class LongtailLibrary
 		void** out_next_chunk_start
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetAsyncPutStoredBlockAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_AsyncPutStoredBlockAPI* Longtail_MakeAsyncPutStoredBlockAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_AsyncPutStoredBlockAPI*, int, void> on_complete_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_AsyncPutStoredBlock_OnComplete(
 		Longtail_AsyncPutStoredBlockAPI* async_complete_api,
 		int err
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetAsyncGetStoredBlockAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_AsyncGetStoredBlockAPI* Longtail_MakeAsyncGetStoredBlockAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_AsyncGetStoredBlockAPI*, Longtail_StoredBlock*, int, void> on_complete_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_AsyncGetStoredBlock_OnComplete(
 		Longtail_AsyncGetStoredBlockAPI* async_complete_api,
 		Longtail_StoredBlock* stored_block,
 		int err
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetAsyncGetExistingContentAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_AsyncGetExistingContentAPI* Longtail_MakeAsyncGetExistingContentAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_AsyncGetExistingContentAPI*, Longtail_StoreIndex*, int, void> on_complete_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_AsyncGetExistingContent_OnComplete(
 		Longtail_AsyncGetExistingContentAPI* async_complete_api,
 		Longtail_StoreIndex* store_index,
 		int err
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetAsyncPruneBlocksAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_AsyncPruneBlocksAPI* Longtail_MakeAsyncPruneBlocksAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_AsyncPruneBlocksAPI*, uint, int, void> on_complete_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_AsyncPruneBlocks_OnComplete(
 		Longtail_AsyncPruneBlocksAPI* async_complete_api,
 		uint pruned_block_count,
 		int err
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetAsyncPreflightStartedAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_AsyncPreflightStartedAPI* Longtail_MakeAsyncPreflightStartedAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_AsyncPreflightStartedAPI*, uint, ulong*, int, void> on_complete_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_AsyncPreflightStarted_OnComplete(
 		Longtail_AsyncPreflightStartedAPI* async_complete_api,
 		uint block_count,
@@ -584,24 +587,24 @@ internal unsafe partial class LongtailLibrary
 		int err
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetAsyncFlushAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_AsyncFlushAPI* Longtail_MakeAsyncFlushAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
 		delegate* unmanaged[Cdecl]<Longtail_AsyncFlushAPI*, int, void> on_complete_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_AsyncFlush_OnComplete(
 		Longtail_AsyncFlushAPI* async_complete_api,
 		int err
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetBlockStoreAPISize();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockStoreAPI* Longtail_MakeBlockStoreAPI(
 		void* mem,
 		delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
@@ -614,14 +617,14 @@ internal unsafe partial class LongtailLibrary
 		delegate* unmanaged[Cdecl]<Longtail_BlockStoreAPI*, Longtail_AsyncFlushAPI*, int> flush_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_BlockStore_PutStoredBlock(
 		Longtail_BlockStoreAPI* block_store_api,
 		Longtail_StoredBlock* stored_block,
 		Longtail_AsyncPutStoredBlockAPI* async_complete_api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_BlockStore_PreflightGet(
 		Longtail_BlockStoreAPI* block_store_api,
 		uint chunk_count,
@@ -629,14 +632,14 @@ internal unsafe partial class LongtailLibrary
 		Longtail_AsyncPreflightStartedAPI* optional_async_complete_api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_BlockStore_GetStoredBlock(
 		Longtail_BlockStoreAPI* block_store_api,
 		ulong block_hash,
 		Longtail_AsyncGetStoredBlockAPI* async_complete_api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_BlockStore_GetExistingContent(
 		Longtail_BlockStoreAPI* block_store_api,
 		uint chunk_count,
@@ -645,7 +648,7 @@ internal unsafe partial class LongtailLibrary
 		Longtail_AsyncGetExistingContentAPI* async_complete_api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_BlockStore_PruneBlocks(
 		Longtail_BlockStoreAPI* block_store_api,
 		uint block_keep_count,
@@ -653,65 +656,65 @@ internal unsafe partial class LongtailLibrary
 		Longtail_AsyncPruneBlocksAPI* async_complete_api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_BlockStore_GetStats(
 		Longtail_BlockStoreAPI* block_store_api,
 		Longtail_BlockStore_Stats* out_stats
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_BlockStore_Flush(
 		Longtail_BlockStoreAPI* block_store_api,
 		Longtail_AsyncFlushAPI* async_complete_api
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_SetAssert(
 		delegate* unmanaged[Cdecl]<byte*, byte*, int, void> assert_func
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_SetLog(
 		delegate* unmanaged[Cdecl]<Longtail_LogContext*, byte*, void> log_func,
 		void* context
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_SetLogLevel(
 		int level
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_GetLogLevel();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_SetAllocAndFree(
 		delegate* unmanaged[Cdecl]<byte*, ulong, void*> alloc,
 		delegate* unmanaged[Cdecl]<void*, void> free
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void* Longtail_Alloc(
 		byte* context,
 		ulong s
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_Free(
 		void* p
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int EnsureParentPathExists(
 		Longtail_StorageAPI* storage_api,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern byte* Longtail_Strdup(
 		byte* str
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_GetFilesRecursively(
 		Longtail_StorageAPI* storage_api,
 		Longtail_PathFilterAPI* path_filter_api,
@@ -721,7 +724,7 @@ internal unsafe partial class LongtailLibrary
 		Longtail_FileInfos** out_file_infos
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CreateVersionIndex(
 		Longtail_StorageAPI* storage_api,
 		Longtail_HashAPI* hash_api,
@@ -738,35 +741,35 @@ internal unsafe partial class LongtailLibrary
 		Longtail_VersionIndex** out_version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteVersionIndexToBuffer(
 		Longtail_VersionIndex* version_index,
 		void** out_buffer,
 		ulong* out_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ReadVersionIndexFromBuffer(
 		void* buffer,
 		ulong size,
 		Longtail_VersionIndex** out_version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteVersionIndex(
 		Longtail_StorageAPI* storage_api,
 		Longtail_VersionIndex* version_index,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ReadVersionIndex(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		Longtail_VersionIndex** out_version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_GetRequiredChunkHashes(
 		Longtail_VersionIndex* version_index,
 		Longtail_VersionDiff* version_diff,
@@ -774,7 +777,7 @@ internal unsafe partial class LongtailLibrary
 		ulong* out_chunk_hashes
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteContent(
 		Longtail_StorageAPI* source_storage_api,
 		Longtail_BlockStoreAPI* block_store_api,
@@ -787,7 +790,7 @@ internal unsafe partial class LongtailLibrary
 		byte* assets_folder
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CreateMissingContent(
 		Longtail_HashAPI* hash_api,
 		Longtail_StoreIndex* store_index,
@@ -797,7 +800,7 @@ internal unsafe partial class LongtailLibrary
 		Longtail_StoreIndex** out_store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_GetMissingChunks(
 		Longtail_StoreIndex* store_index,
 		uint chunk_count,
@@ -806,7 +809,7 @@ internal unsafe partial class LongtailLibrary
 		ulong* out_missing_chunk_hashes
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteVersion(
 		Longtail_BlockStoreAPI* block_storage_api,
 		Longtail_StorageAPI* version_storage_api,
@@ -820,7 +823,7 @@ internal unsafe partial class LongtailLibrary
 		int retain_permissions
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CreateVersionDiff(
 		Longtail_HashAPI* hash_api,
 		Longtail_VersionIndex* source_version,
@@ -828,7 +831,7 @@ internal unsafe partial class LongtailLibrary
 		Longtail_VersionDiff** out_version_diff
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ChangeVersion(
 		Longtail_BlockStoreAPI* block_store_api,
 		Longtail_StorageAPI* version_storage_api,
@@ -845,35 +848,35 @@ internal unsafe partial class LongtailLibrary
 		int retain_permissions
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetBlockIndexDataSize(
 		uint chunk_count
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetBlockIndexSize(
 		uint chunk_count
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockIndex* Longtail_InitBlockIndex(
 		void* mem,
 		uint chunk_count
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockIndex* Longtail_CopyBlockIndex(
 		Longtail_BlockIndex* block_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_InitBlockIndexFromData(
 		Longtail_BlockIndex* block_index,
 		void* data,
 		ulong data_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CreateBlockIndex(
 		Longtail_HashAPI* hash_api,
 		uint tag,
@@ -884,47 +887,47 @@ internal unsafe partial class LongtailLibrary
 		Longtail_BlockIndex** out_block_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteBlockIndexToBuffer(
 		Longtail_BlockIndex* block_index,
 		void** out_buffer,
 		ulong* out_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ReadBlockIndexFromBuffer(
 		void* buffer,
 		ulong size,
 		Longtail_BlockIndex** out_block_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteBlockIndex(
 		Longtail_StorageAPI* storage_api,
 		Longtail_BlockIndex* block_index,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ReadBlockIndex(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		Longtail_BlockIndex** out_block_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetStoredBlockSize(
 		ulong block_data_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_InitStoredBlockFromData(
 		Longtail_StoredBlock* stored_block,
 		void* block_data,
 		ulong block_data_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CreateStoredBlock(
 		ulong block_hash,
 		uint hash_identifier,
@@ -936,159 +939,159 @@ internal unsafe partial class LongtailLibrary
 		Longtail_StoredBlock** out_stored_block
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteStoredBlockToBuffer(
 		Longtail_StoredBlock* stored_block,
 		void** out_buffer,
 		ulong* out_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ReadStoredBlockFromBuffer(
 		void* buffer,
 		ulong size,
 		Longtail_StoredBlock** out_stored_block
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteStoredBlock(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StoredBlock* stored_block,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ReadStoredBlock(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		Longtail_StoredBlock** out_stored_block
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_BlockIndex_GetChunkCount(
 		Longtail_BlockIndex* block_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_BlockIndex_GetChunkTag(
 		Longtail_BlockIndex* block_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong* Longtail_BlockIndex_GetChunkHashes(
 		Longtail_BlockIndex* block_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_BlockIndex_GetChunkSizes(
 		Longtail_BlockIndex* block_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_StoredBlock_Dispose(
 		Longtail_StoredBlock* stored_block
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockIndex* Longtail_StoredBlock_GetBlockIndex(
 		Longtail_StoredBlock* stored_block
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void* Longtail_BlockIndex_BlockData(
 		Longtail_StoredBlock* stored_block
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_BlockIndex_GetBlockChunksDataSize(
 		Longtail_StoredBlock* stored_block
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_FileInfos_GetCount(
 		Longtail_FileInfos* file_infos
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern byte* Longtail_FileInfos_GetPath(
 		Longtail_FileInfos* file_infos,
 		uint index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_Paths* Longtail_FileInfos_GetPaths(
 		Longtail_FileInfos* file_infos
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_FileInfos_GetSize(
 		Longtail_FileInfos* file_infos,
 		uint index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ushort* Longtail_FileInfos_GetPermissions(
 		Longtail_FileInfos* file_infos,
 		uint index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_StoreIndex_GetVersion(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_StoreIndex_GetHashIdentifier(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_StoreIndex_GetBlockCount(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_StoreIndex_GetChunkCount(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong* Longtail_StoreIndex_GetBlockHashes(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong* Longtail_StoreIndex_GetChunkHashes(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_StoreIndex_GetBlockChunksOffsets(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_StoreIndex_GetBlockChunkCounts(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_StoreIndex_GetBlockTags(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_StoreIndex_GetChunkSizes(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetStoreIndexSize(
 		uint block_count,
 		uint chunk_count
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CreateStoreIndex(
 		Longtail_HashAPI* hash_api,
 		uint chunk_count,
@@ -1100,28 +1103,28 @@ internal unsafe partial class LongtailLibrary
 		Longtail_StoreIndex** out_store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CreateStoreIndexFromBlocks(
 		uint block_count,
 		Longtail_BlockIndex** block_indexes,
 		Longtail_StoreIndex** out_store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_MergeStoreIndex(
 		Longtail_StoreIndex* local_store_index,
 		Longtail_StoreIndex* remote_store_index,
 		Longtail_StoreIndex** out_store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_MakeBlockIndex(
 		Longtail_StoreIndex* store_index,
 		uint block_index,
 		Longtail_BlockIndex* out_block_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_GetExistingStoreIndex(
 		Longtail_StoreIndex* store_index,
 		uint chunk_count,
@@ -1130,7 +1133,7 @@ internal unsafe partial class LongtailLibrary
 		Longtail_StoreIndex** out_store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_PruneStoreIndex(
 		Longtail_StoreIndex* source_store_index,
 		uint keep_block_count,
@@ -1138,139 +1141,139 @@ internal unsafe partial class LongtailLibrary
 		Longtail_StoreIndex** out_store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ValidateStore(
 		Longtail_StoreIndex* store_index,
 		Longtail_VersionIndex* version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_StoreIndex* Longtail_CopyStoreIndex(
 		Longtail_StoreIndex* store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteStoreIndexToBuffer(
 		Longtail_StoreIndex* store_index,
 		void** out_buffer,
 		ulong* out_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ReadStoreIndexFromBuffer(
 		void* buffer,
 		ulong size,
 		Longtail_StoreIndex** out_store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_WriteStoreIndex(
 		Longtail_StorageAPI* storage_api,
 		Longtail_StoreIndex* store_index,
 		byte* path
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ReadStoreIndex(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		Longtail_StoreIndex** out_store_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_CreateArchiveIndex(
 		Longtail_StoreIndex* store_index,
 		Longtail_VersionIndex* version_index,
 		Longtail_ArchiveIndex** out_archive_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_ReadArchiveIndex(
 		Longtail_StorageAPI* storage_api,
 		byte* path,
 		Longtail_ArchiveIndex** out_archive_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_VersionIndex_GetVersion(
 		Longtail_VersionIndex* version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_VersionIndex_GetHashAPI(
 		Longtail_VersionIndex* version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_VersionIndex_GetAssetCount(
 		Longtail_VersionIndex* version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_VersionIndex_GetChunkCount(
 		Longtail_VersionIndex* version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong* Longtail_VersionIndex_GetChunkHashes(
 		Longtail_VersionIndex* version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_VersionIndex_GetChunkSizes(
 		Longtail_VersionIndex* version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_VersionIndex_GetChunkTags(
 		Longtail_VersionIndex* version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_GetPathHash(
 		Longtail_HashAPI* hash_api,
 		byte* path,
 		ulong* out_hash
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_LookupTable_GetSize(
 		uint capacity
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_LookupTable* Longtail_LookupTable_Create(
 		void* mem,
 		uint capacity,
 		Longtail_LookupTable* optional_source_entries
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_LookupTable_Put(
 		Longtail_LookupTable* lut,
 		ulong key,
 		uint value
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_LookupTable_PutUnique(
 		Longtail_LookupTable* lut,
 		ulong key,
 		uint value
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint* Longtail_LookupTable_Get(
 		Longtail_LookupTable* lut,
 		ulong key
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_LookupTable_GetSpaceLeft(
 		Longtail_LookupTable* lut
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_MakeFileInfos(
 		uint path_count,
 		byte** path_names,
@@ -1279,7 +1282,7 @@ internal unsafe partial class LongtailLibrary
 		Longtail_FileInfos** out_file_infos
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern ulong Longtail_GetVersionIndexSize(
 		uint asset_count,
 		uint chunk_count,
@@ -1287,7 +1290,7 @@ internal unsafe partial class LongtailLibrary
 		uint path_data_size
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_BuildVersionIndex(
 		void* mem,
 		ulong mem_size,
@@ -1307,7 +1310,7 @@ internal unsafe partial class LongtailLibrary
 		Longtail_VersionIndex** out_version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockStoreAPI* Longtail_CreateArchiveBlockStore(
 		Longtail_StorageAPI* storage_api,
 		byte* archive_path,
@@ -1316,23 +1319,23 @@ internal unsafe partial class LongtailLibrary
 		int enable_mmap_reading
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CancelAPI* Longtail_CreateAtomicCancelAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_JobAPI* Longtail_CreateBikeshedJobAPI(
 		uint worker_count,
 		int worker_priority
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_HashAPI* Longtail_CreateBlake2HashAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetBlake2HashType();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_HashAPI* Longtail_CreateBlake3HashAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetBlake3HashType();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_StorageAPI* Longtail_CreateBlockStoreStorageAPI(
 		Longtail_HashAPI* hash_api,
 		Longtail_JobAPI* job_api,
@@ -1341,34 +1344,34 @@ internal unsafe partial class LongtailLibrary
 		Longtail_VersionIndex* version_index
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CompressionAPI* Longtail_CreateBrotliCompressionAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetBrotliGenericMinQuality();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetBrotliGenericDefaultQuality();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetBrotliGenericMaxQuality();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetBrotliTextMinQuality();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetBrotliTextDefaultQuality();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetBrotliTextMaxQuality();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockStoreAPI* Longtail_CreateCacheBlockStoreAPI(
 		Longtail_JobAPI* job_api,
 		Longtail_BlockStoreAPI* local_block_store,
 		Longtail_BlockStoreAPI* remote_block_store
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockStoreAPI* Longtail_CreateCompressBlockStoreAPI(
 		Longtail_BlockStoreAPI* backing_block_store,
 		Longtail_CompressionRegistryAPI* compression_registry
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CompressionRegistryAPI* Longtail_CreateDefaultCompressionRegistry(
 		uint compression_type_count,
 		uint* compression_types,
@@ -1376,13 +1379,13 @@ internal unsafe partial class LongtailLibrary
 		uint* compression_setting_ids
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CompressionRegistryAPI* Longtail_CreateFullCompressionRegistry();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CompressionRegistryAPI* Longtail_CreateZStdCompressionRegistry();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_StorageAPI* Longtail_CreateFSStorageAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockStoreAPI* Longtail_CreateFSBlockStoreAPI(
 		Longtail_JobAPI* job_api,
 		Longtail_StorageAPI* storage_api,
@@ -1391,81 +1394,81 @@ internal unsafe partial class LongtailLibrary
 		int enable_file_mapping
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_HashRegistryAPI* Longtail_CreateBlake3HashRegistry();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_HashRegistryAPI* Longtail_CreateFullHashRegistry();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_HashRegistryAPI* Longtail_CreateDefaultHashRegistry(
 		uint hash_type_count,
 		uint* hash_types,
 		Longtail_HashAPI** hash_apis
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_ChunkerAPI* Longtail_CreateHPCDCChunkerAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockStoreAPI* Longtail_CreateLRUBlockStoreAPI(
 		Longtail_BlockStoreAPI* backing_block_store,
 		uint max_lru_count
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CompressionAPI* Longtail_CreateLZ4CompressionAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetLZ4DefaultQuality();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_StorageAPI* Longtail_CreateInMemStorageAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetMemTracerSummary();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetMemTracerDetailed();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_MemTracer_Init();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern byte* Longtail_MemTracer_GetStats(
 		uint log_level
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_MemTracer_Dispose();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void* Longtail_MemTracer_Alloc(
 		byte* context,
 		ulong s
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_MemTracer_Free(
 		void* p
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int Longtail_MemTracer_DumpStats(
 		byte* name
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_HashAPI* Longtail_CreateMeowHashAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetMeowHashType();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_ProgressAPI* Longtail_CreateRateLimitedProgress(
 		Longtail_ProgressAPI* progress_api,
 		uint percent_rate_limit
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_BlockStoreAPI* Longtail_CreateShareBlockStoreAPI(
 		Longtail_BlockStoreAPI* backing_block_store
 	);
 
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern Longtail_CompressionAPI* Longtail_CreateZStdCompressionAPI();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetZStdMinQuality();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetZStdDefaultQuality();
-	[DllImport("longtail", CallingConvention = CallingConvention.Cdecl)]
+	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern uint Longtail_GetZStdMaxQuality();
 }
