@@ -1,9 +1,9 @@
 ﻿namespace CodeGen.Syntax.Symbols;
 
-internal class ConstSympol : Symbol
+internal class ConstSymbol : Symbol
 {
     public Symbol Type { get; }
-    public ConstSympol(Symbol type)
+    public ConstSymbol(Symbol type)
     {
         Type = type;
     }

@@ -1,5 +1,4 @@
-﻿using System;
-using CodeGen.Syntax.Expressions;
+﻿using CodeGen.Syntax.Expressions;
 
 namespace CodeGen.Syntax.Statements;
 

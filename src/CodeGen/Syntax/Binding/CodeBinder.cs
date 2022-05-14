@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CodeGen.Lexer;
 using CodeGen.Logging;
 using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Statements;
@@ -45,7 +44,6 @@ internal class CodeBinder
                     {
                         Logger.Warning($"No handling implemented for typedef {statement.Definition.GetType().Name}");
                     }
-
                     break;
                 case EnumDeclarationStatement statement:
                     boundNodes.Add(BindEnumStatement(statement));
@@ -55,6 +53,7 @@ internal class CodeBinder
                     break;
             }
         }
+        
         return boundNodes.ToArray();
     }
 
@@ -119,7 +118,7 @@ internal class CodeBinder
                 {
                     var initializer = BindExpression(array.Expression!);
                     
-                    // NOTE(JEns): assume identifier expression here.
+                    // NOTE(Jens): assume identifier expression here.
                     return new ArrayStructMember(((IdentifierExpression)array.Left).Value, type, initializer);
                 }
 
@@ -135,7 +134,7 @@ internal class CodeBinder
         var type = new StructTypeSymbol(statement.Name, members);
         _symbolLookupTable.AddType(type, !statement.ForwardDeclaration);
 
-        return new BoundStructDeclaration(statement, type);
+        return new BoundStructDeclaration(statement, type, statement.ForwardDeclaration);
     }
 
 
@@ -178,7 +177,7 @@ internal class CodeBinder
             ReferenceTypeExpression reference => new ReferenceTypeSymbol(LookupSymbol(reference.Expression)),
             BuiltInTypeExpression builtIn => LookupBuiltInType(builtIn),
             IdentifierExpression identifer => LookupType(identifer),
-            ConstExpression constExpression => new ConstSympol(LookupSymbol(constExpression.Expression)),
+            ConstExpression constExpression => new ConstSymbol(LookupSymbol(constExpression.Expression)),
             _ => throw new NotImplementedException($"Binding for symbol {expression.GetType()} has not been implemented.")
         };
 

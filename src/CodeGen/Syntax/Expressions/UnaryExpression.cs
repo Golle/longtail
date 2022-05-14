@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CodeGen.Syntax.Expressions;
+﻿namespace CodeGen.Syntax.Expressions;
 
 public class UnaryExpression : Expression
 {

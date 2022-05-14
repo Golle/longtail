@@ -1,5 +1,4 @@
-﻿using System;
-using CodeGen.Lexer;
+﻿using CodeGen.Lexer;
 
 namespace CodeGen.Syntax.Expressions;
 

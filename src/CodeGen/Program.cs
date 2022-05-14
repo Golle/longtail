@@ -16,7 +16,7 @@ using var _ = Logger.Start();
 const string LongtailPath = @"O:\tmp\longtail";
 
 Console.WriteLine("Welcome to the interpreter!");
-
+var resetFile = true;
 while (true)
 {
     await Task.Delay(50);
@@ -63,7 +63,7 @@ while (true)
         await Parse(line);
     }
 
-    static async Task<SyntaxTree?> Parse(string input)
+    async Task<SyntaxTree?> Parse(string input)
     {
         try
         {
@@ -125,40 +125,36 @@ while (true)
             {
 
                 var output = new FileOutput(@"O:\tmp\");
-                var reset = true;
+                // these structs are not defined anywhere.
+                var typedefStructs = new[]
+                {
+                    "Longtail_CancelAPI_CancelToken",
+                    "Longtail_StorageAPI_OpenFile",
+                    "Longtail_StorageAPI_Iterator",
+                    "Longtail_StorageAPI_LockFile",
+                    "Longtail_StorageAPI_FileMap",
+                    "Longtail_ChunkerAPI_Chunker",
+                    "Longtail_HashAPI_Context"
+                };
+                foreach (var typedefStruct in typedefStructs)
+                {
+                    await output.WriteStruct("sample.cs", new StructCode(typedefStruct, Array.Empty<StructMember>()), resetFile: resetFile);
+                    resetFile = false;
+                }
+                
                 foreach (var cSharpCode in code)
                 {
                     if (cSharpCode is EnumCode enumCode)
                     {
-                        await output.WriteEnum("sample.cs", enumCode, reset);
+                        await output.WriteEnum("sample.cs", enumCode, resetFile);
                     }
                     else if (cSharpCode is StructCode structCode)
                     {
-                        await output.WriteStruct("sample.cs", structCode, reset);
+                        await output.WriteStruct("sample.cs", structCode, resetFile);
                     }
-                    reset = false;
                 }
+                
             }
-
-
-
-            //var types = result.GetChildren()
-            //    .GroupBy(c => c.GetType())
-            //    .Select(c => (c.Key.Name, Count: c.Count()))
-            //    .Select(tuple => $"{tuple.Name,-30}{tuple.Count}");
-
-
-            //foreach (var typedef in result.GetChildren().OfType<TypedefStatement>())
-            //{
-            //    typedef.PrettyPrint(new SyntaxConsoleWriter());
-            //}
-
-
-            //foreach (var type in types)
-            //{
-            //    Logger.Raw(type);
-            //}
-
 
 
             return tree;
@@ -170,6 +166,7 @@ while (true)
         return null;
     }
 }
+
 
 
 

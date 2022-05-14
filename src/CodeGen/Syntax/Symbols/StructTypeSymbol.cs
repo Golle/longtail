@@ -27,7 +27,6 @@ internal class StructMember
 internal sealed class StructTypeSymbol : TypeSymbol
 {
     public StructMember[] Members { get; }
-    
     public StructTypeSymbol(string name, StructMember[] members)
         : base(name)
     {

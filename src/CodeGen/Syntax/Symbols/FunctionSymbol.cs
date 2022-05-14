@@ -1,6 +1,4 @@
-﻿using CodeGen.Syntax.Binding;
-
-namespace CodeGen.Syntax.Symbols;
+﻿namespace CodeGen.Syntax.Symbols;
 
 internal class FunctionSymbol : TypeSymbol
 {

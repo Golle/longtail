@@ -6,9 +6,12 @@ namespace CodeGen.Syntax.Binding;
 internal class BoundStructDeclaration : BoundStatement
 {
     public StructTypeSymbol Type { get; }
-    public BoundStructDeclaration(Statement statement, StructTypeSymbol type)
+    public bool ForwardDeclaration { get; }
+
+    public BoundStructDeclaration(Statement statement, StructTypeSymbol type, bool forwardDeclaration)
         : base(statement)
     {
         Type = type;
+        ForwardDeclaration = forwardDeclaration;
     }
 }
