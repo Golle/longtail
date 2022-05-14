@@ -76,9 +76,25 @@ internal class CSharpCodeGen
             FunctionSymbol function => FunctionToDelegate(function),
             StructTypeSymbol structType => structType.Name,
             PointerTypeSymbol pointer => $"{TypeToString(pointer.Type)}*",
+            PrimitiveTypeSymbol primitive => PrimitiveToString(primitive),
             TypeSymbol type => type.Name,
             ConstSymbol constSymbol => TypeToString(constSymbol.Type), // const is not supported here i c#, lets just return the containing type
             _ => throw new NotSupportedException($"{symbol.GetType().Name} is not supported in {nameof(TypeToString)}")
+        };
+
+    private static string PrimitiveToString(PrimitiveTypeSymbol primitive) =>
+        (primitive.Size, primitive.Unsigned) switch
+        {
+            (8, true) => "byte",
+            (8, false) => "sbyte",
+            (16, true) => "ushort",
+            (16, false) => "short",
+            (32, true) => "uint",
+            (64, true) => "ulong",
+            (32, false) => "int",
+            (64, false) => "long",
+            (0, _) => "void",
+            _ => throw new NotSupportedException($"{(primitive.Unsigned ? "unsigned" : "signed")} with size {primitive.Size} has not been implemented. ({primitive.Name})")
         };
 
     private static string FunctionToDelegate(FunctionSymbol function)
@@ -96,6 +112,7 @@ internal class CSharpCodeGen
         builder.Append('>');
         return builder.ToString();
     }
+
 
     private static CSharpCode GenerateEnumCode(BoundEnumDeclaration enumDecl)
     {

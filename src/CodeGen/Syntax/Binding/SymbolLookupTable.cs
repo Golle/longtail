@@ -23,7 +23,7 @@ internal class SymbolLookupTable
 
 
         _primitiveTypes.Add(new[] { TokenType.Void }, new("void", 0));
-        _primitiveTypes.Add(new[] { TokenType.Char }, new("char", 8));
+        _primitiveTypes.Add(new[] { TokenType.Char }, new("char", 8, true)); // NOTE(Jens): treat the type "char" as unsigned.
         _primitiveTypes.Add(new[] { Float }, new("float", 32));
         _primitiveTypes.Add(new[] { TokenType.Double }, new("double", 64));
         _primitiveTypes.Add(new[] { Unsigned, TokenType.Char }, new("unsigned char", 8, true));
