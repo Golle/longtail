@@ -1,4 +1,4 @@
-name: Build Code Gen
+name: Build and Test CodeGen
 
 on: push
 
@@ -16,7 +16,7 @@ jobs:
         include-prerelease: true
         
     - name: Build
-      run: dotnet build
+      run: dotnet build src/CodeGen -c Release
     
     - name: Test
-      run: dotnet test
+      run: dotnet test tests/CodeGen.Tests -c Release
