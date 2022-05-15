@@ -37,7 +37,8 @@ internal class FileOutput
             builder.AppendLine(",");
         }
         builder.AppendLine("}");
-        await stream.WriteAsync(builder.ToString());
+
+        await Write(stream, builder);
     }
 
     public async Task WriteStruct(string fileName, string @namespace, StructCode structCode)
@@ -66,7 +67,8 @@ internal class FileOutput
             builder.AppendLine($"\tpublic {value} {name};");
         }
         builder.AppendLine("}");
-        await stream.WriteAsync(builder.ToString());
+
+        await Write(stream, builder);
     }
 
     public async Task WriteExternFunctions(string fileName, CallingConvention callingConvention, string dllName, string className, string @namespace, IEnumerable<FunctionCode> functions)
@@ -106,6 +108,18 @@ internal class FileOutput
         }
 
         builder.AppendLine("}");
+
+        // Replace tab with space
+        const int indentation = 4;
+        builder.Replace("\t", new string(' ', indentation));
+
+        await Write(stream, builder);
+    }
+
+    private static async Task Write(StreamWriter stream, StringBuilder builder)
+    {
+        const int indentation = 4;
+        builder.Replace("\t", new string(' ', indentation));
 
         await stream.WriteAsync(builder.ToString());
     }
