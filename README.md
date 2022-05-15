@@ -16,13 +16,25 @@ This project generates cross platform C# bindings for Dan Engelbrecht longtail l
 **Working on**
 * Copy the comments from the API functions and generate C# comments in the LongtailLibrary.cs file
 * Nuget package for the low level bindings (Unsafe)
-* Managed abstrations (hide all unsafe code behin easy to use managed functions and classes)
+* Managed abstrations (hide all unsafe code behind easy to use managed functions and classes)
 * More tests for both CodeGen and Longtail
 
 **Known issues**
 * Currently using type `ulong` for `size_t`. This works but it's not correct, it should be `nuint` (or `UIntPtr` in older versions of .NET)
 * Hardcoded paths for longtail.h, the goals is to either have it as a submodule(oh no...) or just specify a path when you run the CodeGen project. 
 
+Comments on function pointers might be a bit different from original. This happens because it binds the type to the parent.
+```csharp
+// The comment
+// int Longtail_BlockStore_PreflightGetFunc(struct Longtail_BlockStoreAPI* block_store_api, unsigned int block_count, const unsigned long long int* block_hashes, struct Longtail_AsyncPreflightStartedAPI* optional_async_complete_api)
+
+// The c# code
+public delegate* unmanaged[Cdecl]<Longtail_BlockStoreAPI*, uint, ulong*, Longtail_AsyncPreflightStartedAPI*, int> PreflightGet;
+```
+```c
+// The original function pointer
+typedef int (*Longtail_BlockStore_PreflightGetFunc)(struct Longtail_BlockStoreAPI* block_store_api, uint32_t block_count, const TLongtail_Hash* block_hashes, struct Longtail_AsyncPreflightStartedAPI* optional_async_complete_api);
+```
 ## Project structure
 
 #### src/CodGen
