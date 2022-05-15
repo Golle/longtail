@@ -1,5 +1,6 @@
-[![Build and Test CodeGen](https://github.com/Golle/longtail/actions/workflows/build.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/build.yml)
+[![Build and Test CodeGen](https://github.com/Golle/longtail/actions/workflows/build.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/build.yml)   
 [![Run longtail tests](https://github.com/Golle/longtail/actions/workflows/longtail.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/longtail.yml)
+
 
 ## Longtail C# Bindings
 
