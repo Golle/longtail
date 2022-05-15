@@ -16,7 +16,7 @@ internal class Parser
     private int _position;
     private Token Current => Peek(0);
 
-    private List<TokenType> _functionModifiers = new();
+    private readonly List<TokenType> _functionModifiers = new();
     private Token Peek(int steps)
     {
         var position = _position + steps;
