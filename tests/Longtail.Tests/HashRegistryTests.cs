@@ -8,7 +8,7 @@ internal class HashRegistryTests
     public void HashRegistry_Blake3_CreateAndDispose()
     {
         using var hashRegistry = HashRegistry.CreateBlake3HashRegistry();
-        
+
         Assert.That(hashRegistry, Is.Not.Null);
     }
 
@@ -34,7 +34,7 @@ internal class HashRegistryTests
     public void GetHashApi_Blake3_ReturnHashApi()
     {
         using var hashRegistry = HashRegistry.CreateFullHashRegistry();
-        
+
         var type = LongtailLibrary.Longtail_GetBlake3HashType();
         using var hashApi = hashRegistry?.GetHashApi(type);
 
@@ -45,7 +45,8 @@ internal class HashRegistryTests
     public void GetHashApi_Meow_ReturnHashApi()
     {
         using var hashRegistry = HashRegistry.CreateFullHashRegistry();
-        using var hashApi = hashRegistry?.GetHashApi(LongtailLibrary.Longtail_GetMeowHashType());
+        var hashType = LongtailLibrary.Longtail_GetMeowHashType();
+        using var hashApi = hashRegistry?.GetHashApi(hashType);
 
         Assert.That(hashApi, Is.Not.Null);
     }
