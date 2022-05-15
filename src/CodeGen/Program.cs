@@ -197,5 +197,5 @@ async Task ExportFunctions(IEnumerable<FunctionCode> functions, string basePath,
         File.Delete(fullPath);
     }
     var output = new FileOutput(basePath);
-    await output.WriteExternFunctions(fileName, CallingConvention.Cdecl, "longtail", className, @namespace, functions);
+    await output.WriteExternFunctions(fileName, CallingConvention.Cdecl, "longtail_csharp_bindings", className, @namespace, functions);
 }

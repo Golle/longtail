@@ -4,7 +4,7 @@ namespace Longtail;
 
 internal unsafe partial class LongtailLibrary
 {
-	private const string DllName = "longtail";
+	private const string DllName = "longtail_csharp_bindings";
 
 	[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
 	public static extern void Longtail_DisposeAPI(

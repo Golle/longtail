@@ -39,13 +39,7 @@ internal class FileOutput
         builder.AppendLine("}");
         await stream.WriteAsync(builder.ToString());
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="fileName"></param>
-    /// <param name="namespace"></param>
-    /// <param name="structCode"></param>
-    /// <returns></returns>
+
     public async Task WriteStruct(string fileName, string @namespace, StructCode structCode)
     {
         var path = Path.Combine(_basePath, fileName);
