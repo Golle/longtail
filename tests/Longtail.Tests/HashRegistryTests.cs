@@ -2,15 +2,51 @@
 
 namespace Longtail.Tests;
 
-internal unsafe class HashRegistryTests
+internal class HashRegistryTests
 {
     [Test]
     public void HashRegistry_Blake3_CreateAndDispose()
     {
-        var result = LongtailLibrary.Longtail_CreateBlake3HashRegistry();
+        using var hashRegistry = HashRegistry.CreateBlake3HashRegistry();
         
-        Assert.That(result != null);
+        Assert.That(hashRegistry, Is.Not.Null);
+    }
+
+    [Test]
+    public void HashRegistry_Full_CreateAndDispose()
+    {
+        using var hashRegistry = HashRegistry.CreateFullHashRegistry();
+
+        Assert.That(hashRegistry, Is.Not.Null);
+    }
+
+    [Test]
+    public void GetHashApi_Blake2_ReturnHashApi()
+    {
+        using var hashRegistry = HashRegistry.CreateFullHashRegistry();
+        var hashType = LongtailLibrary.Longtail_GetBlake2HashType();
+        using var hashApi = hashRegistry?.GetHashApi(hashType);
+
+        Assert.That(hashApi, Is.Not.Null);
+    }
+
+    [Test]
+    public void GetHashApi_Blake3_ReturnHashApi()
+    {
+        using var hashRegistry = HashRegistry.CreateFullHashRegistry();
         
-        LongtailLibrary.Longtail_DisposeAPI((Longtail_API*)result);
+        var type = LongtailLibrary.Longtail_GetBlake3HashType();
+        using var hashApi = hashRegistry?.GetHashApi(type);
+
+        Assert.That(hashApi, Is.Not.Null);
+    }
+
+    [Test]
+    public void GetHashApi_Meow_ReturnHashApi()
+    {
+        using var hashRegistry = HashRegistry.CreateFullHashRegistry();
+        using var hashApi = hashRegistry?.GetHashApi(LongtailLibrary.Longtail_GetMeowHashType());
+
+        Assert.That(hashApi, Is.Not.Null);
     }
 }
