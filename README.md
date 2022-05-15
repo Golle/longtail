@@ -18,6 +18,9 @@ This project generates cross platform C# bindings for Dan Engelbrecht longtail l
 * Managed abstrations (hide all unsafe code behin easy to use managed functions and classes)
 * More tests for both CodeGen and Longtail
 
+**Known issues**
+* Currently using type `ulong` for `size_t`. This works but it's not correct, it should be `nuint` (or `UIntPtr` in older versions of .NET)
+
 ## Project structure
 
 #### src/CodGen
