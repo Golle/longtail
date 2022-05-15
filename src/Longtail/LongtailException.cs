@@ -6,9 +6,7 @@ public class LongtailException : Exception
     public string Method { get; }
     public string LibraryFunction { get; }
     public int Err { get; }
-
     public string ErrorAsString { get; }
-
     public LongtailException(string @class, string method, string libraryFunction, int err) 
         : base($"{@class}:{method} - {libraryFunction} - Code: {err} ({ErrToString(err)})")
     {
@@ -16,7 +14,8 @@ public class LongtailException : Exception
         Method = method;
         LibraryFunction = libraryFunction;
         Err = err;
+        ErrorAsString = ErrToString(err);
     }
 
-    public static string ErrToString(int err) => ((ErrorCodesEnum)err).ToString();
+    private static string ErrToString(int err) => ((ErrorCodesEnum)err).ToString();
 }

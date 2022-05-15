@@ -21,6 +21,7 @@ This project generates cross platform C# bindings for Dan Engelbrecht longtail l
 
 **Known issues**
 * Currently using type `ulong` for `size_t`. This works but it's not correct, it should be `nuint` (or `UIntPtr` in older versions of .NET)
+* Hardcoded paths for longtail.h, the goals is to either have it as a submodule(oh no...) or just specify a path when you run the CodeGen project. 
 
 ## Project structure
 
