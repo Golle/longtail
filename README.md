@@ -8,6 +8,8 @@ This project generates cross platform C# bindings for Dan Engelbrecht longtail l
 
 ## Current status
 
+Version 0.3.0 of longtail
+
 **Implemented**
 * Generates bindings for all structs, enums, functions, function pointers
 * Supports .NET5.0 and .NET 6.0 on platforms Linux, MacOS and Windows x64
