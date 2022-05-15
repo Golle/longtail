@@ -1,4 +1,6 @@
-﻿namespace CodeGen.Syntax.Symbols;
+﻿using System.Linq;
+
+namespace CodeGen.Syntax.Symbols;
 
 internal class FunctionSymbol : TypeSymbol
 {
@@ -11,5 +13,12 @@ internal class FunctionSymbol : TypeSymbol
         ReturnType = returnType;
         Arguments = arguments;
         Export = export;
+    }
+
+
+    public override string ToString()
+    {
+        var arguments = string.Join(", ", Arguments.Select(a => a));
+        return $"{ReturnType} {Name}({arguments})";
     }
 }

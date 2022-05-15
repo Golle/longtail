@@ -35,8 +35,8 @@ while (true)
     if (line.Length == 0)
     {
         var result = Parse(File.ReadAllText(Path.Combine(SamplePath, "sample.h")));
-        await ExportCSharpCode(result, SampleOutputBasePath, "sample.cs", true);
-        await ExportFunctions(result?.Where(c => c is FunctionCode).Cast<FunctionCode>() ?? Array.Empty<FunctionCode>(), SampleOutputBasePath, "sample_functions.cs", "Sample");
+        await ExportCSharpCode(result, SampleOutputBasePath, "sample.cs", "S", true);
+        await ExportFunctions(result?.Where(c => c is FunctionCode).Cast<FunctionCode>() ?? Array.Empty<FunctionCode>(), SampleOutputBasePath, "sample_functions.cs", "Sample", "S");
     }
     else if (line.StartsWith("#longtail"))
     {
@@ -49,12 +49,12 @@ while (true)
         foreach (var input in headers)
         {
             var result = Parse(input);
-            await ExportCSharpCode(result, LongtailOutputBasePath, LongtailOutputFileName, resetFile);
+            await ExportCSharpCode(result, LongtailOutputBasePath, LongtailOutputFileName, "Longtail", resetFile);
             resetFile = false;
 
             functions.AddRange(result?.Where(c => c is FunctionCode).Cast<FunctionCode>() ?? Array.Empty<FunctionCode>());
         }
-        await ExportFunctions(functions, LongtailOutputBasePath, LongtailOutputLibraryFileName, "LongtailLibrary");
+        await ExportFunctions(functions, LongtailOutputBasePath, LongtailOutputLibraryFileName, "LongtailLibrary", "Longtail");
         var typedefStructs = new[]
         {
             "Longtail_CancelAPI_CancelToken",
@@ -70,7 +70,7 @@ while (true)
         foreach (var typedefStruct in typedefStructs)
         {
             var code = new CSharpCode[] { new StructCode(typedefStruct, Array.Empty<StructMember>()) };
-            await ExportCSharpCode(code, LongtailOutputBasePath, LongtailOutputFileName, false);
+            await ExportCSharpCode(code, LongtailOutputBasePath, LongtailOutputFileName, "Longtail", false);
         }
 
         timer.Stop();
@@ -97,15 +97,25 @@ while (true)
     }
     else
     {
-        var result = Parse(line);
+        var result = Parse(line, true);
+
     }
 
-    static CSharpCode[]? Parse(string input)
+    static CSharpCode[]? Parse(string input, bool printTree = false)
     {
         var tree = Run("Parse Syntax Tree", () => SyntaxTree.Parse(input));
         if (tree == null)
         {
             return null;
+        }
+
+        if (printTree)
+        {
+            var writer = new SyntaxConsoleWriter();
+            foreach (var syntaxNode in tree.GetChildren())
+            {
+                syntaxNode.PrettyPrint(writer);
+            }
         }
 
         var nodes = Run("Create AST", () => new CodeBinder(new SymbolLookupTable()
@@ -148,7 +158,7 @@ static T? Run<T>(string name, Func<T> func)
 }
 
 
-async Task ExportCSharpCode(CSharpCode[]? code, string basePath, string fileName, bool resetFile)
+async Task ExportCSharpCode(CSharpCode[]? code, string basePath, string fileName, string @namespace, bool resetFile)
 {
     if (code == null)
     {
@@ -172,14 +182,14 @@ async Task ExportCSharpCode(CSharpCode[]? code, string basePath, string fileName
         }
         else if (cSharpCode is StructCode structCode)
         {
-            await output.WriteStruct(fileName, structCode);
+            await output.WriteStruct(fileName, @namespace, structCode);
         }
     }
 
     var functions = code.Where(c => c is FunctionCode).Cast<FunctionCode>();
 }
 
-async Task ExportFunctions(IEnumerable<FunctionCode> functions, string basePath, string fileName, string className)
+async Task ExportFunctions(IEnumerable<FunctionCode> functions, string basePath, string fileName, string className, string @namespace)
 {
     var fullPath = Path.Combine(basePath, fileName);
     if (File.Exists(fullPath))
@@ -187,5 +197,5 @@ async Task ExportFunctions(IEnumerable<FunctionCode> functions, string basePath,
         File.Delete(fullPath);
     }
     var output = new FileOutput(basePath);
-    await output.WriteExternFunctions(fileName, CallingConvention.Cdecl, "longtail", className, functions);
+    await output.WriteExternFunctions(fileName, CallingConvention.Cdecl, "longtail", className, @namespace, functions);
 }

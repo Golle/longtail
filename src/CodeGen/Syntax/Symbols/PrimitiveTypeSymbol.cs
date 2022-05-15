@@ -10,4 +10,6 @@ internal class PrimitiveTypeSymbol : TypeSymbol
         Size = size;
         Unsigned = unsigned;
     }
+
+    public override string ToString() => Name;
 }

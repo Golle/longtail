@@ -39,8 +39,14 @@ internal class FileOutput
         builder.AppendLine("}");
         await stream.WriteAsync(builder.ToString());
     }
-
-    public async Task WriteStruct(string fileName, StructCode structCode)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="fileName"></param>
+    /// <param name="namespace"></param>
+    /// <param name="structCode"></param>
+    /// <returns></returns>
+    public async Task WriteStruct(string fileName, string @namespace, StructCode structCode)
     {
         var path = Path.Combine(_basePath, fileName);
         await using var fileStream = File.OpenWrite(path);
@@ -48,17 +54,28 @@ internal class FileOutput
         fileStream.Seek(0, SeekOrigin.End);
 
         var builder = new StringBuilder();
+        if (fileStream.Position == 0)
+        {
+            builder.AppendLine($"namespace {@namespace};");
+            builder.AppendLine();
+        }
         builder.AppendLine($"internal unsafe struct {structCode.Name}");
         builder.AppendLine("{");
-        foreach (var (name, value) in structCode.Members)
+        foreach (var (name, value, summary) in structCode.Members)
         {
+            if (summary != null)
+            {
+                builder.AppendLine("\t/// <summary>");
+                builder.AppendLine($"\t/// {summary}");
+                builder.AppendLine("\t/// </summary>");
+            }
             builder.AppendLine($"\tpublic {value} {name};");
         }
         builder.AppendLine("}");
         await stream.WriteAsync(builder.ToString());
     }
 
-    public async Task WriteExternFunctions(string fileName, CallingConvention callingConvention, string dllName, string className, IEnumerable<FunctionCode> functions)
+    public async Task WriteExternFunctions(string fileName, CallingConvention callingConvention, string dllName, string className, string @namespace, IEnumerable<FunctionCode> functions)
     {
         var builder = new StringBuilder();
         var path = Path.Combine(_basePath, fileName);
@@ -67,6 +84,8 @@ internal class FileOutput
         fileStream.Seek(0, SeekOrigin.End);
 
         builder.AppendLine("using System.Runtime.InteropServices;");
+        builder.AppendLine();
+        builder.AppendLine($"namespace {@namespace};");
         builder.AppendLine();
         builder.AppendLine($"internal unsafe partial class {className}");
         builder.AppendLine("{");

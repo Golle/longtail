@@ -7,4 +7,6 @@ internal class PointerTypeSymbol : Symbol
     {
         Type = type;
     }
+
+    public override string ToString() => $"{Type}*";
 }

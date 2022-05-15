@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 
+namespace Longtail;
+
 internal unsafe partial class LongtailLibrary
 {
 	private const string DllName = "longtail";

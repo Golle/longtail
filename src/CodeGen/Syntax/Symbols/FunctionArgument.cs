@@ -10,4 +10,6 @@ internal class FunctionArgument
         Name = name;
         Symbol = symbol;
     }
+
+    public override string ToString() => $"{Symbol} {Name}";
 }

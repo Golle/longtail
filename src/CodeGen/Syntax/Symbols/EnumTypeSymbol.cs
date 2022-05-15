@@ -6,5 +6,6 @@ internal class EnumTypeSymbol : TypeSymbol
         : base(name)
     {
     }
-    public override string ToString() => ParentType != null ? $"enum {Name} => {ParentType}" : Name;
+
+    public override string ToString() => $"enum {Name}";
 }

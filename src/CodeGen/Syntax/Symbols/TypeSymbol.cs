@@ -2,13 +2,11 @@
 
 internal class TypeSymbol : Symbol
 {
-    public TypeSymbol? ParentType { get; }
     public string Name { get; }
-    public TypeSymbol(string name, TypeSymbol? parentType = null)
+    public TypeSymbol(string name)
     {
         Name = name;
-        ParentType = parentType;
     }
 
-    public override string ToString() => ParentType != null ? $"{Name} => {ParentType}" : Name;
+    public override string ToString() => Name;
 }

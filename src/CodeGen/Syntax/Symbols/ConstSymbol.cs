@@ -7,4 +7,6 @@ internal class ConstSymbol : Symbol
     {
         Type = type;
     }
+
+    public override string ToString() => $"const {Type}";
 }

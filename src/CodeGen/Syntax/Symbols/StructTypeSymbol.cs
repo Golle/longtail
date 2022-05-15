@@ -1,4 +1,5 @@
-﻿using CodeGen.Syntax.Binding;
+﻿using System.Text;
+using CodeGen.Syntax.Binding;
 
 namespace CodeGen.Syntax.Symbols;
 
@@ -10,6 +11,8 @@ internal sealed class ArrayStructMember : StructMember
     {
         Initializer = initializer;
     }
+
+    public override string ToString() => $"{Type} {Name}[{Initializer}]";
 }
 
 internal class StructMember
@@ -22,6 +25,8 @@ internal class StructMember
         Name = name;
         Type = type;
     }
+
+    public override string ToString() => $"{Type} {Name}";
 }
 
 internal sealed class StructTypeSymbol : TypeSymbol
@@ -32,5 +37,5 @@ internal sealed class StructTypeSymbol : TypeSymbol
     {
         Members = members;
     }
-    public override string ToString() => ParentType != null ? $"struct {Name} => {ParentType}" : Name;
+    public override string ToString() => $"struct {Name}";
 }

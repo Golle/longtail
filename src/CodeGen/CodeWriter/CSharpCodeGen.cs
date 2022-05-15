@@ -14,7 +14,7 @@ internal record EnumCode(string Name, EnumMember[] Members) : CSharpCode;
 internal record EnumMember(string Name, string? Value = null);
 
 internal record StructCode(string Name, StructMember[] Members) : CSharpCode;
-internal record StructMember(string Name, string Type);
+internal record StructMember(string Name, string Type, string? Summary = null);
 
 internal record FunctionCode(string Name, string ReturnType, Argument[] Arguments) : CSharpCode;
 internal record Argument(string Type, string Name);
@@ -77,7 +77,8 @@ internal class CSharpCodeGen
             .Select(m =>
             {
                 var type = TypeToString(m.Type);
-                return new StructMember(m.Name, type);
+                var summary = m.Type is FunctionPointerSymbol ? m.Type.ToString() : null;
+                return new StructMember(m.Name, type, summary);
             })
             .ToArray();
         return new StructCode(structDecl.Type.Name, members);
