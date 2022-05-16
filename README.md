@@ -39,7 +39,7 @@ typedef int (*Longtail_BlockStore_PreflightGetFunc)(struct Longtail_BlockStoreAP
 ```
 ## Project structure
 
-#### src/CodGen
+#### src/CodeGen
 * Parser, bindings, type handling etc
 
 #### src/Longtail

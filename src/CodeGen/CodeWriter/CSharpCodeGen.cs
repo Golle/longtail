@@ -35,8 +35,11 @@ internal class CSharpCodeGen
                 case BoundStructDeclaration structDecl:
                     if (!structDecl.ForwardDeclaration)
                     {
-                        Logger.Warning($"Ignoring forward declaration for {structDecl.Type.Name}");
                         _code.Add(GenerateStructCode(structDecl));
+                    }
+                    else
+                    {
+                        Logger.Warning($"Ignoring forward declaration for {structDecl.Type.Name}");
                     }
                     break;
                 case BoundFunctionDeclaration functionDecl:

@@ -185,8 +185,6 @@ async Task ExportCSharpCode(CSharpCode[]? code, string basePath, string fileName
             await output.WriteStruct(fileName, @namespace, structCode);
         }
     }
-
-    var functions = code.Where(c => c is FunctionCode).Cast<FunctionCode>();
 }
 
 async Task ExportFunctions(IEnumerable<FunctionCode> functions, string basePath, string fileName, string className, string @namespace)
