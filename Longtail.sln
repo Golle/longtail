@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeGen.Tests", "tests\Code
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Longtail", "src\Longtail\Longtail.csproj", "{A45DF83F-0001-4ECF-AACA-4BF52CA5A810}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Longtail.Tests", "tests\Longtail.Tests\Longtail.Tests.csproj", "{D4FC1729-7229-4707-9303-3D8407E7BD0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Longtail.Tests", "tests\Longtail.Tests\Longtail.Tests.csproj", "{D4FC1729-7229-4707-9303-3D8407E7BD0E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{06C44359-764E-4240-BEE4-2F7A81B132A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildTool", "src\BuildTool\BuildTool.csproj", "{D1A0C303-1305-47EF-80C9-60F33046FC95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{D4FC1729-7229-4707-9303-3D8407E7BD0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4FC1729-7229-4707-9303-3D8407E7BD0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4FC1729-7229-4707-9303-3D8407E7BD0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1A0C303-1305-47EF-80C9-60F33046FC95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1A0C303-1305-47EF-80C9-60F33046FC95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1A0C303-1305-47EF-80C9-60F33046FC95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1A0C303-1305-47EF-80C9-60F33046FC95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
