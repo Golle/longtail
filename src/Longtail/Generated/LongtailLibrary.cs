@@ -1361,6 +1361,12 @@ internal unsafe partial class LongtailLibrary
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern uint Longtail_GetBrotliTextMaxQuality();
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern Longtail_CompressionAPI* Longtail_CompressionRegistry_CreateForBrotli(
+        uint compression_type,
+        uint* out_settings
+    );
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern Longtail_BlockStoreAPI* Longtail_CreateCacheBlockStoreAPI(
         Longtail_JobAPI* job_api,
         Longtail_BlockStoreAPI* local_block_store,
@@ -1375,10 +1381,8 @@ internal unsafe partial class LongtailLibrary
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern Longtail_CompressionRegistryAPI* Longtail_CreateDefaultCompressionRegistry(
-        uint compression_type_count,
-        uint* compression_types,
-        Longtail_CompressionAPI** compression_apis,
-        uint* compression_setting_ids
+        uint compression_api_count,
+        delegate* unmanaged[Cdecl]<uint, uint*, Longtail_CompressionAPI*>* create_api_funcs
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -1419,6 +1423,12 @@ internal unsafe partial class LongtailLibrary
     public static extern Longtail_CompressionAPI* Longtail_CreateLZ4CompressionAPI();
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern uint Longtail_GetLZ4DefaultQuality();
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern Longtail_CompressionAPI* Longtail_CompressionRegistry_CreateForLZ4(
+        uint compression_type,
+        uint* out_settings
+    );
+
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern Longtail_StorageAPI* Longtail_CreateInMemStorageAPI();
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -1473,4 +1483,14 @@ internal unsafe partial class LongtailLibrary
     public static extern uint Longtail_GetZStdDefaultQuality();
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern uint Longtail_GetZStdMaxQuality();
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern uint Longtail_GetZStdHighQuality();
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern uint Longtail_GetZStdLowQuality();
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern Longtail_CompressionAPI* Longtail_CompressionRegistry_CreateForZstd(
+        uint compression_type,
+        uint* out_settings
+    );
+
 }
