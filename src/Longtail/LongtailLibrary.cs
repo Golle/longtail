@@ -5,12 +5,12 @@ internal partial class LongtailLibrary
 {
 #if DEBUG
     private const string DllNameWindows = "longtail_win32_x64_debug.dll";
-    private const string DllNameLinux = "liblongtail_linux_x64_debug.so";
-    private const string DllNameOsx = "liblongtail_darwin_x64_debug.so";
+    private const string DllNameLinux = "longtail_linux_x64_debug.so";
+    private const string DllNameOsx = "longtail_darwin_x64_debug.so";
 #else
     private const string DllNameWindows = "longtail_win32_x64.dll";
-    private const string DllNameLinux = "liblongtail_linux_x64.so";
-    private const string DllNameOsx = "liblongtail_darwin_x64.so";
+    private const string DllNameLinux = "longtail_linux_x64.so";
+    private const string DllNameOsx = "longtail_darwin_x64.so";
 #endif
 
     static LongtailLibrary()
