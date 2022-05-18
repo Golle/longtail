@@ -22,8 +22,4 @@
   <ItemGroup>
     <Folder Include="IO\" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\tests\Longtail.Tests\Longtail.Tests.csproj" />
-  </ItemGroup>
 </Project>
