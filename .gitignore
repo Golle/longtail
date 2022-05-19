@@ -3,3 +3,5 @@
 [Oo]bj/
 
 *.user
+
+tmp/
