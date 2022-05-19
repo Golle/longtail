@@ -12,6 +12,7 @@ var longtailResult = await new PipelineBuilder<LongtailContext>()
     .With<DownloadLongtailLibrary>()
     .With<DeleteLibraryFiles>()
     .With<CopyLibraryFiles>()
+    .With<CloneLongtailGitRepository>()
     .Build()
     .Invoke(new LongtailContext(basePath, libraryPath));
 
