@@ -11,12 +11,13 @@ internal class DownloadLongtailLibrary : IMiddleware<LongtailContext>
     public async Task<LongtailContext> OnInvoke(LongtailContext context, ContextDelegate<LongtailContext> next)
     {
         var downloadDir = Path.Combine(context.BasePath, "tmp", "downloads");
-
-        if (!Directory.Exists(downloadDir))
+        if (Directory.Exists(downloadDir))
         {
-            Logger.Trace($"Creating folder: {downloadDir}");
-            Directory.CreateDirectory(downloadDir);
+            Logger.Trace($"Deleting contents of directory: {downloadDir}");
+            Directory.Delete(downloadDir, true);
         }
+
+        Directory.CreateDirectory(downloadDir);
         Logger.Trace($"Download {context.Assets.Length} assets.");
         var tasks = context.Assets.Select(a => DownloadAndExtract(a, downloadDir));
         await Task.WhenAll(tasks);
@@ -38,7 +39,7 @@ internal class DownloadLongtailLibrary : IMiddleware<LongtailContext>
             var timer = Stopwatch.StartNew();
             Logger.Trace($"Download {asset.Name}");
             var stream = await Client.GetStreamAsync(asset.DownloadUrl);
-            var zipFile = Path.Combine(destination, asset.Name);
+            var zipFile = Path.Combine(destination, $"{asset.Name}.zip");
             {
                 await using var file = File.OpenWrite(zipFile);
                 file.SetLength(0);
@@ -47,8 +48,6 @@ internal class DownloadLongtailLibrary : IMiddleware<LongtailContext>
             Logger.Trace($"Unzip {asset.Name}");
             ZipFile.ExtractToDirectory(zipFile, destination, true);
             Logger.Trace($"Completed {asset.Name} in {timer.Elapsed.TotalMilliseconds:0.##} ms");
-
-            
         }
     }
 }

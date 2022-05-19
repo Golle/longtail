@@ -3,7 +3,6 @@
 namespace BuildTool.LongtailSync;
 
 internal record LongtailVersion(string Name, string Tag, DateTime PublishedAt);
-
 internal record LongtailAsset(string Name, string DownloadUrl);
 internal record LongtailContext(string BasePath, string LibraryPath) : Context
 {
