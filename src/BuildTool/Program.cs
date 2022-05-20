@@ -14,8 +14,12 @@ var longtailResult = await new PipelineBuilder<LongtailContext>()
     .With<DeleteLibraryFiles>()
     .With<CopyLibraryFiles>()
     .With<CloneLongtailGitRepository>()
+    .With<RunCodeGen>()
     .Build()
-    .Invoke(new LongtailContext(basePath, libraryPath));
+    .Invoke(new LongtailContext(basePath, libraryPath)
+    {
+        //ShowCodeGenOutput = true
+    });
 
 if (longtailResult.Failed)
 {

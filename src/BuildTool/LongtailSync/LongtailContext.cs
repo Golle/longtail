@@ -11,4 +11,5 @@ internal record LongtailContext(string BasePath, string LibraryPath) : Context
     public LongtailVersion? NewVersion { get; init; }
     public string[] LibraryDirectories { get; init; } = Array.Empty<string>();
     public string? GitRepoPath { get; init; }
+    public bool ShowCodeGenOutput { get; init; }
 }

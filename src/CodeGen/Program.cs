@@ -21,6 +21,18 @@ const string LongtailOutputLibraryFileName = "LongtailLibrary.cs";
 const string LongtailPath = @"O:\tmp\longtail";
 const string SamplePath = @"O:\tmp\";
 
+if (args.Length == 2)
+{
+    Logger.Info("Execute longtail code gen");
+    await GenerateLongtail(args[0], args[1]);
+    return 0;
+}
+else if (args.Length != 0)
+{
+    Logger.Error("Unexpected amount of arguments.");
+    return -1;
+}
+
 Console.WriteLine("Welcome to the interpreter!");
 while (true)
 {
@@ -40,41 +52,7 @@ while (true)
     }
     else if (line.StartsWith("#longtail"))
     {
-        var timer = Stopwatch.StartNew();
-        var headers = new LongtailFileReader(LongtailPath)
-            .EnumerateAllHeaders(("LONGTAIL_EXPORT", "__declspec(dllexport)"));
-        var resetFile = true;
-
-        List<FunctionCode> functions = new();
-        foreach (var input in headers)
-        {
-            var result = Parse(input);
-            await ExportCSharpCode(result, LongtailOutputBasePath, LongtailOutputFileName, "Longtail", resetFile);
-            resetFile = false;
-
-            functions.AddRange(result?.Where(c => c is FunctionCode).Cast<FunctionCode>() ?? Array.Empty<FunctionCode>());
-        }
-        await ExportFunctions(functions, LongtailOutputBasePath, LongtailOutputLibraryFileName, "LongtailLibrary", "Longtail");
-        var typedefStructs = new[]
-        {
-            "Longtail_CancelAPI_CancelToken",
-            "Longtail_StorageAPI_OpenFile",
-            "Longtail_StorageAPI_Iterator",
-            "Longtail_StorageAPI_LockFile",
-            "Longtail_StorageAPI_FileMap",
-            "Longtail_ChunkerAPI_Chunker",
-            "Longtail_HashAPI_Context",
-            "Longtail_LookupTable",
-            "Longtail_Paths"
-        };
-        foreach (var typedefStruct in typedefStructs)
-        {
-            var code = new CSharpCode[] { new StructCode(typedefStruct, Array.Empty<StructMember>()) };
-            await ExportCSharpCode(code, LongtailOutputBasePath, LongtailOutputFileName, "Longtail", false);
-        }
-
-        timer.Stop();
-        Logger.Info($"Generated longtail bindings in {timer.Elapsed.TotalMilliseconds} ms");
+        await GenerateLongtail(LongtailPath, LongtailOutputBasePath);
     }
     else if (line.StartsWith("#file"))
     {
@@ -100,42 +78,80 @@ while (true)
         var result = Parse(line, true);
 
     }
-
-    static CSharpCode[]? Parse(string input, bool printTree = false)
-    {
-        var tree = Run("Parse Syntax Tree", () => SyntaxTree.Parse(input));
-        if (tree == null)
-        {
-            return null;
-        }
-
-        if (printTree)
-        {
-            var writer = new SyntaxConsoleWriter();
-            foreach (var syntaxNode in tree.GetChildren())
-            {
-                syntaxNode.PrettyPrint(writer);
-            }
-        }
-
-        var nodes = Run("Create AST", () => new CodeBinder(new SymbolLookupTable()
-                .AddTypedef("uint64_t", TokenType.Unsigned, TokenType.Long, TokenType.Long)
-                .AddTypedef("uint32_t", TokenType.Unsigned, TokenType.Int)
-                .AddTypedef("uint16_t", TokenType.Unsigned, TokenType.Short)
-                .AddTypedef("uint8_t", TokenType.Char)
-                .AddTypedef("size_t", TokenType.Unsigned, TokenType.Long, TokenType.Long))
-            .BindNodes(tree.GetChildren()));
-
-        if (nodes == null)
-        {
-            return null;
-        }
-
-        return Run("Bind code", () => new CSharpCodeGen()
-            .GenerateCode(nodes));
-    }
 }
 
+static async Task GenerateLongtail(string longtailPath, string outputBasePath)
+{
+    var timer = Stopwatch.StartNew();
+    var headers = new LongtailFileReader(longtailPath)
+        .EnumerateAllHeaders(("LONGTAIL_EXPORT", "__declspec(dllexport)"));
+    var resetFile = true;
+
+    List<FunctionCode> functions = new();
+    foreach (var input in headers)
+    {
+        var result = Parse(input);
+        await ExportCSharpCode(result, outputBasePath, LongtailOutputFileName, "Longtail", resetFile);
+        resetFile = false;
+
+        functions.AddRange(result?.Where(c => c is FunctionCode).Cast<FunctionCode>() ?? Array.Empty<FunctionCode>());
+    }
+    await ExportFunctions(functions, outputBasePath, LongtailOutputLibraryFileName, "LongtailLibrary", "Longtail");
+    var typedefStructs = new[]
+    {
+        "Longtail_CancelAPI_CancelToken",
+        "Longtail_StorageAPI_OpenFile",
+        "Longtail_StorageAPI_Iterator",
+        "Longtail_StorageAPI_LockFile",
+        "Longtail_StorageAPI_FileMap",
+        "Longtail_ChunkerAPI_Chunker",
+        "Longtail_HashAPI_Context",
+        "Longtail_LookupTable",
+        "Longtail_Paths"
+    };
+    foreach (var typedefStruct in typedefStructs)
+    {
+        var code = new CSharpCode[] { new StructCode(typedefStruct, Array.Empty<StructMember>()) };
+        await ExportCSharpCode(code, outputBasePath, LongtailOutputFileName, "Longtail", false);
+    }
+
+    timer.Stop();
+    Logger.Info($"Generated longtail bindings in {timer.Elapsed.TotalMilliseconds} ms");
+}
+
+static CSharpCode[]? Parse(string input, bool printTree = false)
+{
+    var tree = Run("Parse Syntax Tree", () => SyntaxTree.Parse(input));
+    if (tree == null)
+    {
+        return null;
+    }
+
+    if (printTree)
+    {
+        var writer = new SyntaxConsoleWriter();
+        foreach (var syntaxNode in tree.GetChildren())
+        {
+            syntaxNode.PrettyPrint(writer);
+        }
+    }
+
+    var nodes = Run("Create AST", () => new CodeBinder(new SymbolLookupTable()
+            .AddTypedef("uint64_t", TokenType.Unsigned, TokenType.Long, TokenType.Long)
+            .AddTypedef("uint32_t", TokenType.Unsigned, TokenType.Int)
+            .AddTypedef("uint16_t", TokenType.Unsigned, TokenType.Short)
+            .AddTypedef("uint8_t", TokenType.Char)
+            .AddTypedef("size_t", TokenType.Unsigned, TokenType.Long, TokenType.Long))
+        .BindNodes(tree.GetChildren()));
+
+    if (nodes == null)
+    {
+        return null;
+    }
+
+    return Run("Bind code", () => new CSharpCodeGen()
+        .GenerateCode(nodes));
+}
 
 static T? Run<T>(string name, Func<T> func)
 {
@@ -158,7 +174,7 @@ static T? Run<T>(string name, Func<T> func)
 }
 
 
-async Task ExportCSharpCode(CSharpCode[]? code, string basePath, string fileName, string @namespace, bool resetFile)
+static async Task ExportCSharpCode(CSharpCode[]? code, string basePath, string fileName, string @namespace, bool resetFile)
 {
     if (code == null)
     {
@@ -187,7 +203,7 @@ async Task ExportCSharpCode(CSharpCode[]? code, string basePath, string fileName
     }
 }
 
-async Task ExportFunctions(IEnumerable<FunctionCode> functions, string basePath, string fileName, string className, string @namespace)
+static async Task ExportFunctions(IEnumerable<FunctionCode> functions, string basePath, string fileName, string className, string @namespace)
 {
     var fullPath = Path.Combine(basePath, fileName);
     if (File.Exists(fullPath))

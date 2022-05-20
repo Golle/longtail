@@ -9,7 +9,7 @@ internal class DeleteLibraryFiles : IMiddleware<LongtailContext>
     {
         foreach (var file in Directory.EnumerateFiles(context.LibraryPath))
         {
-            Logger.Info($"Deleting old file: {Path.GetFileName(file)}");
+            Logger.Trace($"Deleting old file: {Path.GetFileName(file)}");
             File.Delete(file);
         }
 
