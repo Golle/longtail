@@ -7,6 +7,7 @@ var basePath = FindFile(AppDomain.CurrentDomain.BaseDirectory, "Longtail.sln", 1
 var libraryPath = Path.Combine(basePath, "lib");
 
 var longtailResult = await new PipelineBuilder<LongtailContext>()
+    .With<ValidatePreReqs>()
     .With<ReadWriteCurrentVersion>()
     .With<GetLongtailReleases>()
     .With<DownloadLongtailLibrary>()
