@@ -6,9 +6,18 @@
 
 This project generates cross platform C# bindings for Dan Engelbrecht longtail library. [Longtail](https://github.com/DanEngelbrecht/longtail).
 
-## Current status
 
-Version 0.3.0 of longtail
+## How to
+### BuildTool
+Run the entire build pipeline to sync with the latest version of Longtail. 
+Delete the LONGTAIL_VERSION file in the root folder of the repo to force the pipeline to run.
+```powershell
+.\build.ps1     # windows
+./build.sh      # mac/linux
+```
+
+## Current status
+Version 0.3.2 of longtail
 
 **Implemented**
 * Generates bindings for all structs, enums, functions, function pointers
@@ -23,7 +32,7 @@ Version 0.3.0 of longtail
 
 **Known issues**
 * Currently using type `ulong` for `size_t`. This works but it's not correct, it should be `nuint` (or `UIntPtr` in older versions of .NET)
-* Hardcoded paths for longtail.h, the goals is to either have it as a submodule(oh no...) or just specify a path when you run the CodeGen project. 
+* Hardcoded paths for longtail inside code gen (can be overriden with calling the project with arguments)
 
 Comments on function pointers might be a bit different from original. This happens because it binds the type to the parent.
 ```csharp
@@ -38,6 +47,9 @@ public delegate* unmanaged[Cdecl]<Longtail_BlockStoreAPI*, uint, ulong*, Longtai
 typedef int (*Longtail_BlockStore_PreflightGetFunc)(struct Longtail_BlockStoreAPI* block_store_api, uint32_t block_count, const TLongtail_Hash* block_hashes, struct Longtail_AsyncPreflightStartedAPI* optional_async_complete_api);
 ```
 ## Project structure
+
+#### src/BuildTool
+* Tool to update dll/so files and run the code gen on the latest version from github.
 
 #### src/CodeGen
 * Parser, bindings, type handling etc
