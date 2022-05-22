@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using CodeGen.Logging;
 using CodeGen.Syntax.Binding;
+using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Symbols;
 
 namespace CodeGen.CodeWriter;
@@ -12,25 +13,30 @@ internal record CSharpCode;
 
 internal record EnumCode(string Name, EnumMember[] Members) : CSharpCode;
 internal record EnumMember(string Name, string? Value = null);
-
 internal record StructCode(string Name, StructMember[] Members) : CSharpCode;
 internal record StructMember(string Name, string Type, string? Summary = null);
+internal record FixedStructMember(string Name, string Type, string Initializer) : StructMember(Name, Type);
 
 internal record FunctionCode(string Name, string ReturnType, Argument[] Arguments) : CSharpCode;
 internal record Argument(string Type, string Name);
 
 internal class CSharpCodeGen
 {
+    private List<EnumCode> _enums = new();
+
     public CSharpCode[] GenerateCode(BoundSyntaxNode[] nodes)
     {
         List<CSharpCode> _code = new();
 
+        _enums.Clear();
         foreach (var boundSyntaxNode in nodes)
         {
             switch (boundSyntaxNode)
             {
                 case BoundEnumDeclaration enumDecl:
-                    _code.Add(GenerateEnumCode(enumDecl));
+                    var enumCode = GenerateEnumCode(enumDecl);
+                    _code.Add(enumCode);
+                    _enums.Add(enumCode);
                     break;
                 case BoundStructDeclaration structDecl:
                     if (!structDecl.ForwardDeclaration)
@@ -74,12 +80,19 @@ internal class CSharpCodeGen
         return new FunctionCode(symbol.Name, TypeToString(symbol.ReturnType), arguments);
     }
 
-    private static CSharpCode GenerateStructCode(BoundStructDeclaration structDecl)
+    private CSharpCode GenerateStructCode(BoundStructDeclaration structDecl)
     {
         var members = structDecl.Type.Members
             .Select(m =>
             {
                 var type = TypeToString(m.Type);
+                if (m is ArrayStructMember array)
+                {
+                    // TODO: Find the type and bind it. (in previous classes)
+                    var initializer = ExpressionToString(array.Initializer);
+                    return new FixedStructMember(array.Name, type, initializer);
+                }
+
                 var summary = m.Type is FunctionPointerSymbol ? m.Type.ToString() : null;
                 return new StructMember(m.Name, type, summary);
             })
@@ -87,17 +100,37 @@ internal class CSharpCodeGen
         return new StructCode(structDecl.Type.Name, members);
     }
 
-   private static string TypeToString(Symbol symbol) =>
-        symbol switch
+    private string ExpressionToString(BoundExpression expression)
+    {
+        if (expression is BoundIdentifierExpression identifier)
         {
-            FunctionSymbol function => FunctionToDelegate(function),
-            StructTypeSymbol structType => structType.Name,
-            PointerTypeSymbol pointer => $"{TypeToString(pointer.Type)}*",
-            PrimitiveTypeSymbol primitive => PrimitiveToString(primitive),
-            TypeSymbol type => type.Name,
-            ConstSymbol constSymbol => TypeToString(constSymbol.Type), // const is not supported here in c#, lets just return the containing type
-            _ => throw new NotSupportedException($"{symbol.GetType().Name} is not supported in {nameof(TypeToString)}")
-        };
+            foreach (var enumCode in _enums)
+            {
+                foreach (var member in enumCode.Members)
+                {
+                    if (member.Name == identifier.Value)
+                    {
+                        return $"{enumCode.Name}.{member.Name}";
+                    }
+                }
+            }
+        }
+        throw new NotSupportedException($"only {nameof(BoundIdentifierExpression)} is currently supported.");
+    }
+
+
+
+    private static string TypeToString(Symbol symbol) =>
+         symbol switch
+         {
+             FunctionSymbol function => FunctionToDelegate(function),
+             StructTypeSymbol structType => structType.Name,
+             PointerTypeSymbol pointer => $"{TypeToString(pointer.Type)}*",
+             PrimitiveTypeSymbol primitive => PrimitiveToString(primitive),
+             TypeSymbol type => type.Name,
+             ConstSymbol constSymbol => TypeToString(constSymbol.Type), // const is not supported here in c#, lets just return the containing type
+             _ => throw new NotSupportedException($"{symbol.GetType().Name} is not supported in {nameof(TypeToString)}")
+         };
 
     private static string PrimitiveToString(PrimitiveTypeSymbol primitive) =>
         (primitive.Size, primitive.Unsigned) switch
@@ -131,7 +164,7 @@ internal class CSharpCodeGen
     }
 
 
-    private static CSharpCode GenerateEnumCode(BoundEnumDeclaration enumDecl)
+    private static EnumCode GenerateEnumCode(BoundEnumDeclaration enumDecl)
     {
         var members = enumDecl.Members
             .Select(m => m switch
