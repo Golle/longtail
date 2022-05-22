@@ -364,7 +364,7 @@ internal enum Longtail_BlockStoreAPI_StatU64_Enum
 }
 internal unsafe struct Longtail_BlockStore_Stats
 {
-    public ulong m_StatU64;
+    public fixed ulong m_StatU64[(int)Longtail_BlockStoreAPI_StatU64_Enum.Longtail_BlockStoreAPI_StatU64_Count];
 }
 internal unsafe struct Longtail_BlockStoreAPI
 {
