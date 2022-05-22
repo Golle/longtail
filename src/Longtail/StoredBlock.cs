@@ -4,8 +4,6 @@ public unsafe class StoredBlock : IDisposable
 {
     private Longtail_StoredBlock* _storedBlock;
     private readonly bool _owner;
-
-
     internal Longtail_StoredBlock* AsPointer() => _storedBlock;
     internal StoredBlock(Longtail_StoredBlock* storedBlock, bool owner = true)
     {
