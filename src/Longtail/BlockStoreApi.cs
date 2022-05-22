@@ -44,7 +44,7 @@ public unsafe class BlockStoreApi : IDisposable
         return new BlockstoreStats(stats);
     }
 
-    public Task<ErrorCodesEnum> Flush() =>
+    public Task Flush() =>
         Task.Run(() =>
         {
             using var flushApi = new AsyncFlushApi();
@@ -52,9 +52,12 @@ public unsafe class BlockStoreApi : IDisposable
             if (err == 0)
             {
                 flushApi.Wait();
-                return flushApi.Err;
+                err = (int)flushApi.Err;
             }
-            return (ErrorCodesEnum)err;
+            if (err != 0)
+            {
+                throw new LongtailException(nameof(BlockStoreApi), nameof(Flush), nameof(LongtailLibrary.Longtail_BlockStore_Flush), err);
+            }
         });
 
     public static BlockStoreApi MakeBlockStoreApi(IBlockstore blockstore)
