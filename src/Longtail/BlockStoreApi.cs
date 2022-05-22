@@ -185,8 +185,9 @@ public unsafe class BlockStoreApi : IDisposable
         if (result != null)
         {
             *outStats = result.Internal;
+            return 0;
         }
-        return 0;
+        return ErrorCodes.ENOTSUP;
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]

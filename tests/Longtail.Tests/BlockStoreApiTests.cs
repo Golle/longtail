@@ -50,4 +50,34 @@ internal class BlockStoreApiTests
 
         Assert.That(result, Is.EqualTo(ErrorCodesEnum.ENOMEM));
     }
+
+    [Test]
+    public void GetStats_NullStats_ThrowsException()
+    {
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+        _blockStore.GetStats().Returns((BlockstoreStats)null);
+
+        var result = Assert.Throws<LongtailException>(() => api.GetStats());
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Err, Is.EqualTo(ErrorCodes.ENOTSUP));
+    }
+
+
+    [TestCase(BlockStoreApiStats.Flush_Count)]
+    [TestCase(BlockStoreApiStats.GetExistingContent_RetryCount)]
+    [TestCase(BlockStoreApiStats.GetStoredBlock_FailCount)]
+    [TestCase(BlockStoreApiStats.PutStoredBlock_Chunk_Count)]
+    public void GetStats_WithStatus_ReturnStats(BlockStoreApiStats index)
+    {
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+        _blockStore.GetStats().Returns(new BlockstoreStats
+        {
+            [index] = 4
+        });
+
+        var result = api.GetStats();
+
+        Assert.That(result.Get(index), Is.EqualTo(4));
+    }
 }
