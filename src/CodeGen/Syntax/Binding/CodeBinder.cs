@@ -66,7 +66,7 @@ internal class CodeBinder
             // only added named enums (does not exist in longtail and its a c++ feature)
             _symbolLookupTable.AddType(enumType);
         }
-
+        
         // TODO(Jens): these values are not referenced anywhere in the longtail header file so we don't have to register them as types right now
         var boundMembers = statement
             .Members

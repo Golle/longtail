@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using CodeGen.Syntax.Symbols;
 
 namespace CodeGen.CodeWriter;
 
@@ -56,15 +57,24 @@ internal class FileOutput
         }
         builder.AppendLine($"internal unsafe struct {structCode.Name}");
         builder.AppendLine("{");
-        foreach (var (name, value, summary) in structCode.Members)
+        foreach (var member in structCode.Members)
         {
-            if (summary != null)
+            if (member.Summary != null)
             {
                 builder.AppendLine("\t/// <summary>");
-                builder.AppendLine($"\t/// {summary}");
+                builder.AppendLine($"\t/// {member.Summary}");
                 builder.AppendLine("\t/// </summary>");
             }
-            builder.AppendLine($"\tpublic {value} {name};");
+
+            if (member is FixedStructMember fixedMember)
+            {
+                builder.AppendLine($"\tpublic fixed {fixedMember.Type} {fixedMember.Name}[(int){fixedMember.Initializer}];");
+            }
+            else
+            {
+                builder.AppendLine($"\tpublic {member.Type} {member.Name};");
+            }
+
         }
         builder.AppendLine("}");
 
