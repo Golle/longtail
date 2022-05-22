@@ -194,6 +194,7 @@ public unsafe class BlockStoreApi : IDisposable
         var blockstoreApi = (BlockStoreAPIInternal*)api;
         if (blockstoreApi->Handle.IsAllocated)
         {
+            (blockstoreApi->Handle.Target as IBlockstore)?.OnDispose();
             blockstoreApi->Handle.Free();
         }
         LongtailLibrary.Longtail_Free(api);

@@ -14,9 +14,19 @@ internal class BlockStoreApiTests
     }
 
     [Test]
-    public async Task Flush_OnSuccess_CallFlushCallback()
+    public void Dispose_Always_CallOnDispose()
     {
         var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+     
+        api.Dispose();
+
+        _blockStore.Received(1).OnDispose();
+    }
+
+    [Test]
+    public async Task Flush_OnSuccess_CallFlushCallback()
+    {
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
 
         _blockStore
             .When(blockStore => blockStore.Flush(Arg.Any<Action<ErrorCodesEnum>>()))
@@ -28,7 +38,7 @@ internal class BlockStoreApiTests
     [Test]
     public void Flush_OnError_ThrowException()
     {
-        var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
 
         _blockStore
             .When(blockStore => blockStore.Flush(Arg.Any<Action<ErrorCodesEnum>>()))
@@ -37,6 +47,5 @@ internal class BlockStoreApiTests
         var result = Assert.CatchAsync<LongtailException>(async () => await api.Flush());
 
         Assert.That(result.Err, Is.EqualTo((int)ErrorCodesEnum.ENOMEM));
-
     }
 }

@@ -9,4 +9,5 @@ public interface IBlockstore
     ErrorCodesEnum PruneBlocks(ReadOnlySpan<ulong> blockKeepHashes, Action<uint, ErrorCodesEnum> asyncCompleteApi);
     BlockstoreStats? GetStats();
     ErrorCodesEnum Flush(Action<ErrorCodesEnum> asyncCompleteApi);
+    void OnDispose();
 }
