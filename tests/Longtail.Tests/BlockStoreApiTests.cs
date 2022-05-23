@@ -73,7 +73,6 @@ internal class BlockStoreApiTests
         Assert.That(result.Get(index), Is.EqualTo(4));
     }
 
-
     [Test]
     public void PruneBlocks_OnSuccess_ReturnPrunedBlocksCount()
     {
@@ -106,6 +105,76 @@ internal class BlockStoreApiTests
 
         Assert.That(result.Err, Is.EqualTo(ErrorCodes.ENOMEM));
     }
+
+
+    [Test]
+    public unsafe void GetExistingContent_OnSuccess_ReturnStoreIndex()
+    {
+        _blockStore.StoredIndex = new StoreIndex((Longtail_StoreIndex*)10);
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+
+        var storeIndex = api.GetExistingContent(ReadOnlySpan<ulong>.Empty, 0);
+
+        Assert.That(storeIndex, Is.Not.Null);
+    }
+
+    [Test]
+    public unsafe void GetExistingContent_OnSuccess_PassMinBlockUsagePercent()
+    {
+        _blockStore.StoredIndex = new StoreIndex((Longtail_StoreIndex*)10);
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+
+        api.GetExistingContent(ReadOnlySpan<ulong>.Empty, 1);
+
+        Assert.That(_blockStore.MinBlockUsagePercent, Is.EqualTo(1));
+    }
+
+    [Test]
+    public unsafe void GetExistingContent_OnSuccess_PassBlockHashes()
+    {
+        var blockHashes = new ulong[] { 1, 2, 3 };
+        _blockStore.StoredIndex = new StoreIndex((Longtail_StoreIndex*)10);
+        
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+
+        api.GetExistingContent(blockHashes, 1);
+        
+        Assert.That(_blockStore.BlockHashes, Is.EqualTo(blockHashes));
+    }
+
+    [Test]
+    public void GetExistingContent_OnErrro_ThrowException()
+    {
+        _blockStore.Err = ErrorCodesEnum.ENOMEM;
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+
+        var result = Assert.Catch<LongtailException>(() => api.GetExistingContent(ReadOnlySpan<ulong>.Empty, 0))!;
+
+        Assert.That(result.Err, Is.EqualTo(ErrorCodes.ENOMEM));
+    }
+
+
+    [Test]
+    public unsafe void GetStoredBlock_OnSuccess_ReturnStoredBlock()
+    {
+        _blockStore.StoredBlock = new StoredBlock((Longtail_StoredBlock*)10);
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+
+        var storedBlock = api.GetStoredBlock(0);
+
+        Assert.That(storedBlock, Is.Not.Null);
+    }
+
+    [Test]
+    public void CreateFSStorageApi_OnSuccess_ReturnStorageApi()
+    {
+        using var jobApi = JobApi.CreateBikeshedJobAPI(1);
+        using var storageApi = StorageApi.CreateFSStorageAPI();
+
+        using var api = BlockStoreApi.CreateFSBlockStoreApi(jobApi, storageApi, @"c:\tmp", null, false);
+
+        Assert.That(api, Is.Not.Null);
+    }
 }
 
 
@@ -115,8 +184,14 @@ internal class BlockStoreMock : IBlockstore
     public ErrorCodesEnum Err { get; set; }
     public ulong[] BlockKeepHashes { get; set; }
     public BlockstoreStats Stats { get; set; }
+    public StoredBlock StoredBlock { get; set; }
+    public StoreIndex StoredIndex { get; set; }
+    public ulong[] BlockHashes { get; private set; }
+    public uint MinBlockUsagePercent { get; private set; }
+    public ulong BlockHash { get; private set; }
     public bool Disposed { get; private set; }
     public bool Flushed { get; private set; }
+
 
     public ErrorCodesEnum PutStoredBlock(StoredBlock storedBlock, Action<ErrorCodesEnum> onCompleteCallback)
     {
@@ -130,12 +205,17 @@ internal class BlockStoreMock : IBlockstore
 
     public ErrorCodesEnum GetStoredBlock(ulong blockHash, Action<StoredBlock, ErrorCodesEnum> onComplete)
     {
-        throw new NotImplementedException();
+        BlockHash = blockHash;
+        onComplete(StoredBlock, Err);
+        return Err;
     }
 
     public ErrorCodesEnum GetExistingContentFunc(ReadOnlySpan<ulong> blockHashes, uint minBlockUsagePercent, Action<StoreIndex, ErrorCodesEnum> asyncCompleteApi)
     {
-        throw new NotImplementedException();
+        BlockHashes = blockHashes.ToArray();
+        MinBlockUsagePercent = minBlockUsagePercent;
+        asyncCompleteApi(StoredIndex, Err);
+        return Err;
     }
 
     public ErrorCodesEnum PruneBlocks(ReadOnlySpan<ulong> blockKeepHashes, Action<uint, ErrorCodesEnum> asyncCompleteApi)

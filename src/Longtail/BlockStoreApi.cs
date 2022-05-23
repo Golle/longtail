@@ -20,6 +20,8 @@ public unsafe class BlockStoreApi : IDisposable
         _blockStore = blockstoreApi;
     }
 
+    internal Longtail_BlockStoreAPI* AsPointer() => _blockStore;
+
     public ErrorCodesEnum PutStoredBlock(StoredBlock storedBlock /*, Longtail_AsyncPutStoredBlockAPI* async_complete_api*/)
     {
         //LongtailLibrary.Longtail_BlockStore_PutStoredBlock(_blockStore, storedBlock.AsPointer(), )
@@ -31,14 +33,40 @@ public unsafe class BlockStoreApi : IDisposable
         return ErrorCodesEnum.SUCCESS;
     }
 
-    public ErrorCodesEnum GetStoredBlock(ulong block_hash /*, Longtail_AsyncGetStoredBlockAPI* async_complete_api*/)
+    public StoredBlock? GetStoredBlock(ulong blockHash)
     {
-        return ErrorCodesEnum.SUCCESS;
+        using var storedBlockApi = new AsyncGetStoredBlockAPI();
+
+        var err = LongtailLibrary.Longtail_BlockStore_GetStoredBlock(_blockStore, blockHash, storedBlockApi);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_GetStoredBlock), err);
+        }
+        storedBlockApi.Wait();
+        if (storedBlockApi.Err != ErrorCodesEnum.SUCCESS)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_GetStoredBlock), storedBlockApi.Err);
+        }
+        return storedBlockApi.StoredBlock != null ? new StoredBlock(storedBlockApi.StoredBlock, false) : null;
     }
 
-    public ErrorCodesEnum GetExistingContent(uint chunk_count, ulong* chunk_hashes, uint min_block_usage_percent /*, Longtail_AsyncGetExistingContentAPI* async_complete_api*/)
+    public StoreIndex? GetExistingContent(ReadOnlySpan<ulong> chunkHashes, uint minBlockUsagePercent)
     {
-        return ErrorCodesEnum.SUCCESS;
+        using var contentApi = new AsyncGetExistingContentAPI();
+        fixed (ulong* pChunkHashes = chunkHashes)
+        {
+            var err = LongtailLibrary.Longtail_BlockStore_GetExistingContent(_blockStore, (uint)chunkHashes.Length, pChunkHashes, minBlockUsagePercent, contentApi);
+            if (err != 0)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_GetExistingContent), err);
+            }
+            contentApi.Wait();
+            if (contentApi.Err != ErrorCodesEnum.SUCCESS)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_AsyncGetExistingContent_OnComplete), contentApi.Err);
+            }
+            return contentApi.StoreIndex != null ? new StoreIndex(contentApi.StoreIndex, false) : null;
+        }
     }
 
     public uint PruneBlocks(ReadOnlySpan<ulong> blockKeepHashes)
@@ -85,6 +113,18 @@ public unsafe class BlockStoreApi : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_Flush), flushApi.Err);
         }
+    }
+
+    public static BlockStoreApi CreateFSBlockStoreApi(JobApi jobApi, StorageApi storageApi, string path, string? optionalExtension = null, bool enableFileMapping = false)
+    {
+        using var contentPath = new Utf8String(path);
+        using var fileExtension = optionalExtension != null ? new Utf8String(optionalExtension) : default;
+        var api = LongtailLibrary.Longtail_CreateFSBlockStoreAPI(jobApi.AsPointer(), storageApi.AsPointer(), contentPath, fileExtension, enableFileMapping ? 1 : 0);
+        if (api == null)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateFSBlockStoreAPI), ErrorCodesEnum.ENOMEM);
+        }
+        return new BlockStoreApi(api);
     }
 
     public static BlockStoreApi MakeBlockStoreApi(IBlockstore blockstore)

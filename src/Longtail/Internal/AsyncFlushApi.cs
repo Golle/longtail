@@ -50,6 +50,7 @@ internal unsafe class AsyncFlushApi : IDisposable
     {
         if (_flushApi != null)
         {
+            _waitHandle.Dispose();
             LongtailLibrary.Longtail_DisposeAPI(&_flushApi->FlushApi.m_API);
             _flushApi = null;
         }

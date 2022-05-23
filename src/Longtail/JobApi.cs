@@ -8,6 +8,7 @@ public unsafe class JobApi : IDisposable
         _jobApi = jobApi;
     }
 
+    internal Longtail_JobAPI* AsPointer() => _jobApi;
     public static JobApi CreateBikeshedJobAPI(uint workerCount, int workerPriority = -1)
     {
         var jobApi = LongtailLibrary.Longtail_CreateBikeshedJobAPI(workerCount, workerPriority);
