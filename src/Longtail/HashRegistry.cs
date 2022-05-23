@@ -16,7 +16,7 @@ public unsafe class HashRegistry : IDisposable
         var err = LongtailLibrary.Longtail_GetHashRegistry_GetHashAPI(_registry, hashType, &hashApi);
         if (err != 0)
         {
-            throw new LongtailException(nameof(HashRegistry), nameof(GetHashApi), nameof(LongtailLibrary.Longtail_GetHashRegistry_GetHashAPI), err);
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_GetHashRegistry_GetHashAPI), err);
         }
         return hashApi != null ? new HashApi(hashApi, owner:false) : null;
     }

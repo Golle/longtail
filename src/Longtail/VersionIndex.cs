@@ -30,7 +30,7 @@ public unsafe class VersionIndex : IDisposable
             var err = LongtailLibrary.Longtail_ReadVersionIndexFromBuffer(pBuffer, (ulong)buffer.Length, &versionIndex);
             if (err != 0)
             {
-                throw new LongtailException(nameof(VersionIndex), nameof(ReadFromBuffer), nameof(LongtailLibrary.Longtail_ReadVersionIndexFromBuffer), err);
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_ReadVersionIndexFromBuffer), err);
             }
             return versionIndex != null ? new VersionIndex(versionIndex) : null;
         }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Longtail.Internal;
 
@@ -6,14 +7,7 @@ namespace Longtail;
 
 public static class BlockStoreAsyncApiExtensions
 {
-    public static Task FlushAsync(this BlockStoreApi api) => Task.Run(() =>
-    {
-        var err = api.Flush();
-        if (err != ErrorCodesEnum.SUCCESS)
-        {
-            throw new LongtailException(nameof(BlockStoreApi), nameof(FlushAsync), nameof(LongtailLibrary.Longtail_BlockStore_Flush), (int)err);
-        }
-    });
+    public static Task FlushAsync(this BlockStoreApi api) => Task.Run(api.Flush);
 }
 
 
@@ -47,9 +41,23 @@ public unsafe class BlockStoreApi : IDisposable
         return ErrorCodesEnum.SUCCESS;
     }
 
-    public ErrorCodesEnum PruneBlocks(uint block_keep_count, ulong* block_keep_hashes /*, Longtail_AsyncPruneBlocksAPI* async_complete_api*/)
+    public uint PruneBlocks(ReadOnlySpan<ulong> blockKeepHashes)
     {
-        return ErrorCodesEnum.SUCCESS;
+        using var pruneApi = new AsyncPruneBlocksAPI();
+        fixed (ulong* pBlockHashes = blockKeepHashes)
+        {
+            var err = LongtailLibrary.Longtail_BlockStore_PruneBlocks(_blockStore, (uint)blockKeepHashes.Length, pBlockHashes, pruneApi);
+            if (err != 0)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_PruneBlocks), err);
+            }
+            pruneApi.Wait();
+            if (pruneApi.Err != ErrorCodesEnum.SUCCESS)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_AsyncPruneBlocks_OnComplete), err);
+            }
+            return pruneApi.PrunedBlockCount;
+        }
     }
 
     public BlockstoreStats GetStats()
@@ -58,22 +66,25 @@ public unsafe class BlockStoreApi : IDisposable
         var err = LongtailLibrary.Longtail_BlockStore_GetStats(_blockStore, &stats);
         if (err != 0)
         {
-            throw new LongtailException(nameof(BlockStoreApi), nameof(GetStats), nameof(LongtailLibrary.Longtail_BlockStore_GetStats), err);
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_GetStats), err);
         }
 
         return new BlockstoreStats(stats);
     }
 
-    public ErrorCodesEnum Flush()
+    public void Flush()
     {
         using var flushApi = new AsyncFlushApi();
         var err = LongtailLibrary.Longtail_BlockStore_Flush(_blockStore, flushApi);
         if (err != 0)
         {
-            return (ErrorCodesEnum)err;
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_Flush), err);
         }
         flushApi.Wait();
-        return flushApi.Err;
+        if (flushApi.Err != ErrorCodesEnum.SUCCESS)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_Flush), flushApi.Err);
+        }
     }
 
     public static BlockStoreApi MakeBlockStoreApi(IBlockstore blockstore)
@@ -82,7 +93,7 @@ public unsafe class BlockStoreApi : IDisposable
         var mem = LongtailLibrary.Longtail_Alloc(name, (ulong)sizeof(BlockStoreAPIInternal));
         if (mem == null)
         {
-            throw new LongtailException(nameof(BlockStoreApi), nameof(MakeBlockStoreApi), nameof(LongtailLibrary.Longtail_Alloc), ErrorCodes.ENOMEM);
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_Alloc), ErrorCodes.ENOMEM);
         }
         mem = LongtailLibrary.Longtail_MakeBlockStoreAPI(
             mem,
@@ -97,7 +108,7 @@ public unsafe class BlockStoreApi : IDisposable
         );
         if (mem == null)
         {
-            throw new LongtailException(nameof(BlockStoreApi), nameof(MakeBlockStoreApi), nameof(LongtailLibrary.Longtail_MakeBlockStoreAPI), ErrorCodes.ENOMEM);
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_MakeBlockStoreAPI), ErrorCodes.ENOMEM);
         }
 
         var blockstoreApi = (BlockStoreAPIInternal*)mem;
@@ -133,10 +144,10 @@ public unsafe class BlockStoreApi : IDisposable
         var result = GetInterface(blockStoreApi)
             .PreflightGet(new ReadOnlySpan<ulong>(blockHashes, (int)blockCount), err =>
             {
+                // NOTE(Jens): not sure if you're allowed to modify the contents of blockhashes or change the amount. if that's the case this wont work.
                 if (optionalAsyncCompleteApi != null)
                 {
-                    // NOTE(Jens): not sure if you're allowed to modify the contents of blockhashes or change the amount. if that's the case this wont work.
-                    optionalAsyncCompleteApi->OnComplete(optionalAsyncCompleteApi, blockCount, blockHashes, (int)err);
+                    LongtailLibrary.Longtail_AsyncPreflightStarted_OnComplete(optionalAsyncCompleteApi, blockCount, blockHashes, (int)err);
                 }
             });
         return (int)result;
@@ -149,7 +160,7 @@ public unsafe class BlockStoreApi : IDisposable
             .GetStoredBlock(blockHash, (storedBlock, err) =>
             {
                 var storedBlockApi = storedBlock != null ? storedBlock.AsPointer() : null;
-                asyncCompleteApi->OnComplete(asyncCompleteApi, storedBlockApi, (int)err);
+                LongtailLibrary.Longtail_AsyncGetStoredBlock_OnComplete(asyncCompleteApi, storedBlockApi, (int)err);
             });
         return (int)result;
     }
@@ -161,7 +172,7 @@ public unsafe class BlockStoreApi : IDisposable
             .GetExistingContentFunc(new ReadOnlySpan<ulong>(chunkHashes, (int)chunkCount), minBlockUsagePercent, (storeIndex, err) =>
             {
                 var storeIndexPointer = storeIndex != null ? storeIndex.AsPointer() : null;
-                asyncCompleteApi->OnComplete(asyncCompleteApi, storeIndexPointer, (int)err);
+                LongtailLibrary.Longtail_AsyncGetExistingContent_OnComplete(asyncCompleteApi, storeIndexPointer, (int)err);
             });
         return (int)result;
     }
@@ -170,9 +181,9 @@ public unsafe class BlockStoreApi : IDisposable
     private static int PruneBlocksFunc(Longtail_BlockStoreAPI* blockStoreApi, uint blockKeepCount, ulong* blockKeepHashes, Longtail_AsyncPruneBlocksAPI* asyncCompleteApi)
     {
         var result = GetInterface(blockStoreApi)
-            .PruneBlocks(new ReadOnlySpan<ulong>(blockKeepHashes, (int)blockKeepHashes), (prunedBlockCount, err) =>
+            .PruneBlocks(new ReadOnlySpan<ulong>(blockKeepHashes, (int)blockKeepCount), (prunedBlockCount, err) =>
             {
-                asyncCompleteApi->OnComplete(asyncCompleteApi, prunedBlockCount, (int)err);
+                LongtailLibrary.Longtail_AsyncPruneBlocks_OnComplete(asyncCompleteApi, prunedBlockCount, (int)err);
             });
         return (int)result;
     }
@@ -194,7 +205,7 @@ public unsafe class BlockStoreApi : IDisposable
     private static int FlushFunc(Longtail_BlockStoreAPI* blockStoreApi, Longtail_AsyncFlushAPI* asyncCompleteApi)
     {
         var result = GetInterface(blockStoreApi)
-            .Flush(err => asyncCompleteApi->OnComplete(asyncCompleteApi, (int)err));
+            .Flush(err => LongtailLibrary.Longtail_AsyncFlush_OnComplete(asyncCompleteApi, (int)err));
         return (int)result;
     }
 

@@ -16,12 +16,12 @@ public unsafe class ProgressApi : IDisposable
         var mem = LongtailLibrary.Longtail_Alloc(name, (ulong)sizeof(ProgressApiInternal));
         if (mem == null)
         {
-            throw new LongtailException(nameof(ProgressApi), "ctor", nameof(LongtailLibrary.Longtail_Alloc), ErrorCodes.ENOMEM);
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_Alloc), ErrorCodes.ENOMEM);
         }
         var result = LongtailLibrary.Longtail_MakeProgressAPI(mem, &DisposeFunc, &OnProgressFunc);
         if (result == null)
         {
-            throw new LongtailException(nameof(ProgressApi), "ctor", nameof(LongtailLibrary.Longtail_MakeProgressAPI), ErrorCodes.ENOMEM);
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_MakeProgressAPI), ErrorCodes.ENOMEM);
         }
 
         _progressApi = (ProgressApiInternal*)mem;

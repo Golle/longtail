@@ -13,7 +13,7 @@ public unsafe class JobApi : IDisposable
         var jobApi = LongtailLibrary.Longtail_CreateBikeshedJobAPI(workerCount, workerPriority);
         if (jobApi == null)
         {
-            throw new LongtailException(nameof(JobApi), nameof(CreateBikeshedJobAPI), nameof(LongtailLibrary.Longtail_CreateBikeshedJobAPI), -1);
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateBikeshedJobAPI), -1);
         }
         return new(jobApi);
     }
