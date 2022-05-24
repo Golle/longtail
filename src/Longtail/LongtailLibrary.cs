@@ -3,6 +3,7 @@
 namespace Longtail;
 internal partial class LongtailLibrary
 {
+    // NOTE(Jens): since the DLL will be pre-built this will only work in a dev setup with the source code. We need a way to decide which dll to load based on a bool
 #if DEBUG
     private const string DllNameWindows = "longtail_win32_x64_debug.dll";
     private const string DllNameLinux = "longtail_linux_x64_debug.so";

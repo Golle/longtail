@@ -1,7 +1,4 @@
-﻿using System.Net.Http.Headers;
-using Longtail.Internal;
-
-namespace Longtail;
+﻿namespace Longtail;
 
 public unsafe class VersionIndex : IDisposable
 {
@@ -15,12 +12,12 @@ public unsafe class VersionIndex : IDisposable
     public ulong* ChunkHashes => LongtailLibrary.Longtail_VersionIndex_GetChunkHashes(_versionIndex);
     public uint* ChunkSizes => LongtailLibrary.Longtail_VersionIndex_GetChunkSizes(_versionIndex);
     public uint* ChunkTags => LongtailLibrary.Longtail_VersionIndex_GetChunkTags(_versionIndex);
+    internal Longtail_VersionIndex* AsPointer() => _versionIndex;
 
-    private VersionIndex(Longtail_VersionIndex* versionIndex)
+    internal VersionIndex(Longtail_VersionIndex* versionIndex)
     {
         _versionIndex = versionIndex;
     }
-
 
     public static VersionIndex? ReadFromBuffer(ReadOnlySpan<byte> buffer)
     {
