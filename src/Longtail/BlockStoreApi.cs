@@ -1,15 +1,8 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Longtail.Internal;
 
 namespace Longtail;
-
-public static class BlockStoreAsyncApiExtensions
-{
-    public static Task FlushAsync(this BlockStoreApi api) => Task.Run(api.Flush);
-}
-
 
 public unsafe class BlockStoreApi : IDisposable
 {
@@ -22,15 +15,37 @@ public unsafe class BlockStoreApi : IDisposable
 
     internal Longtail_BlockStoreAPI* AsPointer() => _blockStore;
 
-    public ErrorCodesEnum PutStoredBlock(StoredBlock storedBlock /*, Longtail_AsyncPutStoredBlockAPI* async_complete_api*/)
+    public void PutStoredBlock(StoredBlock storedBlock)
     {
-        //LongtailLibrary.Longtail_BlockStore_PutStoredBlock(_blockStore, storedBlock.AsPointer(), )
-        return ErrorCodesEnum.SUCCESS;
+        using var storedBlockApi = new AsyncPutStoredBlockAPI();
+        var err = LongtailLibrary.Longtail_BlockStore_PutStoredBlock(_blockStore, storedBlock.AsPointer(), storedBlockApi);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_PutStoredBlock), err);
+        }
+        storedBlockApi.Wait();
+        if (storedBlockApi.Err != ErrorCodesEnum.SUCCESS)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_AsyncPutStoredBlock_OnComplete), storedBlockApi.Err);
+        }
     }
 
-    public ErrorCodesEnum PreflightGet(uint chunk_count, ulong* chunk_hashes /*, Longtail_AsyncPreflightStartedAPI* optional_async_complete_api*/)
+    public void PreflightGet(ReadOnlySpan<ulong> chunkHashes)
     {
-        return ErrorCodesEnum.SUCCESS;
+        using var preflightApi = new AsyncPreflightStartedAPI();
+        fixed (ulong* pChunkHashes = chunkHashes)
+        {
+            var err = LongtailLibrary.Longtail_BlockStore_PreflightGet(_blockStore, (uint)chunkHashes.Length, pChunkHashes, preflightApi);
+            if (err != 0)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_BlockStore_PreflightGet), err);
+            }
+            preflightApi.Wait();
+            if (preflightApi.Err != ErrorCodesEnum.SUCCESS)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_AsyncPreflightStarted_OnComplete), preflightApi.Err);
+            }
+        }
     }
 
     public StoredBlock? GetStoredBlock(ulong blockHash)
