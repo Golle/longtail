@@ -1,4 +1,6 @@
-﻿namespace Longtail;
+﻿using Longtail.Internal;
+
+namespace Longtail;
 
 public unsafe class VersionIndex : IDisposable
 {
@@ -48,6 +50,44 @@ public unsafe class VersionIndex : IDisposable
         //}
     }
 
+    public static VersionIndex? Create(
+        string rootPath, 
+        StorageApi storageApi, 
+        HashApi hashApi, 
+        ChunkerApi chunkerApi, 
+        JobApi jobApi, 
+        FileInfos fileInfos, 
+        uint targetChunkSize, 
+        bool enableFileMap, 
+        ProgressApi? progressApi = null, 
+        CancelApi? cancelApi = null, 
+        CancelToken? cancelToken = null)
+    {
+        using var rootPathUtf8 = new Utf8String(rootPath);
+
+        Longtail_VersionIndex* versionIndex;
+        var err = LongtailLibrary.Longtail_CreateVersionIndex(
+            storageApi.AsPointer(),
+            hashApi.AsPointer(),
+            chunkerApi.AsPointer(),
+            jobApi.AsPointer(),
+            progressApi != null ? progressApi.AsPointer() : null,
+            cancelApi != null ? cancelApi.AsPointer() : null,
+            cancelToken != null ? cancelToken.AsPointer() : null,
+            rootPathUtf8,
+            fileInfos.AsPointer(),
+            null,
+            targetChunkSize,
+            enableFileMap ? 1 : 0,
+            &versionIndex
+        );
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_ReadVersionIndexFromBuffer), err);
+        }
+        return versionIndex != null ? new VersionIndex(versionIndex) : null;
+    }
+
     public void Dispose()
     {
         if (_versionIndex != null)
@@ -56,6 +96,26 @@ public unsafe class VersionIndex : IDisposable
             _versionIndex = null;
         }
     }
+}
+
+public unsafe class CancelToken
+{
+    private Longtail_CancelAPI_CancelToken* _token;
+
+    // NOTE(Jens): can this be replaced by CancellationToken ?
+    internal Longtail_CancelAPI_CancelToken* AsPointer() => _token;
+}
+
+public unsafe class CancelApi
+{
+    private Longtail_CancelAPI* _cancelApi;
+    internal Longtail_CancelAPI* AsPointer() => _cancelApi;
+}
+
+public unsafe class ChunkerApi
+{
+    private Longtail_ChunkerAPI* _chunkerApi;
+    internal Longtail_ChunkerAPI* AsPointer() => _chunkerApi;
 }
 
 public interface IStorageApi

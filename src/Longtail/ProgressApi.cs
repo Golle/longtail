@@ -8,7 +8,7 @@ public unsafe class ProgressApi : IDisposable
 {
     private readonly Action<(uint DoneCount, uint TotalCount)> _callback;
     private ProgressApiInternal* _progressApi;
-
+    internal Longtail_ProgressAPI* AsPointer() => (Longtail_ProgressAPI*)_progressApi;
     public ProgressApi(Action<(uint DoneCount, uint TotalCount)> callback)
     {
         _callback = callback;

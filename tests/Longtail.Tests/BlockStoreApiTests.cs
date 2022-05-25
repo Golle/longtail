@@ -259,7 +259,7 @@ internal class BlockStoreMock : IBlockstore
         return Err;
     }
 
-    public ErrorCodesEnum GetExistingContentFunc(ReadOnlySpan<ulong> blockHashes, uint minBlockUsagePercent, Action<StoreIndex, ErrorCodesEnum> asyncCompleteApi)
+    public ErrorCodesEnum GetExistingContent(ReadOnlySpan<ulong> blockHashes, uint minBlockUsagePercent, Action<StoreIndex, ErrorCodesEnum> asyncCompleteApi)
     {
         BlockHashes = blockHashes.ToArray();
         MinBlockUsagePercent = minBlockUsagePercent;

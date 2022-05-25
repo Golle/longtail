@@ -15,6 +15,8 @@ public unsafe class BlockStoreApi : IDisposable
 
     internal Longtail_BlockStoreAPI* AsPointer() => _blockStore;
 
+    // NOTE(Jens): most of these methods have an optional async API, we make it mandatory. This is not the way they should be implemented.
+    // NOTE(Jens): These will most likely never (or rarely) be called by users of the lib, so we might not need them at all (make them internal and use for testing only?)
     public void PutStoredBlock(StoredBlock storedBlock)
     {
         using var storedBlockApi = new AsyncPutStoredBlockAPI();
@@ -224,7 +226,7 @@ public unsafe class BlockStoreApi : IDisposable
     private static int GetExistingContentFunc(Longtail_BlockStoreAPI* blockStoreApi, uint chunkCount, ulong* chunkHashes, uint minBlockUsagePercent, Longtail_AsyncGetExistingContentAPI* asyncCompleteApi)
     {
         var result = GetInterface(blockStoreApi)
-            .GetExistingContentFunc(new ReadOnlySpan<ulong>(chunkHashes, (int)chunkCount), minBlockUsagePercent, (storeIndex, err) =>
+            .GetExistingContent(new ReadOnlySpan<ulong>(chunkHashes, (int)chunkCount), minBlockUsagePercent, (storeIndex, err) =>
             {
                 var storeIndexPointer = storeIndex != null ? storeIndex.AsPointer() : null;
                 LongtailLibrary.Longtail_AsyncGetExistingContent_OnComplete(asyncCompleteApi, storeIndexPointer, (int)err);
