@@ -3,6 +3,7 @@
 public sealed unsafe class VersionDiff : IDisposable
 {
     private Longtail_VersionDiff* _versionDiff;
+    internal Longtail_VersionDiff* AsPointer() => _versionDiff;
     internal VersionDiff(Longtail_VersionDiff* versionDiff)
     {
         _versionDiff = versionDiff;
