@@ -211,7 +211,7 @@ internal class BlockStoreApiTests
     }
 
     [Test]
-    public void CreateFSStorageApi_OnSuccess_ReturnStorageApi()
+    public void CreateFSStorageApi_OnSuccess_ReturnStoreApi()
     {
         using var jobApi = JobApi.CreateBikeshedJobAPI(1);
         using var storageApi = StorageApi.CreateFSStorageAPI();
@@ -219,6 +219,68 @@ internal class BlockStoreApiTests
         using var api = BlockStoreApi.CreateFSBlockStoreApi(jobApi, storageApi, Path.GetTempPath(), null, false);
 
         Assert.That(api, Is.Not.Null);
+    }
+
+    [Test]
+    public unsafe void CreateArchiveBlockStore_OnSuccess_ReturnStoreApi()
+    {
+        // TODO(Jens): implement this test when we can create a Storeindex (either from code or from file)
+        //using var storageApi = StorageApi.CreateFSStorageAPI();
+        //using var archiveIndex = ArchiveIndex.CreateArchiveIndex(new StoreIndex((Longtail_StoreIndex*)1, false), new VersionIndex((Longtail_VersionIndex*)2));
+
+        //using var result = BlockStoreApi.CreateArchiveBlockStore(Directory.GetCurrentDirectory(), storageApi, archiveIndex, false, false);
+
+        //Assert.That(result, Is.Not.Null);
+    }
+
+    [Test]
+    public void CreateCacheBlockStoreAPI_OnSuccess_ReturnStoreApi()
+    {
+        using var jobApi = JobApi.CreateBikeshedJobAPI(1);
+        using var fileStorage = StorageApi.CreateFSStorageAPI();
+        using var localApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
+        using var remoteApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
+        
+        using var result = BlockStoreApi.CreateCacheBlockStoreAPI(jobApi, localApi, remoteApi);
+
+        Assert.That(result, Is.Not.Null);
+    }
+
+    [Test]
+    public void CreateCompressBlockStoreAPI_OnSuccess_ReturnStoreApi()
+    {
+        using var jobApi = JobApi.CreateBikeshedJobAPI(1);
+        using var fileStorage = StorageApi.CreateFSStorageAPI();
+        using var localApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
+        using var compressionRegistry = CompressionRegistry.CreateFullCompressionRegistry()!;
+
+        using var result = BlockStoreApi.CreateCompressBlockStoreAPI(localApi, compressionRegistry);
+
+        Assert.That(result, Is.Not.Null);
+    }
+
+    [Test]
+    public void CreateLRUBlockStoreAPI_OnSuccess_ReturnStoreApi()
+    {
+        using var jobApi = JobApi.CreateBikeshedJobAPI(1);
+        using var fileStorage = StorageApi.CreateFSStorageAPI();
+        using var localApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
+
+        using var result = BlockStoreApi.CreateLRUBlockStoreAPI(localApi, 32);
+
+        Assert.That(result, Is.Not.Null);
+    } 
+    
+    [Test]
+    public void CreateShareBlockStoreAPI_OnSuccess_ReturnStoreApi()
+    {
+        using var jobApi = JobApi.CreateBikeshedJobAPI(1);
+        using var fileStorage = StorageApi.CreateFSStorageAPI();
+        using var localApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
+
+        using var result = BlockStoreApi.CreateShareBlockStoreAPI(localApi);
+
+        Assert.That(result, Is.Not.Null);
     }
 }
 

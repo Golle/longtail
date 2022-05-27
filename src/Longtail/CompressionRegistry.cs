@@ -1,11 +1,9 @@
-﻿using System.ComponentModel;
-
-namespace Longtail;
+﻿namespace Longtail;
 
 public unsafe class CompressionRegistry : IDisposable
 {
     private Longtail_CompressionRegistryAPI* _api;
-
+    internal Longtail_CompressionRegistryAPI* AsPointer() => _api;
     internal CompressionRegistry(Longtail_CompressionRegistryAPI* api)
     {
         _api = api;
@@ -13,6 +11,7 @@ public unsafe class CompressionRegistry : IDisposable
 
     public static ulong GetCompressionRegistryAPISize() => LongtailLibrary.Longtail_GetCompressionAPISize();
     public static CompressionRegistry? CreateDefaultCompressionRegistry() => throw new NotImplementedException("This function has not been implemented yet, it might not be needed.");
+
     public static CompressionRegistry? CreateFullCompressionRegistry()
     {
         var api = LongtailLibrary.Longtail_CreateFullCompressionRegistry();
