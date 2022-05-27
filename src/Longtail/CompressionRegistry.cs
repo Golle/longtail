@@ -30,11 +30,14 @@ public unsafe class CompressionRegistry : IDisposable
         Longtail_CompressionAPI* compressionApi;
         uint settingsId;
         var err = LongtailLibrary.Longtail_GetCompressionRegistry_GetCompressionAPI(_api, compressionType, &compressionApi, &settingsId);
+        if (err == ErrorCodes.ENOENT)
+        {
+            return null;
+        }
         if (err != 0)
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_GetCompressionRegistry_GetCompressionAPI), err);
         }
-
         return compressionApi != null ? new CompressionApi(compressionApi, settingsId, false) : null;
     }
 
