@@ -150,28 +150,3 @@ public unsafe class VersionIndex : IDisposable
         }
     }
 }
-
-public unsafe class CancelToken
-{
-    private Longtail_CancelAPI_CancelToken* _token;
-
-    // NOTE(Jens): can this be replaced by CancellationToken ?
-    internal Longtail_CancelAPI_CancelToken* AsPointer() => _token;
-}
-
-public unsafe class CancelApi
-{
-    private Longtail_CancelAPI* _cancelApi;
-    internal Longtail_CancelAPI* AsPointer() => _cancelApi;
-}
-
-public unsafe class ChunkerApi
-{
-    private Longtail_ChunkerAPI* _chunkerApi;
-    internal Longtail_ChunkerAPI* AsPointer() => _chunkerApi;
-}
-
-public interface IStorageApi
-{
-    // TODO: Implement a safe version of the API
-}
