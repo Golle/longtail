@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using CodeGen.Logging;
 using CodeGen.Syntax.Binding;
-using CodeGen.Syntax.Expressions;
 using CodeGen.Syntax.Symbols;
 
 namespace CodeGen.CodeWriter;

@@ -12,6 +12,23 @@ public unsafe class HashApi : IDisposable
         _owner = owner;
     }
 
+    public static HashApi? CreateBlake2HashAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateBlake2HashAPI();
+        return api != null ? new HashApi(api) : null;
+    }
+
+    public static HashApi? CreateBlake3HashAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateBlake3HashAPI();
+        return api != null ? new HashApi(api) : null;
+    }
+    public static HashApi? CreateMeowHashAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateMeowHashAPI();
+        return api != null ? new HashApi(api) : null;
+    }
+
     public void Dispose()
     {
         if (_hashApi != null && _owner)

@@ -20,6 +20,23 @@ public unsafe class CompressionApi : IDisposable
         return api != null ? new CompressionApi(api, settings) : null;
     }
 
+    public static CompressionApi? CreateBrotliCompressionAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateBrotliCompressionAPI();
+        return api != null ? new CompressionApi(api, 0) : null;
+    }
+    public static CompressionApi? CreateLZ4CompressionAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateLZ4CompressionAPI();
+        return api != null ? new CompressionApi(api, 0) : null;
+    }
+
+    public static CompressionApi? CreateZStdCompressionAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateZStdCompressionAPI();
+        return api != null ? new CompressionApi(api, 0) : null;
+    }
+
     public static CompressionApi? CreateForLZ4(uint compressionType)
     {
         uint settings;
@@ -33,6 +50,8 @@ public unsafe class CompressionApi : IDisposable
         var api = LongtailLibrary.Longtail_CompressionRegistry_CreateForZstd(compressionType, &settings);
         return api != null ? new CompressionApi(api, settings) : null;
     }
+
+
 
     public void Dispose()
     {

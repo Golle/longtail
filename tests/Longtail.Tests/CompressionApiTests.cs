@@ -19,7 +19,7 @@ internal class CompressionApiTests
 
         Assert.That(api, Is.Null);
     }
-    
+
     [Test]
     public void CreateForLZ4_NoCompressionType_ReturnNull()
     {
@@ -35,7 +35,7 @@ internal class CompressionApiTests
 
         Assert.That(api, Is.Not.Null);
     }
-    
+
     [TestCaseSource(nameof(GetBrotliCompressionTypes))]
     public void CreateForBrotli_WithCompressionType_SetSettingsId(uint compressionType)
     {
@@ -74,6 +74,28 @@ internal class CompressionApiTests
         using var api = CompressionApi.CreateForLZ4(CompressionTypes.LZ4DefaultQuality)!;
 
         Assert.That(api.SettingsId, Is.EqualTo(CompressionTypes.LZ4DefaultQuality));
+    }
+
+    [Test]
+    public void CreateBrotliCompressionAPI_OnSuccess_ReturnCompressionApi()
+    {
+        using var api = CompressionApi.CreateBrotliCompressionAPI();
+
+        Assert.That(api, Is.Not.Null);
+    }
+    [Test]
+    public void CreateZStdCompressionAPI_OnSuccess_ReturnCompressionApi()
+    {
+        using var api = CompressionApi.CreateZStdCompressionAPI();
+
+        Assert.That(api, Is.Not.Null);
+    }
+    [Test]
+    public void CreateLZ4CompressionAPI_OnSuccess_ReturnCompressionApi()
+    {
+        using var api = CompressionApi.CreateLZ4CompressionAPI();
+
+        Assert.That(api, Is.Not.Null);
     }
 
     private static IEnumerable<uint> GetZStdCompressionTypes()

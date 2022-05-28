@@ -28,6 +28,12 @@ public unsafe class ProgressApi : IDisposable
         _progressApi->Handle = GCHandle.Alloc(this);
     }
 
+    public static ProgressApi? CreateRateLimitedProgress(uint percentRateLimit)
+    {
+        // NOTE(Jens): this create a new ProgressAPi with longtail alloc and a fixed size. So to use this we need to know the size of that struct, allocate new memory + GCHandle size and copy over the bytes and free the old one.
+        throw new NotImplementedException("Not supported yet. Read comment in the code.");
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void OnProgress(uint totalCount, uint doneCount)
         => LongtailLibrary.Longtail_Progress_OnProgress((Longtail_ProgressAPI*)_progressApi, totalCount, doneCount);
