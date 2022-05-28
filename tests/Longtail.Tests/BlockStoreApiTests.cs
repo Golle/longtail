@@ -214,7 +214,7 @@ internal class BlockStoreApiTests
     public void CreateFSStorageApi_OnSuccess_ReturnStoreApi()
     {
         using var jobApi = JobApi.CreateBikeshedJobAPI(1);
-        using var storageApi = StorageApi.CreateFSStorageAPI();
+        using var storageApi = StorageApi.CreateFSStorageAPI()!;
 
         using var api = BlockStoreApi.CreateFSBlockStoreApi(jobApi, storageApi, Path.GetTempPath(), null, false);
 
@@ -237,7 +237,7 @@ internal class BlockStoreApiTests
     public void CreateCacheBlockStoreAPI_OnSuccess_ReturnStoreApi()
     {
         using var jobApi = JobApi.CreateBikeshedJobAPI(1);
-        using var fileStorage = StorageApi.CreateFSStorageAPI();
+        using var fileStorage = StorageApi.CreateFSStorageAPI()!;
         using var localApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
         using var remoteApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
         
@@ -250,7 +250,7 @@ internal class BlockStoreApiTests
     public void CreateCompressBlockStoreAPI_OnSuccess_ReturnStoreApi()
     {
         using var jobApi = JobApi.CreateBikeshedJobAPI(1);
-        using var fileStorage = StorageApi.CreateFSStorageAPI();
+        using var fileStorage = StorageApi.CreateFSStorageAPI()!;
         using var localApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
         using var compressionRegistry = CompressionRegistry.CreateFullCompressionRegistry()!;
 
@@ -263,7 +263,7 @@ internal class BlockStoreApiTests
     public void CreateLRUBlockStoreAPI_OnSuccess_ReturnStoreApi()
     {
         using var jobApi = JobApi.CreateBikeshedJobAPI(1);
-        using var fileStorage = StorageApi.CreateFSStorageAPI();
+        using var fileStorage = StorageApi.CreateFSStorageAPI()!;
         using var localApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
 
         using var result = BlockStoreApi.CreateLRUBlockStoreAPI(localApi, 32);
@@ -275,7 +275,7 @@ internal class BlockStoreApiTests
     public void CreateShareBlockStoreAPI_OnSuccess_ReturnStoreApi()
     {
         using var jobApi = JobApi.CreateBikeshedJobAPI(1);
-        using var fileStorage = StorageApi.CreateFSStorageAPI();
+        using var fileStorage = StorageApi.CreateFSStorageAPI()!;
         using var localApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fileStorage, Directory.GetCurrentDirectory())!;
 
         using var result = BlockStoreApi.CreateShareBlockStoreAPI(localApi);

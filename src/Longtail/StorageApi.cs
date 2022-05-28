@@ -10,15 +10,16 @@ public unsafe class StorageApi : IDisposable
     }
 
     internal Longtail_StorageAPI* AsPointer() => _api;
-
-    public static StorageApi CreateFSStorageAPI()
+    public static StorageApi? CreateFSStorageAPI()
     {
         var api = LongtailLibrary.Longtail_CreateFSStorageAPI();
-        if (api == null)
-        {
-            throw new OutOfMemoryException();
-        }
-        return new(api);
+        return api != null ? new StorageApi(api) : null;
+    }
+
+    public static StorageApi? CreateInMemoryStorageAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateInMemStorageAPI();
+        return api != null ? new StorageApi(api) : null;
     }
 
     public void Dispose()
