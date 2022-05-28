@@ -22,7 +22,7 @@ internal class LongtailLogTests
     public void SetLogCallback_DebugLevel_CallLogCallback()
     {
         // TODO(Jens): Add better tests for logging if needed. This just makes sure we get a callback and it converts it correctly.
-        LongtailLogContext? result = null;
+        LongtailLogContext result = null;
         LongtailLog.SetLogLevel(LongtailLogLevel.Debug);
         LongtailLog.SetLogCallback((context, s) => { result = context; });
         using var storage = StorageApi.CreateFSStorageAPI();
