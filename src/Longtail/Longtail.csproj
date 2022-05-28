@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <Folder Include="Generated\" />
-    <Folder Include="Internal\" />
   </ItemGroup>
 
   <ItemGroup>

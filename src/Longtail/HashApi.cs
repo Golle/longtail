@@ -4,10 +4,29 @@ public unsafe class HashApi : IDisposable
 {
     private Longtail_HashAPI* _hashApi;
     private readonly bool _owner;
+    internal Longtail_HashAPI* AsPointer() => _hashApi;
+    public uint GetIdentifier() => LongtailLibrary.Longtail_Hash_GetIdentifier(_hashApi);
     internal HashApi(Longtail_HashAPI* hashApi, bool owner = true)
     {
         _hashApi = hashApi;
         _owner = owner;
+    }
+
+    public static HashApi? CreateBlake2HashAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateBlake2HashAPI();
+        return api != null ? new HashApi(api) : null;
+    }
+
+    public static HashApi? CreateBlake3HashAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateBlake3HashAPI();
+        return api != null ? new HashApi(api) : null;
+    }
+    public static HashApi? CreateMeowHashAPI()
+    {
+        var api = LongtailLibrary.Longtail_CreateMeowHashAPI();
+        return api != null ? new HashApi(api) : null;
     }
 
     public void Dispose()

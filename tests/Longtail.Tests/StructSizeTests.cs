@@ -163,4 +163,14 @@ internal unsafe class StructSizeTests
 
         Assert.That(result, Is.EqualTo(size));
     }
+    
+    [Test]
+    public void GetPathFilterAPISize_Always_ReturnSameSizeAsCSharp()
+    {
+        var size = (ulong)sizeof(Longtail_PathFilterAPI);
+
+        var result = LongtailLibrary.Longtail_GetPathFilterAPISize();
+
+        Assert.That(result, Is.EqualTo(size));
+    }
 }
