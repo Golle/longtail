@@ -21,7 +21,7 @@ internal class CompressionRegistryTests
     }
 
     [Test]
-    public void GetHashApi_NoCompressionType_ReturnNull()
+    public void GetCompressionAPI_NoCompressionType_ReturnNull()
     {
         using var registry = CompressionRegistry.CreateFullCompressionRegistry()!;
 
@@ -31,7 +31,7 @@ internal class CompressionRegistryTests
     }
 
     [TestCaseSource(nameof(GetZStdCompressionTypes))]
-    public void GetHashApi_FZStdRegistryWithCompressionType_ReturnHashApi(uint compressionType)
+    public void GetCompressionAPI_FZStdRegistryWithCompressionType_ReturnHashApi(uint compressionType)
     {
         using var registry = CompressionRegistry.CreateZStdCompressionRegistry()!;
 
@@ -44,7 +44,7 @@ internal class CompressionRegistryTests
     [TestCaseSource(nameof(GetBrotliCompressionTypes))]
     [TestCaseSource(nameof(GetZStdCompressionTypes))]
     [TestCaseSource(nameof(GetLZ4CompressionTypes))]
-    public void GetHashApi_FullRegistryWithCompressionType_ReturnHashApi(uint compressionType)
+    public void GetCompressionAPI_FullRegistryWithCompressionType_ReturnHashApi(uint compressionType)
     {
         using var registry = CompressionRegistry.CreateFullCompressionRegistry()!;
 

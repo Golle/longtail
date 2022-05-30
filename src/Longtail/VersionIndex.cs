@@ -136,7 +136,7 @@ public unsafe class VersionIndex : IDisposable
         );
         if (err != 0)
         {
-            throw new LongtailException(nameof(LongtailLibrary.Longtail_ReadVersionIndexFromBuffer), err);
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateVersionIndex), err);
         }
         return versionIndex != null ? new VersionIndex(versionIndex) : null;
     }
