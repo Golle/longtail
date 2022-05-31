@@ -11,11 +11,10 @@ public unsafe class VersionIndex : IDisposable
     public uint GetHashAPI() => LongtailLibrary.Longtail_VersionIndex_GetHashAPI(_versionIndex);
     public uint GetAssetCount() => LongtailLibrary.Longtail_VersionIndex_GetAssetCount(_versionIndex);
     public uint GetChunkCount() => LongtailLibrary.Longtail_VersionIndex_GetChunkCount(_versionIndex);
-    public ulong* GetChunkHashes() => LongtailLibrary.Longtail_VersionIndex_GetChunkHashes(_versionIndex);
-    public uint* GetChunkSizes() => LongtailLibrary.Longtail_VersionIndex_GetChunkSizes(_versionIndex);
-    public uint* GetChunkTags() => LongtailLibrary.Longtail_VersionIndex_GetChunkTags(_versionIndex);
+    public ReadOnlySpan<ulong> GetChunkHashes() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkHashes(_versionIndex), (int)GetChunkCount());
+    public ReadOnlySpan<uint> GetChunkSizes() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkSizes(_versionIndex), (int)GetChunkCount());
+    public ReadOnlySpan<uint> GetChunkTags() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkTags(_versionIndex), (int)GetChunkCount());
     internal Longtail_VersionIndex* AsPointer() => _versionIndex;
-
     internal VersionIndex(Longtail_VersionIndex* versionIndex)
     {
         _versionIndex = versionIndex;
