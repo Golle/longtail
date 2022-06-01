@@ -2,9 +2,9 @@
 
 namespace Longtail;
 
-public unsafe class API
+public static unsafe class API
 {
-    public void ChangeVersion(
+    public static void ChangeVersion(
         string versionPath,
         BlockStoreApi blockStoreApi,
         StorageApi versionStorageApi,
@@ -41,6 +41,35 @@ public unsafe class API
         }
     }
 
+
+    public static void WriteContent(string assetsFolder,
+        StoreIndex storeIndex, 
+        VersionIndex versionIndex, 
+        StorageApi storageApi, 
+        BlockStoreApi blockStoreApi, 
+        JobApi jobApi, 
+        ProgressApi? progressApi = null, 
+        CancelApi? cancelApi = null, 
+        CancelToken? cancelToken = null)
+    {
+
+        using var path = new Utf8String(assetsFolder);
+        var err = LongtailLibrary.Longtail_WriteContent(
+            storageApi.AsPointer(),
+            blockStoreApi.AsPointer(),
+            jobApi.AsPointer(),
+            progressApi != null ? progressApi.AsPointer() : null,
+            cancelApi != null ? cancelApi.AsPointer() : null,
+            cancelToken != null ? cancelToken.AsPointer() : null,
+            storeIndex.AsPointer(),
+            versionIndex.AsPointer(),
+            path
+        );
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_WriteContent), err);
+        }
+    }
     //[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     //public static extern int Longtail_WriteContent(
     //    Longtail_StorageAPI* source_storage_api,
