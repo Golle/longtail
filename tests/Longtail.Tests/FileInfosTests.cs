@@ -8,7 +8,6 @@ internal class FileInfosTests
     public void GetFilesRecursively_OnSuccess_ReturnFileInfos()
     {
         using var fileStorageApi = StorageApi.CreateFSStorageAPI();
-        
         using var fileInfos = FileInfos.GetFilesRecursively(Directory.GetCurrentDirectory(), fileStorageApi);
 
         Assert.That(fileInfos, Is.Not.Null);
@@ -27,7 +26,7 @@ internal class FileInfosTests
     }
 
     [Test]
-    public void GetPath_OnSuccess_ReturnCount()
+    public void GetCount_OnSuccess_ReturnCount()
     {
         // NOTE(Jens): when we can implement a mock for the storage API we can replace this to a fake FS.
         using var fileStorageApi = StorageApi.CreateFSStorageAPI();
@@ -39,19 +38,20 @@ internal class FileInfosTests
     }
 
     [Test]
-    public void GetPath_OnSuccess_ReturnSize()
+    public void GetSize_OnSuccess_ReturnSize()
     {
         // NOTE(Jens): when we can implement a mock for the storage API we can replace this to a fake FS.
         using var fileStorageApi = StorageApi.CreateFSStorageAPI();
         using var fileInfos = FileInfos.GetFilesRecursively(Directory.GetCurrentDirectory(), fileStorageApi)!;
 
+        Assert.That(Directory.GetCurrentDirectory(), Is.EqualTo("nope"));
         var result = fileInfos.GetSize(0);
 
         Assert.That(result, Is.GreaterThan(0));
     }
 
     [Test]
-    public void GetPath_OnSuccess_ReturnPermissions()
+    public void GetPermissions_OnSuccess_ReturnPermissions()
     {
         // NOTE(Jens): when we can implement a mock for the storage API we can replace this to a fake FS.
         using var fileStorageApi = StorageApi.CreateFSStorageAPI();
