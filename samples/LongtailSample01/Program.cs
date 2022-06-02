@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Longtail;
@@ -16,56 +17,141 @@ MemTracer.Init();
     const uint targetBlocKSize = 8388608u;
     const uint chunksPerBlock = 1024u;
 
+    var versionFileName = "version_index.1.2.2.lvi";
     var samplePath = Path.Combine(basePath, "tmp", typeof(Program).Assembly.GetName().Name!);
     var dataPath = Path.Combine(samplePath, "data");
+    var downloadCachePath = Path.Combine(samplePath, "cache");
     var destinationPath = Path.Combine(samplePath, "store");
+    var indexPath = Path.Combine(samplePath, "index");
     var outPath = Path.Combine(samplePath, "out");
+
 
     // Clear old folders since we generate new data
     CleanupFolder(dataPath);
     CleanupFolder(destinationPath);
     CleanupFolder(outPath);
+    CleanupFolder(indexPath);
 
+    // Generate some files with random values and sizes
     Console.WriteLine("Creating files.");
     CreateSomeFiles(dataPath, 10, 4 * 1024, 10 * 1024 * 1024);
     Console.WriteLine("Files created.");
-    using var fsStorage = StorageApi.CreateFSStorageAPI()!;
-    using var files = FileInfos.GetFilesRecursively(dataPath, fsStorage);
 
-    using var jobApi = JobApi.CreateBikeshedJobAPI((uint)(Environment.ProcessorCount - 1))!;
 
-    using var hashRegistry = HashRegistry.CreateFullHashRegistry()!;
-    using var hashApi = hashRegistry.GetHashApi(HashTypes.Blake3)!;
-
-    //using var compression = CompressionApi.CreateBrotliCompressionAPI()!;
-    using var chunker = ChunkerApi.CreateHPCDCChunkerAPI();
-
-    using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
-    using var versionIndex = VersionIndex.Create(dataPath, fsStorage, hashApi!, chunker!, jobApi, files!, targetChunkSize, false)!;
-
-    using var outBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, destinationPath)!;
-
-    using var compressionRegistry = CompressionRegistry.CreateFullCompressionRegistry()!;
-    compressionRegistry.GetCompressionAPI(CompressionTypes.BrotliGenericDefaultQuality);
-
-    using var outStoreIndex = outBlockStore.GetExistingContent(versionIndex.GetChunkHashes())!;
-    using var versionMissingStoreIndex = StoreIndex.CreateMissingContent(hashApi, outStoreIndex, versionIndex, targetBlocKSize, chunksPerBlock);
-    if (versionMissingStoreIndex.GetBlockCount() > 0)
+    var indexFilePath = Path.Combine(indexPath, versionFileName);
+    
+    // Take the data and upload it to a path
     {
-        Console.WriteLine("Misssing content found.");
-        API.WriteContent(dataPath, versionMissingStoreIndex, versionIndex, fsStorage, outBlockStore, jobApi, progress);
+        var timer = Stopwatch.StartNew();
+        Console.WriteLine($"Starting upsync from {dataPath} to {destinationPath}");
+        Upsync(dataPath, destinationPath, indexFilePath);
+        Console.WriteLine($"Finished upsync in {timer.Elapsed.TotalMilliseconds:0.00}");
+        
     }
-    Console.WriteLine("All well");
 
-    if (!CompareContent(dataPath, outPath))
+    // Download the chunks and unpack them
     {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("Mismatch in content.");
-        Console.ResetColor();
+
+        // using a cache
+        var timer = Stopwatch.StartNew();
+        var output = Path.Combine(outPath, "cache");
+        Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
+        Downsync(destinationPath, output, indexFilePath);
+        Console.WriteLine($"Finished downsync in {timer.Elapsed.TotalMilliseconds:0.00} ms");
+        Console.WriteLine("Comparing file content");
+        if (!CompareContent(dataPath, output))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Mismatch in content.");
+            Console.ResetColor();
+        }
+        else
+        {
+            Console.WriteLine("All files are identical!");
+        }
     }
-    else
     {
-        Console.WriteLine("All files are identical!");
+        // using no cache
+        var timer = Stopwatch.StartNew();
+        var output = Path.Combine(outPath, "nocache");
+        Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
+        Downsync(destinationPath, output, indexFilePath, downloadCachePath);
+        Console.WriteLine($"Finished downsync in {timer.Elapsed.TotalMilliseconds:0.00} ms");
+        Console.WriteLine("Comparing file content");
+        if (!CompareContent(dataPath, output))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Mismatch in content.");
+            Console.ResetColor();
+        }
+        else
+        {
+            Console.WriteLine("All files are identical!");
+        }
+        
+    }
+
+
+    static void Upsync(string path, string destination, string indexPath)
+    {
+        using var fsStorage = StorageApi.CreateFSStorageAPI()!;
+        using var files = FileInfos.GetFilesRecursively(path, fsStorage);
+        using var jobApi = JobApi.CreateBikeshedJobAPI((uint)(Environment.ProcessorCount - 1))!;
+        using var hashRegistry = HashRegistry.CreateFullHashRegistry()!;
+        using var hashApi = hashRegistry.GetHashApi(HashTypes.Blake3)!;
+        using var chunker = ChunkerApi.CreateHPCDCChunkerAPI();
+        using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
+        using var versionIndex = VersionIndex.Create(path, fsStorage, hashApi!, chunker!, jobApi, files!, targetChunkSize, false)!;
+        using var outBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, destination)!;
+        using var compressionRegistry = CompressionRegistry.CreateFullCompressionRegistry()!;
+        compressionRegistry.GetCompressionAPI(CompressionTypes.BrotliGenericDefaultQuality);
+        using var outStoreIndex = outBlockStore.GetExistingContent(versionIndex.GetChunkHashes())!;
+        using var versionMissingStoreIndex = StoreIndex.CreateMissingContent(hashApi, outStoreIndex, versionIndex, targetBlocKSize, chunksPerBlock);
+        if (versionMissingStoreIndex.GetBlockCount() > 0)
+        {
+            Console.WriteLine("Misssing content found.");
+            API.WriteContent(path, versionMissingStoreIndex, versionIndex, fsStorage, outBlockStore, jobApi, progress);
+        }
+
+        using var versionIndexBuffer = versionIndex.WriteVersionIndexToBuffer();
+        using var file = File.OpenWrite(indexPath);
+        file.SetLength(0);
+        file.Write(versionIndexBuffer.AsReadOnlySpan());
+    }
+
+    static void Downsync(string source, string output, string version, string? cachePath = null)
+    {
+        using var fsStorage = StorageApi.CreateFSStorageAPI()!;
+        using var jobApi = JobApi.CreateBikeshedJobAPI((uint)(Environment.ProcessorCount - 1))!;
+
+        using var targetVersionIndex = VersionIndex.Read(version, fsStorage)!;
+        using var hashRegistry = HashRegistry.CreateFullHashRegistry()!;
+        using var hashApi = hashRegistry.GetHashApi(targetVersionIndex.HashIdentifier)!;
+        using var chunkerApi = ChunkerApi.CreateHPCDCChunkerAPI()!;
+        using var fileInfos = FileInfos.GetFilesRecursively(output, fsStorage)!;
+
+        using var currentVersionIndex = VersionIndex.Create(output, fsStorage, hashApi, chunkerApi, jobApi, fileInfos, targetVersionIndex.TargetChunkSize, false)!;
+        using var versionDiff = VersionDiff.Create(hashApi, currentVersionIndex, targetVersionIndex)!;
+        var requiredChunkHashes = targetVersionIndex.GetRequiredChunkHashes(versionDiff);
+        using var blockStoreApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, source)!;
+
+        using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
+        if (cachePath != null)
+        {
+            using var cacheFileBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, source)!;
+            using var cacheBlockStoreApi = BlockStoreApi.CreateCacheBlockStoreAPI(jobApi, cacheFileBlockStore, blockStoreApi);
+            using var compressionRegistry = CompressionRegistry.CreateFullCompressionRegistry()!;
+            using var compressBlockStore = BlockStoreApi.CreateCompressBlockStoreAPI(cacheFileBlockStore, compressionRegistry)!;
+            using var lruStorage = BlockStoreApi.CreateLRUBlockStoreAPI(compressBlockStore, 32)!;
+            using var shareStorage = BlockStoreApi.CreateShareBlockStoreAPI(lruStorage)!;
+            using var storeIndex = blockStoreApi.GetExistingContent(requiredChunkHashes)!;
+            API.ChangeVersion(output, shareStorage, fsStorage, hashApi, jobApi, storeIndex, currentVersionIndex, targetVersionIndex, versionDiff, true, progressApi: progress);
+        }
+        else
+        {
+            using var storeIndex = blockStoreApi.GetExistingContent(requiredChunkHashes)!;
+            API.ChangeVersion(output, blockStoreApi, fsStorage, hashApi, jobApi, storeIndex, currentVersionIndex, targetVersionIndex, versionDiff, true, progressApi: progress);
+        }
     }
 }
 
@@ -89,8 +175,6 @@ static string? FindFile(string? currentPath, string name, int parents = 6)
     }
     return FindFile(Directory.GetParent(currentPath)?.FullName, name, parents - 1);
 }
-
-
 
 static bool CompareContent(string path1, string path2)
 {
@@ -141,7 +225,6 @@ static bool CompareContent(string path1, string path2)
             }
         }
     }
-
     return true;
 }
 
