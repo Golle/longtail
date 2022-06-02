@@ -7,13 +7,16 @@ public unsafe class VersionIndex : IDisposable
     private Longtail_VersionIndex* _versionIndex;
 
     // Note(Jens): The implementation for these are very simple, maybe we should not do an interop call to get the values?
-    public uint GetVersion() => LongtailLibrary.Longtail_VersionIndex_GetVersion(_versionIndex);
-    public uint GetHashAPI() => LongtailLibrary.Longtail_VersionIndex_GetHashAPI(_versionIndex);
-    public uint GetAssetCount() => LongtailLibrary.Longtail_VersionIndex_GetAssetCount(_versionIndex);
-    public uint GetChunkCount() => LongtailLibrary.Longtail_VersionIndex_GetChunkCount(_versionIndex);
-    public ReadOnlySpan<ulong> GetChunkHashes() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkHashes(_versionIndex), (int)GetChunkCount());
-    public ReadOnlySpan<uint> GetChunkSizes() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkSizes(_versionIndex), (int)GetChunkCount());
-    public ReadOnlySpan<uint> GetChunkTags() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkTags(_versionIndex), (int)GetChunkCount());
+    public uint Version => *_versionIndex->m_Version; // LongtailLibrary.Longtail_VersionIndex_GetVersion(_versionIndex);
+    public uint HashIdentifier => *_versionIndex->m_HashIdentifier; //LongtailLibrary.Longtail_VersionIndex_GetHashAPI(_versionIndex);
+    public uint AssetCount => *_versionIndex->m_AssetCount; //LongtailLibrary.Longtail_VersionIndex_GetAssetCount(_versionIndex);
+    public uint ChunkCount => *_versionIndex->m_ChunkCount; //LongtailLibrary.Longtail_VersionIndex_GetChunkCount(_versionIndex);
+    public uint TargetChunkSize => *_versionIndex->m_TargetChunkSize;
+
+    public ReadOnlySpan<ulong> GetChunkHashes() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkHashes(_versionIndex), (int)ChunkCount);
+    public ReadOnlySpan<uint> GetChunkSizes() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkSizes(_versionIndex), (int)ChunkCount);
+    public ReadOnlySpan<uint> GetChunkTags() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkTags(_versionIndex), (int)ChunkCount);
+
     internal Longtail_VersionIndex* AsPointer() => _versionIndex;
     internal VersionIndex(Longtail_VersionIndex* versionIndex)
     {
@@ -71,7 +74,7 @@ public unsafe class VersionIndex : IDisposable
     public ulong[] GetRequiredChunkHashes(VersionDiff versionDiff)
     {
         uint chunkCount;
-        var chunkHashes = new ulong[GetChunkCount()];
+        var chunkHashes = new ulong[ChunkCount];
         fixed (ulong* pChunkHashes = chunkHashes)
         {
             var err = LongtailLibrary.Longtail_GetRequiredChunkHashes(_versionIndex, versionDiff.AsPointer(), &chunkCount, pChunkHashes);
@@ -86,9 +89,9 @@ public unsafe class VersionIndex : IDisposable
 
     public uint GetRequiredChunkHashes(VersionDiff versionDiff, Span<ulong> buffer)
     {
-        if (GetChunkCount() > buffer.Length)
+        if (ChunkCount > buffer.Length)
         {
-            throw new InvalidOperationException($"The buffer must have atleast {GetChunkCount()} size.");
+            throw new InvalidOperationException($"The buffer must have atleast {ChunkCount} size.");
         }
         uint chunkCount;
         fixed (ulong* pChunkHashes = buffer)
