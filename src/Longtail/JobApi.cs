@@ -7,19 +7,14 @@ public unsafe class JobApi : IDisposable
     {
         _jobApi = jobApi;
     }
-
+    public uint GetWorkerCount() => LongtailLibrary.Longtail_Job_GetWorkerCount(_jobApi);
     internal Longtail_JobAPI* AsPointer() => _jobApi;
-    public static JobApi CreateBikeshedJobAPI(uint workerCount, int workerPriority = -1)
+
+    public static JobApi? CreateBikeshedJobAPI(uint workerCount, int workerPriority = -1)
     {
         var jobApi = LongtailLibrary.Longtail_CreateBikeshedJobAPI(workerCount, workerPriority);
-        if (jobApi == null)
-        {
-            throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateBikeshedJobAPI), -1);
-        }
-        return new(jobApi);
+        return jobApi != null ? new JobApi(jobApi) : null;
     }
-
-    public uint GetWorkerCount() => LongtailLibrary.Longtail_Job_GetWorkerCount(_jobApi);
 
     public void Dispose()
     {

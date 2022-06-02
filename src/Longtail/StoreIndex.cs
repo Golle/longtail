@@ -100,6 +100,22 @@ public sealed unsafe class StoreIndex : IDisposable
         return storeindex != null ? new StoreIndex(storeindex) : null;
     }
 
+    public static StoreIndex CreateMissingContent(HashApi hashApi, StoreIndex storeIndex, VersionIndex versionIndex, uint minBlockSize, uint maxChunksPerBlock)
+    {
+        Longtail_StoreIndex* outStoreIndex;
+        var err = LongtailLibrary.Longtail_CreateMissingContent(hashApi.AsPointer(), storeIndex.AsPointer(), versionIndex.AsPointer(), minBlockSize, maxChunksPerBlock, &outStoreIndex);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateMissingContent), err);
+        }
+        if (outStoreIndex == null)
+        {
+            // TODO: add proper error for null pointers.
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateMissingContent), ErrorCodesEnum.EINVAL);
+        }
+        return new StoreIndex(outStoreIndex);
+    }
+
     public void Dispose()
     {
         if (_storeIndex != null && _owner)

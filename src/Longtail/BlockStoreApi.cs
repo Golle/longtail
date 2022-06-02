@@ -89,7 +89,7 @@ public unsafe class BlockStoreApi : IDisposable
             {
                 throw new LongtailException(nameof(LongtailLibrary.Longtail_AsyncGetExistingContent_OnComplete), contentApi.Err);
             }
-            return contentApi.StoreIndex != null ? new StoreIndex(contentApi.StoreIndex, false) : null;
+            return contentApi.StoreIndex != null ? new StoreIndex(contentApi.StoreIndex) : null;
         }
     }
 
