@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Longtail;
 
 MemTracer.Init();
@@ -24,7 +25,6 @@ MemTracer.Init();
     var destinationPath = Path.Combine(samplePath, "store");
     var indexPath = Path.Combine(samplePath, "index");
     var outPath = Path.Combine(samplePath, "out");
-
 
     // Clear old folders since we generate new data
     CleanupFolder(dataPath);
