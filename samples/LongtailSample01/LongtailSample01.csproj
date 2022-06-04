@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -11,5 +10,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Longtail\Longtail.csproj" />
   </ItemGroup>
-
 </Project>

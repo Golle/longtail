@@ -28,3 +28,27 @@ jobs:
     
     - name: Test
       run: dotnet test tests/Longtail.Tests -c ${{ matrix.conf }} -f ${{ matrix.target }}
+
+  package:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Nuget package
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install .NET x.0.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: | 
+          5.0.x
+          6.0.x
+        include-prerelease: true
+
+    - name: Package
+      run: dotnet pack src/Longtail -c Release -o release/
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        path: release/*.nupkg
+

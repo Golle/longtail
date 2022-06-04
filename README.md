@@ -1,5 +1,10 @@
+### Builds
 [![Build and Test CodeGen](https://github.com/Golle/longtail/actions/workflows/build.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/build.yml)   
 [![Run longtail tests](https://github.com/Golle/longtail/actions/workflows/longtail.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/longtail.yml)
+
+### Nuget
+(This is a pre-release, some APIs are missing and some error handling are inconsistent)
+![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Longtail) 
 
 
 ## Longtail C# Bindings
