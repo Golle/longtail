@@ -8,7 +8,6 @@
 
 
 ## Longtail C# Bindings
-
 This project generates cross platform C# bindings for Dan Engelbrecht longtail library. [Longtail](https://github.com/DanEngelbrecht/longtail).
 
 
@@ -26,18 +25,20 @@ Version 0.3.2 of longtail
 
 **Implemented**
 * Generates bindings for all structs, enums, functions, function pointers
-* Supports .NET5.0 and .NET 6.0 on platforms Linux, MacOS and Windows x64
+* Supports .NET 5.0, 6.0 and 7.0-preview 4 on platforms Linux, MacOS and Windows x64
 * Automatic documentation for function pointers with the original names of parameters
 
 **Working on**
 * Copy the comments from the API functions and generate C# comments in the LongtailLibrary.cs file
-* Nuget package for the low level bindings (Unsafe)
 * Managed abstrations (hide all unsafe code behind easy to use managed functions and classes)
+* Task based interfaces for IStorage and IBlockStore (will probably be named IAsyncBlockStore and IAsyncStorage) for easy .NET IO (which is mostly async code).
 * More tests for both CodeGen and Longtail
 
 **Known issues**
 * Currently using type `ulong` for `size_t`. This works but it's not correct, it should be `nuint` (or `UIntPtr` in older versions of .NET)
 * Hardcoded paths for longtail inside code gen (can be overriden with calling the project with arguments)
+* Some pointer references does not have a fixed size, so we can't convert them to a managed safe type in an easy way. (will continue to investigate that)
+* Some APIs have not been implemented as managed functions yet.
 
 Comments on function pointers might be a bit different from original. This happens because it binds the type to the parent.
 ```csharp
@@ -66,3 +67,5 @@ typedef int (*Longtail_BlockStore_PreflightGetFunc)(struct Longtail_BlockStoreAP
 * Longtail.cs contains all structs, enums etc
 * LongtailLibrary.cs contains all the longtail functions found in longtail.h (and all other h files in the repo)
 
+#### samples/LongtailSample01
+* Full upsync and downsync sample with a FileSystem block store.

@@ -8,19 +8,20 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         conf: [Release, Debug]
-        target: [net5.0, net6.0]
+        target: [net5.0, net6.0, net7.0]
 
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} - ${{ matrix.conf }} - ${{ matrix.target }}
     steps:
     - uses: actions/checkout@v2
     
-    - name: Install .NET x.0.x
+    - name: Install .NET 5, 6 and 7
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: | 
           5.0.x
           6.0.x
+          7.0.x
         include-prerelease: true
         
     - name: Build
@@ -36,12 +37,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install .NET x.0.x
+    - name: Install .NET 5, 6 and 7
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: | 
           5.0.x
           6.0.x
+          7.0.x
         include-prerelease: true
 
     - name: Package
