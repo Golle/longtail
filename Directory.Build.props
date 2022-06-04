@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <Version>0.0.1-rc1</Version>
+        <Version>0.0.1-rc2</Version>
         <FileVersion>0.0.1.0</FileVersion>
         <Product>Longtail</Product>
         <Company>Golle</Company>
