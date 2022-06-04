@@ -10,16 +10,16 @@ public unsafe class StorageApi : IDisposable
     }
 
     internal Longtail_StorageAPI* AsPointer() => _api;
-    public static StorageApi? CreateFSStorageAPI()
+    public static StorageApi CreateFSStorageAPI()
     {
         var api = LongtailLibrary.Longtail_CreateFSStorageAPI();
-        return api != null ? new StorageApi(api) : null;
+        return api != null ? new StorageApi(api) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateFSStorageAPI)} returned a null pointer"); ;
     }
 
-    public static StorageApi? CreateInMemoryStorageAPI()
+    public static StorageApi CreateInMemoryStorageAPI()
     {
         var api = LongtailLibrary.Longtail_CreateInMemStorageAPI();
-        return api != null ? new StorageApi(api) : null;
+        return api != null ? new StorageApi(api) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateInMemStorageAPI)} returned a null pointer"); ;
     }
 
     public void Dispose()

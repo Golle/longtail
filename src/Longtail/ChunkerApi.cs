@@ -1,6 +1,6 @@
 ﻿namespace Longtail;
 
-public unsafe class ChunkerApi :IDisposable
+public unsafe class ChunkerApi : IDisposable
 {
     private Longtail_ChunkerAPI* _chunkerApi;
 
@@ -20,10 +20,10 @@ public unsafe class ChunkerApi :IDisposable
         return chunkSize;
     }
 
-    public static ChunkerApi? CreateHPCDCChunkerAPI()
+    public static ChunkerApi CreateHPCDCChunkerAPI()
     {
         var api = LongtailLibrary.Longtail_CreateHPCDCChunkerAPI();
-        return api != null ? new ChunkerApi(api) : null;
+        return api != null ? new ChunkerApi(api) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateHPCDCChunkerAPI)} returned a null pointer"); ;
     }
 
     internal Longtail_ChunkerAPI* AsPointer() => _chunkerApi;

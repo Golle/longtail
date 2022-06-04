@@ -25,7 +25,6 @@ MemTracer.Init();
     var indexPath = Path.Combine(samplePath, "index");
     var outPath = Path.Combine(samplePath, "out");
 
-
     // Clear old folders since we generate new data
     CleanupFolder(dataPath);
     CleanupFolder(destinationPath);
@@ -88,7 +87,6 @@ MemTracer.Init();
         {
             Console.WriteLine("All files are identical!");
         }
-        
     }
 
 
@@ -117,6 +115,9 @@ MemTracer.Init();
         using var file = File.OpenWrite(indexPath);
         file.SetLength(0);
         file.Write(versionIndexBuffer.AsReadOnlySpan());
+
+        //This can be used to write the version to a blockstore
+        //API.WriteVersion(indexPath, SomeBlocKStore, fsStorage, outStoreIndex, versionIndex, jobApi, true);
     }
 
     static void Downsync(string source, string output, string version, string? cachePath = null)

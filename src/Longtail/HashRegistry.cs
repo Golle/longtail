@@ -14,11 +14,15 @@ public unsafe class HashRegistry : IDisposable
     {
         Longtail_HashAPI* hashApi;
         var err = LongtailLibrary.Longtail_GetHashRegistry_GetHashAPI(_registry, hashType, &hashApi);
+        if (err == ErrorCodes.ENOENT)
+        {
+            return null;
+        }
         if (err != 0)
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_GetHashRegistry_GetHashAPI), err);
         }
-        return hashApi != null ? new HashApi(hashApi, owner:false) : null;
+        return hashApi != null ? new HashApi(hashApi, owner: false) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_GetHashRegistry_GetHashAPI)} returned a null pointer");
     }
 
     public void Dispose()

@@ -23,7 +23,7 @@ public unsafe class VersionIndex : IDisposable
         _versionIndex = versionIndex;
     }
 
-    public static VersionIndex? ReadFromBuffer(ReadOnlySpan<byte> buffer)
+    public static VersionIndex ReadFromBuffer(ReadOnlySpan<byte> buffer)
     {
         fixed (byte* pBuffer = buffer)
         {
@@ -33,11 +33,11 @@ public unsafe class VersionIndex : IDisposable
             {
                 throw new LongtailException(nameof(LongtailLibrary.Longtail_ReadVersionIndexFromBuffer), err);
             }
-            return versionIndex != null ? new VersionIndex(versionIndex) : null;
+            return versionIndex != null ? new VersionIndex(versionIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_ReadVersionIndexFromBuffer)} returned a null pointer");
         }
     }
 
-    public static VersionIndex? Read(string path, StorageApi storageApi)
+    public static VersionIndex Read(string path, StorageApi storageApi)
     {
         using var utf8Path = new Utf8String(path);
         Longtail_VersionIndex* versionIndex;
@@ -46,7 +46,7 @@ public unsafe class VersionIndex : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_ReadVersionIndex), err);
         }
-        return versionIndex != null ? new VersionIndex(versionIndex) : null;
+        return versionIndex != null ? new VersionIndex(versionIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_ReadVersionIndex)} returned a null pointer");
     }
 
     public void WriteVersionIndex(string path, StorageApi storageApi)
@@ -105,7 +105,7 @@ public unsafe class VersionIndex : IDisposable
         return chunkCount;
     }
 
-    public static VersionIndex? Create(
+    public static VersionIndex Create(
         string rootPath,
         StorageApi storageApi,
         HashApi hashApi,
@@ -140,7 +140,7 @@ public unsafe class VersionIndex : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateVersionIndex), err);
         }
-        return versionIndex != null ? new VersionIndex(versionIndex) : null;
+        return versionIndex != null ? new VersionIndex(versionIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_ReadVersionIndex)} returned a null pointer");
     }
 
     public void Dispose()

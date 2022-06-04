@@ -51,6 +51,7 @@ public unsafe class BlockStoreApi : IDisposable
     }
 
     // TODO: investigate how to properly make an async api for these functions
+    // TODO: can TaskCompletionSource be used instead of EventWaitHandle ? Maybe we can avoid Task.Run
     public Task<StoredBlock?> GetStoredBlockAsync(ulong blockHash)
         => Task.Run(() => GetStoredBlock(blockHash));
 
@@ -139,7 +140,7 @@ public unsafe class BlockStoreApi : IDisposable
         }
     }
 
-    public static BlockStoreApi? CreateFSBlockStoreApi(JobApi jobApi, StorageApi storageApi, string path, string? optionalExtension = null, bool enableFileMapping = false)
+    public static BlockStoreApi CreateFSBlockStoreApi(JobApi jobApi, StorageApi storageApi, string path, string? optionalExtension = null, bool enableFileMapping = false)
     {
         using var contentPath = new Utf8String(path);
         using var fileExtension = optionalExtension != null ? new Utf8String(optionalExtension) : default;
@@ -148,22 +149,22 @@ public unsafe class BlockStoreApi : IDisposable
         return Wrap(api);
     }
 
-    public static BlockStoreApi? CreateArchiveBlockStore(string archivePath, StorageApi storageApi, ArchiveIndex archiveIndex, bool enableWrite, bool enableMemoryMapReading)
+    public static BlockStoreApi CreateArchiveBlockStore(string archivePath, StorageApi storageApi, ArchiveIndex archiveIndex, bool enableWrite, bool enableMemoryMapReading)
     {
         using var path = new Utf8String(archivePath);
         var api = LongtailLibrary.Longtail_CreateArchiveBlockStore(storageApi.AsPointer(), path, archiveIndex.AsPointer(), enableWrite ? 1 : 0, enableMemoryMapReading ? 1 : 0);
         return Wrap(api);
     }
 
-    public static BlockStoreApi? CreateCacheBlockStoreAPI(JobApi jobApi, BlockStoreApi localBlockStoreApi, BlockStoreApi remoteBlockStoreApi)
+    public static BlockStoreApi CreateCacheBlockStoreAPI(JobApi jobApi, BlockStoreApi localBlockStoreApi, BlockStoreApi remoteBlockStoreApi)
         => Wrap(LongtailLibrary.Longtail_CreateCacheBlockStoreAPI(jobApi.AsPointer(), localBlockStoreApi.AsPointer(), remoteBlockStoreApi.AsPointer()));
 
-    public static BlockStoreApi? CreateCompressBlockStoreAPI(BlockStoreApi backingBlockStore, CompressionRegistry compressionRegistry)
+    public static BlockStoreApi CreateCompressBlockStoreAPI(BlockStoreApi backingBlockStore, CompressionRegistry compressionRegistry)
         => Wrap(LongtailLibrary.Longtail_CreateCompressBlockStoreAPI(backingBlockStore.AsPointer(), compressionRegistry.AsPointer()));
 
-    public static BlockStoreApi? CreateLRUBlockStoreAPI(BlockStoreApi backingBlockStoreApi, uint maxLruCount)
+    public static BlockStoreApi CreateLRUBlockStoreAPI(BlockStoreApi backingBlockStoreApi, uint maxLruCount)
         => Wrap(LongtailLibrary.Longtail_CreateLRUBlockStoreAPI(backingBlockStoreApi.AsPointer(), maxLruCount));
-    public static BlockStoreApi? CreateShareBlockStoreAPI(BlockStoreApi backingBlockStoreApi)
+    public static BlockStoreApi CreateShareBlockStoreAPI(BlockStoreApi backingBlockStoreApi)
         => Wrap(LongtailLibrary.Longtail_CreateShareBlockStoreAPI(backingBlockStoreApi.AsPointer()));
 
 
@@ -197,7 +198,7 @@ public unsafe class BlockStoreApi : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static BlockStoreApi? Wrap(Longtail_BlockStoreAPI* api) => api != null ? new BlockStoreApi(api) : null;
+    private static BlockStoreApi Wrap(Longtail_BlockStoreAPI* api, [CallerMemberName]string? caller=null) => api != null ? new BlockStoreApi(api) : throw new InvalidOperationException($"The reference passed from {caller} is null");
 
     [StructLayout(LayoutKind.Sequential)]
     private struct BlockStoreAPIInternal
