@@ -24,10 +24,10 @@ internal class HashRegistryTests
     public void GetHashApi_Blake2_ReturnHashApi()
     {
         using var hashRegistry = HashRegistry.CreateFullHashRegistry();
-        var type = LongtailLibrary.Longtail_GetBlake2HashType();
-        using var hashApi = hashRegistry?.GetHashApi(type)!;
 
-        Assert.That(hashApi?.GetIdentifier(), Is.EqualTo(type));
+        using var hashApi = hashRegistry?.GetHashApi(HashTypes.Blake2)!;
+
+        Assert.That(hashApi?.GetIdentifier(), Is.EqualTo(HashTypes.Blake2));
     }
 
     [Test]
@@ -35,19 +35,18 @@ internal class HashRegistryTests
     {
         using var hashRegistry = HashRegistry.CreateFullHashRegistry();
 
-        var type = LongtailLibrary.Longtail_GetBlake3HashType();
-        using var hashApi = hashRegistry?.GetHashApi(type);
+        using var hashApi = hashRegistry?.GetHashApi(HashTypes.Blake3);
 
-        Assert.That(hashApi?.GetIdentifier(), Is.EqualTo(type));
+        Assert.That(hashApi?.GetIdentifier(), Is.EqualTo(HashTypes.Blake3));
     }
 
     [Test]
     public void GetHashApi_Meow_ReturnHashApi()
     {
         using var hashRegistry = HashRegistry.CreateFullHashRegistry();
-        var type = LongtailLibrary.Longtail_GetMeowHashType();
-        using var hashApi = hashRegistry?.GetHashApi(type);
 
-        Assert.That(hashApi?.GetIdentifier(), Is.EqualTo(type));
+        using var hashApi = hashRegistry?.GetHashApi(HashTypes.Meow);
+
+        Assert.That(hashApi?.GetIdentifier(), Is.EqualTo(HashTypes.Meow));
     }
 }

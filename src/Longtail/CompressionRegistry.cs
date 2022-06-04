@@ -12,16 +12,16 @@ public unsafe class CompressionRegistry : IDisposable
     public static ulong GetCompressionRegistryAPISize() => LongtailLibrary.Longtail_GetCompressionAPISize();
     public static CompressionRegistry? CreateDefaultCompressionRegistry() => throw new NotImplementedException("This function has not been implemented yet, it might not be needed.");
 
-    public static CompressionRegistry? CreateFullCompressionRegistry()
+    public static CompressionRegistry CreateFullCompressionRegistry()
     {
         var api = LongtailLibrary.Longtail_CreateFullCompressionRegistry();
-        return api != null ? new CompressionRegistry(api) : null;
+        return api != null ? new CompressionRegistry(api) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateFullCompressionRegistry)} returned a null pointer"); ;
     }
 
-    public static CompressionRegistry? CreateZStdCompressionRegistry()
+    public static CompressionRegistry CreateZStdCompressionRegistry()
     {
         var api = LongtailLibrary.Longtail_CreateZStdCompressionRegistry();
-        return api != null ? new CompressionRegistry(api) : null;
+        return api != null ? new CompressionRegistry(api) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateZStdCompressionRegistry)} returned a null pointer");
     }
 
     public CompressionApi? GetCompressionAPI(uint compressionType)
@@ -37,7 +37,7 @@ public unsafe class CompressionRegistry : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_GetCompressionRegistry_GetCompressionAPI), err);
         }
-        return compressionApi != null ? new CompressionApi(compressionApi, settingsId, false) : null;
+        return compressionApi != null ? new CompressionApi(compressionApi, settingsId, false) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_GetCompressionRegistry_GetCompressionAPI)} returned a null pointer");
     }
 
     public void Dispose()

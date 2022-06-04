@@ -9,7 +9,7 @@ public sealed unsafe class VersionDiff : IDisposable
         _versionDiff = versionDiff;
     }
 
-    public static VersionDiff? Create(HashApi hashApi, VersionIndex sourceVersion, VersionIndex targetVersion)
+    public static VersionDiff Create(HashApi hashApi, VersionIndex sourceVersion, VersionIndex targetVersion)
     {
         Longtail_VersionDiff* versionDiff = default;
         var err = LongtailLibrary.Longtail_CreateVersionDiff(
@@ -22,7 +22,7 @@ public sealed unsafe class VersionDiff : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateVersionDiff), err);
         }
-        return versionDiff != null ? new VersionDiff(versionDiff) : null;
+        return versionDiff != null ? new VersionDiff(versionDiff) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateVersionDiff)} returned a null pointer");
     }
 
     public void Dispose()

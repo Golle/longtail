@@ -16,7 +16,7 @@ public unsafe class ProgressApi : IDisposable
         var mem = LongtailLibrary.Longtail_Alloc(name, (ulong)sizeof(ProgressApiInternal));
         if (mem == null)
         {
-            throw new LongtailException(nameof(LongtailLibrary.Longtail_Alloc), ErrorCodes.ENOMEM);
+            throw new OutOfMemoryException(nameof(LongtailLibrary.Longtail_Alloc));
         }
         var result = LongtailLibrary.Longtail_MakeProgressAPI(mem, &DisposeFunc, &OnProgressFunc);
         if (result == null)
@@ -28,7 +28,7 @@ public unsafe class ProgressApi : IDisposable
         _progressApi->Handle = GCHandle.Alloc(this);
     }
 
-    public static ProgressApi? CreateRateLimitedProgress(uint percentRateLimit)
+    public static ProgressApi CreateRateLimitedProgress(uint percentRateLimit)
     {
         // NOTE(Jens): this create a new ProgressAPi with longtail alloc and a fixed size. So to use this we need to know the size of that struct, allocate new memory + GCHandle size and copy over the bytes and free the old one.
         throw new NotImplementedException("Not supported yet. Read comment in the code.");

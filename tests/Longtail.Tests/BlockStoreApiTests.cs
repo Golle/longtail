@@ -143,7 +143,7 @@ internal class BlockStoreApiTests
     }
 
     [Test]
-    public void GetExistingContent_OnErrro_ThrowException()
+    public void GetExistingContent_OnError_ThrowException()
     {
         _blockStore.Err = ErrorCodesEnum.ENOMEM;
         using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
@@ -163,6 +163,17 @@ internal class BlockStoreApiTests
         var storedBlock = api.GetStoredBlock(0);
 
         Assert.That(storedBlock, Is.Not.Null);
+    }
+
+    [Test]
+    public void GetStoredBlock_StoredBlockIsNull_ReturnNull()
+    {
+        _blockStore.StoredBlock = null;
+        using var api = BlockStoreApi.MakeBlockStoreApi(_blockStore);
+
+        var storedBlock = api.GetStoredBlock(0);
+
+        Assert.That(storedBlock, Is.Null);
     }
 
     [Test]

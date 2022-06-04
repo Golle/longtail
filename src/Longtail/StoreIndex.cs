@@ -74,7 +74,7 @@ public sealed unsafe class StoreIndex : IDisposable
         }
     }
 
-    public static StoreIndex? ReadStoreIndexFromBuffer(ReadOnlySpan<byte> buffer)
+    public static StoreIndex ReadStoreIndexFromBuffer(ReadOnlySpan<byte> buffer)
     {
         Longtail_StoreIndex* storeindex;
         fixed (byte* pBuffer = buffer)
@@ -85,10 +85,10 @@ public sealed unsafe class StoreIndex : IDisposable
                 throw new LongtailException(nameof(LongtailLibrary.Longtail_ReadStoreIndexFromBuffer), err);
             }
         }
-        return storeindex != null ? new StoreIndex(storeindex) : null;
+        return storeindex != null ? new StoreIndex(storeindex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_ReadStoreIndexFromBuffer)} returned a null pointer");
     }
 
-    public static StoreIndex? ReadStoreIndex(string path, StorageApi storageApi)
+    public static StoreIndex ReadStoreIndex(string path, StorageApi storageApi)
     {
         using var utf8Path = new Utf8String(path);
         Longtail_StoreIndex* storeindex;
@@ -97,7 +97,33 @@ public sealed unsafe class StoreIndex : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_ReadStoreIndex), err);
         }
-        return storeindex != null ? new StoreIndex(storeindex) : null;
+        return storeindex != null ? new StoreIndex(storeindex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_ReadStoreIndexFromBuffer)} returned a null pointer");
+    }
+
+    public static StoreIndex CreateMissingContent(HashApi hashApi, StoreIndex storeIndex, VersionIndex versionIndex, uint minBlockSize, uint maxChunksPerBlock)
+    {
+        Longtail_StoreIndex* outStoreIndex;
+        var err = LongtailLibrary.Longtail_CreateMissingContent(hashApi.AsPointer(), storeIndex.AsPointer(), versionIndex.AsPointer(), minBlockSize, maxChunksPerBlock, &outStoreIndex);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateMissingContent), err);
+        }
+        return outStoreIndex != null ? new StoreIndex(outStoreIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateMissingContent)} returned a null pointer");
+    }
+
+    public uint GetMissingContent(ReadOnlySpan<ulong> chunkHashes, Span<ulong> outMissingChunkHashes)
+    {
+        var outChunkCount = (uint)outMissingChunkHashes.Length;
+        fixed (ulong* pChunkHashes = chunkHashes)
+        fixed (ulong* pMissingChunkHashes = outMissingChunkHashes)
+        {
+            var err = LongtailLibrary.Longtail_GetMissingChunks(_storeIndex, (uint)chunkHashes.Length, pChunkHashes, &outChunkCount, pMissingChunkHashes);
+            if (err != 0)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_GetMissingChunks), err);
+            }
+        }
+        return outChunkCount;
     }
 
     public void Dispose()

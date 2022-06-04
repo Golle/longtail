@@ -13,7 +13,7 @@ public unsafe class ArchiveIndex : IDisposable
         _archiveIndex = archiveIndex;
     }
 
-    public static ArchiveIndex? CreateArchiveIndex(StoreIndex storeIndex, VersionIndex versionIndex)
+    public static ArchiveIndex CreateArchiveIndex(StoreIndex storeIndex, VersionIndex versionIndex)
     {
         Longtail_ArchiveIndex* archiveIndex;
         var err = LongtailLibrary.Longtail_CreateArchiveIndex(storeIndex.AsPointer(), versionIndex.AsPointer(), &archiveIndex);
@@ -21,10 +21,10 @@ public unsafe class ArchiveIndex : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateArchiveIndex), err);
         }
-        return archiveIndex != null ? new ArchiveIndex(archiveIndex) : null;
+        return archiveIndex != null ? new ArchiveIndex(archiveIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateArchiveIndex)} returned a null pointer");
     }
 
-    public static ArchiveIndex? ReadArchiveIndex(string path, StorageApi storageApi)
+    public static ArchiveIndex ReadArchiveIndex(string path, StorageApi storageApi)
     {
         using var utf8Path = new Utf8String(path);
         Longtail_ArchiveIndex* archiveIndex;
@@ -33,7 +33,7 @@ public unsafe class ArchiveIndex : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_ReadArchiveIndex), err);
         }
-        return archiveIndex != null ? new ArchiveIndex(archiveIndex) : null;
+        return archiveIndex != null ? new ArchiveIndex(archiveIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_ReadArchiveIndex)} returned a null pointer");
     }
 
     public void Dispose()
