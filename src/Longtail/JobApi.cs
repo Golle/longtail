@@ -10,10 +10,10 @@ public unsafe class JobApi : IDisposable
     public uint GetWorkerCount() => LongtailLibrary.Longtail_Job_GetWorkerCount(_jobApi);
     internal Longtail_JobAPI* AsPointer() => _jobApi;
 
-    public static JobApi? CreateBikeshedJobAPI(uint workerCount, int workerPriority = -1)
+    public static JobApi CreateBikeshedJobAPI(uint workerCount, int workerPriority = -1)
     {
         var jobApi = LongtailLibrary.Longtail_CreateBikeshedJobAPI(workerCount, workerPriority);
-        return jobApi != null ? new JobApi(jobApi) : null;
+        return jobApi != null ? new JobApi(jobApi) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateBikeshedJobAPI)} returned a null pointer");
     }
 
     public void Dispose()

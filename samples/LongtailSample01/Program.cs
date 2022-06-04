@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Longtail;
 
 MemTracer.Init();
@@ -88,7 +87,6 @@ MemTracer.Init();
         {
             Console.WriteLine("All files are identical!");
         }
-        
     }
 
 
@@ -117,6 +115,9 @@ MemTracer.Init();
         using var file = File.OpenWrite(indexPath);
         file.SetLength(0);
         file.Write(versionIndexBuffer.AsReadOnlySpan());
+
+        //This can be used to write the version to a blockstore
+        //API.WriteVersion(indexPath, SomeBlocKStore, fsStorage, outStoreIndex, versionIndex, jobApi, true);
     }
 
     static void Downsync(string source, string output, string version, string? cachePath = null)

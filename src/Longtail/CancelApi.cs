@@ -27,11 +27,7 @@ public unsafe class CancelApi : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_CancelAPI_CreateToken), err);
         }
-        if (token == null)
-        {
-            throw new OutOfMemoryException(nameof(LongtailLibrary.Longtail_CancelAPI_CreateToken));
-        }
-        return new CancelToken(_cancelApi, token);
+        return token != null ? new CancelToken(_cancelApi, token) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CancelAPI_CreateToken)} returned a null pointer");
     }
 
     //public static extern Longtail_CancelAPI* Longtail_MakeCancelAPI(

@@ -1,5 +1,4 @@
-﻿using System.Text;
-using CodeGen.Syntax.Binding;
+﻿using CodeGen.Syntax.Binding;
 
 namespace CodeGen.Syntax.Symbols;
 

@@ -20,21 +20,21 @@ public unsafe class CompressionApi : IDisposable
         return api != null ? new CompressionApi(api, settings) : null;
     }
 
-    public static CompressionApi? CreateBrotliCompressionAPI()
+    public static CompressionApi CreateBrotliCompressionAPI()
     {
         var api = LongtailLibrary.Longtail_CreateBrotliCompressionAPI();
-        return api != null ? new CompressionApi(api, 0) : null;
+        return api != null ? new CompressionApi(api, 0) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateBrotliCompressionAPI)} returned a null pointer");
     }
-    public static CompressionApi? CreateLZ4CompressionAPI()
+    public static CompressionApi CreateLZ4CompressionAPI()
     {
         var api = LongtailLibrary.Longtail_CreateLZ4CompressionAPI();
-        return api != null ? new CompressionApi(api, 0) : null;
+        return api != null ? new CompressionApi(api, 0) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateLZ4CompressionAPI)} returned a null pointer");
     }
 
-    public static CompressionApi? CreateZStdCompressionAPI()
+    public static CompressionApi CreateZStdCompressionAPI()
     {
         var api = LongtailLibrary.Longtail_CreateZStdCompressionAPI();
-        return api != null ? new CompressionApi(api, 0) : null;
+        return api != null ? new CompressionApi(api, 0) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateZStdCompressionAPI)} returned a null pointer");
     }
 
     public static CompressionApi? CreateForLZ4(uint compressionType)
@@ -50,8 +50,6 @@ public unsafe class CompressionApi : IDisposable
         var api = LongtailLibrary.Longtail_CompressionRegistry_CreateForZstd(compressionType, &settings);
         return api != null ? new CompressionApi(api, settings) : null;
     }
-
-
 
     public void Dispose()
     {

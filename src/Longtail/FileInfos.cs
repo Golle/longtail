@@ -30,7 +30,7 @@ public unsafe class FileInfos : IDisposable
     //    Longtail_FileInfos* file_infos
     //);
 
-    public static FileInfos? GetFilesRecursively(string rootPath, StorageApi storageApi, PathFilterApi? pathFilter = null, CancelApi? cancelApi = null, CancelToken? cancelToken = null)
+    public static FileInfos GetFilesRecursively(string rootPath, StorageApi storageApi, PathFilterApi? pathFilter = null, CancelApi? cancelApi = null, CancelToken? cancelToken = null)
     {
         using var path = new Utf8String(rootPath);
 
@@ -49,7 +49,7 @@ public unsafe class FileInfos : IDisposable
             throw new LongtailException(nameof(LongtailLibrary.Longtail_GetFilesRecursively), err);
         }
 
-        return fileInfos != null ? new FileInfos(fileInfos) : null;
+        return fileInfos != null ? new FileInfos(fileInfos) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_GetFilesRecursively)} returned a null pointer");
     }
 
     public void Dispose()
