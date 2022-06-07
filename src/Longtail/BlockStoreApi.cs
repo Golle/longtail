@@ -167,7 +167,7 @@ public unsafe class BlockStoreApi : IDisposable
     public static BlockStoreApi CreateShareBlockStoreAPI(BlockStoreApi backingBlockStoreApi)
         => Wrap(LongtailLibrary.Longtail_CreateShareBlockStoreAPI(backingBlockStoreApi.AsPointer()));
 
-
+    public static BlockStoreApi MakeBlockStoreApi(IAsyncBlockstore blockstore) => MakeBlockStoreApi(new AsyncBlockStore(blockstore));
     public static BlockStoreApi MakeBlockStoreApi(IBlockstore blockstore)
     {
         using var name = new Utf8String(nameof(BlockStoreApi));
