@@ -144,8 +144,5 @@ internal class AsyncBlockStore : IBlockstore
         return 0;
     }
 
-    public void OnDispose()
-    {
-        throw new NotImplementedException();
-    }
+    public void OnDispose() => _blockstore.OnDispose();
 }

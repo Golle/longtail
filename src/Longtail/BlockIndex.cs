@@ -1,6 +1,6 @@
 ﻿namespace Longtail;
 
-public readonly unsafe ref struct BlockIndex
+public readonly unsafe struct BlockIndex
 {
     private readonly Longtail_BlockIndex* _index;
     public ulong BlockHash => *_index->m_BlockHash;

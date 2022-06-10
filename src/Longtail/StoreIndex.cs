@@ -8,6 +8,13 @@ public sealed unsafe class StoreIndex : IDisposable
     private readonly bool _owner;
     internal Longtail_StoreIndex* AsPointer() => _storeIndex;
 
+    public StoreIndex()
+    {
+        using var name = new Utf8String(nameof(StoreIndex));
+        _storeIndex = (Longtail_StoreIndex*)LongtailLibrary.Longtail_Alloc(name, (ulong)sizeof(Longtail_StoreIndex));
+        *_storeIndex = default;
+        _owner = true;
+    }
     internal StoreIndex(Longtail_StoreIndex* storeIndex, bool owner = true)
     {
         _storeIndex = storeIndex;
@@ -124,6 +131,68 @@ public sealed unsafe class StoreIndex : IDisposable
             }
         }
         return outChunkCount;
+    }
+
+
+    //public static extern ulong Longtail_GetStoreIndexSize(
+    //    uint block_count,
+    //    uint chunk_count
+    //);
+    //public static extern int Longtail_CreateStoreIndex(
+    //    Longtail_HashAPI* hash_api,
+    //    uint chunk_count,
+    //    ulong* chunk_hashes,
+    //    uint* chunk_sizes,
+    //    uint* optional_chunk_tags,
+    //    uint max_block_size,
+    //    uint max_chunks_per_block,
+    //    Longtail_StoreIndex** out_store_index
+    //);
+
+    public static StoreIndex CreateStoreIndexFromBlocks(ReadOnlySpan<BlockIndex> blockIndexes)
+    {
+        fixed (BlockIndex* pBlockIndexes = blockIndexes)
+        {
+            Longtail_StoreIndex* storeIndex;
+            var err = LongtailLibrary.Longtail_CreateStoreIndexFromBlocks((uint)blockIndexes.Length, (Longtail_BlockIndex**)pBlockIndexes, &storeIndex);
+            if (err != 0)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateStoreIndexFromBlocks), err);
+            }
+            return storeIndex != null ? new StoreIndex(storeIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateStoreIndexFromBlocks)} returned a null pointer");
+        }
+
+    }
+    public StoreIndex MergeStoreIndex(StoreIndex remoteStoreIndex)
+    {
+        Longtail_StoreIndex* newStoreIndex;
+        var err = LongtailLibrary.Longtail_MergeStoreIndex(_storeIndex, remoteStoreIndex.AsPointer(), &newStoreIndex);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_MergeStoreIndex), err);
+        }
+        return newStoreIndex != null ? new StoreIndex(newStoreIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_MergeStoreIndex)} returned a null pointer");
+    }
+    
+    //public static extern int Longtail_MakeBlockIndex(
+    //    Longtail_StoreIndex* store_index,
+    //    uint block_index,
+    //    Longtail_BlockIndex* out_block_index
+    //);
+
+
+    public StoreIndex GetExistingStoreIndex(ReadOnlySpan<ulong> chunks, uint minBlockUsagePercent)
+    {
+        fixed (ulong* pChunks = chunks)
+        {
+            Longtail_StoreIndex* existingStoreIndex;
+            var err = LongtailLibrary.Longtail_GetExistingStoreIndex(_storeIndex, (uint)chunks.Length, pChunks, minBlockUsagePercent, &existingStoreIndex);
+            if (err != 0)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_GetExistingStoreIndex), err);
+            }
+            return existingStoreIndex != null ? new StoreIndex(existingStoreIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_GetExistingStoreIndex)} returned a null pointer"); ;
+        }
     }
 
     public void Dispose()
