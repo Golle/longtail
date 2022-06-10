@@ -46,7 +46,7 @@ MemTracer.Init();
 
     }
 
-    return 0;
+    
     // Download the chunks and unpack them
     {
 
@@ -68,6 +68,7 @@ MemTracer.Init();
             Console.WriteLine("All files are identical!");
         }
     }
+    
     {
         // using no cache
         var timer = Stopwatch.StartNew();
@@ -100,9 +101,6 @@ MemTracer.Init();
         using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
         using var versionIndex = VersionIndex.Create(path, fsStorage, hashApi!, chunker!, jobApi, files!, targetChunkSize, false)!;
         using var outBlockStore = BlockStoreApi.MakeBlockStoreApi(new SampleAsyncBlockStore(destination, "stuff", fsStorage));
-        //using var outBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, destination)!;
-        using var compressionRegistry = CompressionRegistry.CreateFullCompressionRegistry()!;
-        compressionRegistry.GetCompressionAPI(CompressionTypes.BrotliGenericDefaultQuality);
         using var outStoreIndex = outBlockStore.GetExistingContent(versionIndex.GetChunkHashes())!;
         using var versionMissingStoreIndex = StoreIndex.CreateMissingContent(hashApi, outStoreIndex, versionIndex, targetBlocKSize, chunksPerBlock);
         if (versionMissingStoreIndex.GetBlockCount() > 0)
@@ -115,9 +113,6 @@ MemTracer.Init();
         using var file = File.OpenWrite(indexPath);
         file.SetLength(0);
         file.Write(versionIndexBuffer.AsReadOnlySpan());
-
-        //This can be used to write the version to a blockstore
-        //API.WriteVersion(indexPath, SomeBlocKStore, fsStorage, outStoreIndex, versionIndex, jobApi, true);
     }
 
     static void Downsync(string source, string output, string version, string? cachePath = null)
@@ -134,7 +129,7 @@ MemTracer.Init();
         using var currentVersionIndex = VersionIndex.Create(output, fsStorage, hashApi, chunkerApi, jobApi, fileInfos, targetVersionIndex.TargetChunkSize, false)!;
         using var versionDiff = VersionDiff.Create(hashApi, currentVersionIndex, targetVersionIndex)!;
         var requiredChunkHashes = targetVersionIndex.GetRequiredChunkHashes(versionDiff);
-        using var blockStoreApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, source)!;
+        using var blockStoreApi = BlockStoreApi.MakeBlockStoreApi(new SampleAsyncBlockStore(source, "stuff", fsStorage));
 
         using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
         if (cachePath != null)

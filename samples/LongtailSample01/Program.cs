@@ -101,8 +101,6 @@ MemTracer.Init();
         using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
         using var versionIndex = VersionIndex.Create(path, fsStorage, hashApi!, chunker!, jobApi, files!, targetChunkSize, false)!;
         using var outBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, destination)!;
-        //using var compressionRegistry = CompressionRegistry.CreateFullCompressionRegistry()!;
-        //compressionRegistry.GetCompressionAPI(CompressionTypes.BrotliGenericDefaultQuality);
         using var outStoreIndex = outBlockStore.GetExistingContent(versionIndex.GetChunkHashes())!;
         using var versionMissingStoreIndex = StoreIndex.CreateMissingContent(hashApi, outStoreIndex, versionIndex, targetBlocKSize, chunksPerBlock);
         if (versionMissingStoreIndex.GetBlockCount() > 0)

@@ -3,6 +3,7 @@
 public readonly unsafe struct BlockIndex
 {
     private readonly Longtail_BlockIndex* _index;
+    internal Longtail_BlockIndex* AsPointer() => _index;
     public ulong BlockHash => *_index->m_BlockHash;
     public uint HashIdentifier => *_index->m_HashIdentifier;
     public uint ChunkCount => *_index->m_ChunkCount;

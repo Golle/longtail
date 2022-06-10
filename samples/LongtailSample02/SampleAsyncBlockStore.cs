@@ -15,52 +15,44 @@ internal class SampleAsyncBlockStore : IAsyncBlockstore
         _storageApi = storageApi;
     }
 
-    public async Task PutStoredBlock(StoredBlock storedBlock)
+    public Task PutStoredBlock(StoredBlock storedBlock)
     {
         var blockHash = storedBlock.BlockIndex.BlockHash;
         var path = Path.Combine(_basePath, $"{blockHash:X16}.{_fileExtension}");
-        await using var file = File.OpenWrite(path);
-        await file.WriteAsync(storedBlock.BlockData.ToArray(), CancellationToken.None);
+        storedBlock.WriteStoredBlock(path, _storageApi);
+        return Task.CompletedTask;
     }
 
     public Task PreflightGet(ReadOnlyMemory<ulong> blockHashes)
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
+        return Task.CompletedTask;
+
     }
 
     public Task<StoredBlock?> GetStoredBlock(ulong blockHash)
     {
-        throw new NotImplementedException();
+        var path = Path.Combine(_basePath, $"{blockHash:X16}.{_fileExtension}");
+
+        var block = StoredBlock.ReadStoredBlock(path, _storageApi);
+        return Task.FromResult(block)!;
     }
 
     public async Task<StoreIndex?> GetExistingContent(ReadOnlyMemory<ulong> blockHashes, uint minBlockUsagePercent)
     {
-        //using var fileStorage = StorageApi.CreateFSStorageAPI();
         using var fileInfos = FileInfos.GetFilesRecursively(_basePath, _storageApi);
         if (fileInfos.GetCount() == 0)
         {
             return StoreIndex.CreateStoreIndexFromBlocks(ReadOnlySpan<BlockIndex>.Empty);
         }
-        StoreIndex? storeIndex = null;
-        try
+
+        var blockIndexes = new BlockIndex[(int)fileInfos.GetCount()];
+        for (var i = 0u; i < fileInfos.GetCount(); ++i)
         {
-            foreach (var file in Directory.EnumerateFiles(_basePath, $"*.{_fileExtension}", SearchOption.AllDirectories))
-            {
-                var contents = await File.ReadAllBytesAsync(file);
-                using var tmpStoreIndex = StoreIndex.ReadStoreIndexFromBuffer(contents);
-                storeIndex ??= new StoreIndex(); // Create an empty storeindex if there's none.
-                var mergedStoreIndex = storeIndex.MergeStoreIndex(tmpStoreIndex);
-                storeIndex.Dispose();
-                storeIndex = mergedStoreIndex;
-            }
+            var path = fileInfos.GetPath(i);
+            blockIndexes[i] = await _storageApi.ReadBlockIndexAsync(Path.Combine(_basePath, path));
         }
-        catch
-        {
-            storeIndex?.Dispose();
-            throw;
-        }
-        
-        return storeIndex;
+        return StoreIndex.CreateStoreIndexFromBlocks(blockIndexes);
     }
 
     public Task<uint> PruneBlocks(ReadOnlyMemory<ulong> blockKeepHashes)
