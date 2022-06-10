@@ -1,8 +1,6 @@
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using Longtail;
+using LongtailSample02;
 
 MemTracer.Init();
 {
@@ -17,7 +15,7 @@ MemTracer.Init();
     const uint targetBlocKSize = 8388608u;
     const uint chunksPerBlock = 1024u;
 
-    var versionFileName = "version_index.1.2.2.lvi";
+    const string versionFileName = "version_index.1.2.2.lvi";
     var samplePath = Path.Combine(basePath, "tmp", typeof(Program).Assembly.GetName().Name!);
     var dataPath = Path.Combine(samplePath, "data");
     var downloadCachePath = Path.Combine(samplePath, "cache");
@@ -38,16 +36,17 @@ MemTracer.Init();
 
 
     var indexFilePath = Path.Combine(indexPath, versionFileName);
-    
+
     // Take the data and upload it to a path
     {
         var timer = Stopwatch.StartNew();
         Console.WriteLine($"Starting upsync from {dataPath} to {destinationPath}");
         Upsync(dataPath, destinationPath, indexFilePath);
         Console.WriteLine($"Finished upsync in {timer.Elapsed.TotalMilliseconds:0.00}");
-        
+
     }
 
+    return 0;
     // Download the chunks and unpack them
     {
 
@@ -100,9 +99,10 @@ MemTracer.Init();
         using var chunker = ChunkerApi.CreateHPCDCChunkerAPI();
         using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
         using var versionIndex = VersionIndex.Create(path, fsStorage, hashApi!, chunker!, jobApi, files!, targetChunkSize, false)!;
-        using var outBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, destination)!;
-        //using var compressionRegistry = CompressionRegistry.CreateFullCompressionRegistry()!;
-        //compressionRegistry.GetCompressionAPI(CompressionTypes.BrotliGenericDefaultQuality);
+        using var outBlockStore = BlockStoreApi.MakeBlockStoreApi(new SampleAsyncBlockStore(destination, "stuff", fsStorage));
+        //using var outBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, destination)!;
+        using var compressionRegistry = CompressionRegistry.CreateFullCompressionRegistry()!;
+        compressionRegistry.GetCompressionAPI(CompressionTypes.BrotliGenericDefaultQuality);
         using var outStoreIndex = outBlockStore.GetExistingContent(versionIndex.GetChunkHashes())!;
         using var versionMissingStoreIndex = StoreIndex.CreateMissingContent(hashApi, outStoreIndex, versionIndex, targetBlocKSize, chunksPerBlock);
         if (versionMissingStoreIndex.GetBlockCount() > 0)
