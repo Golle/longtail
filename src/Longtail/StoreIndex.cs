@@ -15,24 +15,42 @@ public sealed unsafe class StoreIndex : IDisposable
         *_storeIndex = default;
         _owner = true;
     }
+
     internal StoreIndex(Longtail_StoreIndex* storeIndex, bool owner = true)
     {
         _storeIndex = storeIndex;
         _owner = owner;
     }
 
-    public uint GetVersion() => LongtailLibrary.Longtail_StoreIndex_GetVersion(_storeIndex);
-    public uint GetHashIdentifier() => LongtailLibrary.Longtail_StoreIndex_GetHashIdentifier(_storeIndex);
-    public uint GetBlockCount() => LongtailLibrary.Longtail_StoreIndex_GetBlockCount(_storeIndex);
-    public uint GetChunkCount() => LongtailLibrary.Longtail_StoreIndex_GetChunkCount(_storeIndex);
-    // NOTE(Jens): these does not have set size, they depend on other factors. Not sure what to return? maybe just a struct with an indexer that wont check sizes?
-    public ulong* GetBlockHashes() => throw new NotImplementedException("No fixed size for this, so we'll have to support unsafe code. TBD");
-    public ulong* GetChunkHashes() => throw new NotImplementedException("No fixed size for this, so we'll have to support unsafe code. TBD");
-    public ReadOnlySpan<uint> GetBlockChunksOffsets() => new(LongtailLibrary.Longtail_StoreIndex_GetBlockChunksOffsets(_storeIndex), (int)GetBlockCount());
-    public ReadOnlySpan<uint> GetBlockChunkCounts() => new(LongtailLibrary.Longtail_StoreIndex_GetBlockChunkCounts(_storeIndex), (int)GetBlockCount());
-    public ReadOnlySpan<uint> GetBlockTags() => new(LongtailLibrary.Longtail_StoreIndex_GetBlockTags(_storeIndex), (int)GetBlockCount());
-    public uint* GetChunkSizes() => throw new NotImplementedException("No fixed size for this, so we'll have to support unsafe code. TBD");
+    public uint Version => *_storeIndex->m_Version;
+    public uint HashIdentifner => *_storeIndex->m_HashIdentifier;
+    public uint BlockCount => *_storeIndex->m_BlockCount;
+    public uint ChunkCount => *_storeIndex->m_ChunkCount;
+    public ReadOnlySpan<ulong> BlockHashes => new(_storeIndex->m_BlockHashes, (int)_storeIndex->m_BlockCount);
+    public ReadOnlySpan<uint> BlockChunksOffsets => new(_storeIndex->m_BlockChunksOffsets, (int)BlockCount);
+    public ReadOnlySpan<uint> BlockChunkCounts => new(_storeIndex->m_BlockChunkCounts, (int)BlockCount);
+    public ReadOnlySpan<uint> BlockTags => new(_storeIndex->m_BlockTags, (int)BlockCount);
+    public ReadOnlySpan<uint> GetChunkSizes(uint index)
+    {
+        if (index >= ChunkCount)
+        {
+            throw new IndexOutOfRangeException($"The index {index} is out of range. Max allowed: {ChunkCount}");
+        }
+        var count = _storeIndex->m_BlockChunkCounts[index];
+        var offset = _storeIndex->m_BlockChunksOffsets[index];
+        return new(_storeIndex->m_ChunkSizes + offset, (int)count);
+    }
 
+    public ReadOnlySpan<ulong> GetChunkHashes(uint index)
+    {
+        if (index >= ChunkCount)
+        {
+            throw new IndexOutOfRangeException($"The index {index} is out of range. Max allowed: {ChunkCount}");
+        }
+        var count = _storeIndex->m_BlockChunkCounts[index];
+        var offset = _storeIndex->m_BlockChunksOffsets[index];
+        return new(_storeIndex->m_ChunkHashes + offset, (int)count);
+    }
 
     public StoreIndex? PruneStoreIndex(ReadOnlySpan<ulong> keepBlockhashes)
     {
@@ -175,7 +193,7 @@ public sealed unsafe class StoreIndex : IDisposable
         }
         return newStoreIndex != null ? new StoreIndex(newStoreIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_MergeStoreIndex)} returned a null pointer");
     }
-    
+
     //public static extern int Longtail_MakeBlockIndex(
     //    Longtail_StoreIndex* store_index,
     //    uint block_index,

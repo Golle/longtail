@@ -102,7 +102,7 @@ MemTracer.Init();
         using var outBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, destination)!;
         using var outStoreIndex = outBlockStore.GetExistingContent(versionIndex.GetChunkHashes())!;
         using var versionMissingStoreIndex = StoreIndex.CreateMissingContent(hashApi, outStoreIndex, versionIndex, targetBlocKSize, chunksPerBlock);
-        if (versionMissingStoreIndex.GetBlockCount() > 0)
+        if (versionMissingStoreIndex.BlockCount > 0)
         {
             Console.WriteLine("Misssing content found.");
             API.WriteContent(path, versionMissingStoreIndex, versionIndex, fsStorage, outBlockStore, jobApi, progress);
