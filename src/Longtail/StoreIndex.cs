@@ -151,17 +151,19 @@ public sealed unsafe class StoreIndex : IDisposable
 
     public static StoreIndex CreateStoreIndexFromBlocks(ReadOnlySpan<BlockIndex> blockIndexes)
     {
-        fixed (BlockIndex* pBlockIndexes = blockIndexes)
+        var indexes = stackalloc Longtail_BlockIndex*[blockIndexes.Length];
+        for (var i = 0; i < blockIndexes.Length; ++i)
         {
-            Longtail_StoreIndex* storeIndex;
-            var err = LongtailLibrary.Longtail_CreateStoreIndexFromBlocks((uint)blockIndexes.Length, (Longtail_BlockIndex**)pBlockIndexes, &storeIndex);
-            if (err != 0)
-            {
-                throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateStoreIndexFromBlocks), err);
-            }
-            return storeIndex != null ? new StoreIndex(storeIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateStoreIndexFromBlocks)} returned a null pointer");
+            indexes[i] = blockIndexes[i].AsPointer();
         }
 
+        Longtail_StoreIndex* storeIndex;
+        var err = LongtailLibrary.Longtail_CreateStoreIndexFromBlocks((uint)blockIndexes.Length, indexes, &storeIndex);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateStoreIndexFromBlocks), err);
+        }
+        return storeIndex != null ? new StoreIndex(storeIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateStoreIndexFromBlocks)} returned a null pointer");
     }
     public StoreIndex MergeStoreIndex(StoreIndex remoteStoreIndex)
     {

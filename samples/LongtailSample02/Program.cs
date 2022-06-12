@@ -49,8 +49,8 @@ MemTracer.Init();
     
     // Download the chunks and unpack them
     {
-
-        // using a cache
+        // using no cache
+        
         var timer = Stopwatch.StartNew();
         var output = Path.Combine(outPath, "cache");
         Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
@@ -69,25 +69,25 @@ MemTracer.Init();
         }
     }
     
-    {
-        // using no cache
-        var timer = Stopwatch.StartNew();
-        var output = Path.Combine(outPath, "nocache");
-        Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
-        Downsync(destinationPath, output, indexFilePath, downloadCachePath);
-        Console.WriteLine($"Finished downsync in {timer.Elapsed.TotalMilliseconds:0.00} ms");
-        Console.WriteLine("Comparing file content");
-        if (!CompareContent(dataPath, output))
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Mismatch in content.");
-            Console.ResetColor();
-        }
-        else
-        {
-            Console.WriteLine("All files are identical!");
-        }
-    }
+    //{
+    //    // using a cache
+    //    var timer = Stopwatch.StartNew();
+    //    var output = Path.Combine(outPath, "nocache");
+    //    Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
+    //    Downsync(destinationPath, output, indexFilePath, downloadCachePath);
+    //    Console.WriteLine($"Finished downsync in {timer.Elapsed.TotalMilliseconds:0.00} ms");
+    //    Console.WriteLine("Comparing file content");
+    //    if (!CompareContent(dataPath, output))
+    //    {
+    //        Console.ForegroundColor = ConsoleColor.Red;
+    //        Console.WriteLine("Mismatch in content.");
+    //        Console.ResetColor();
+    //    }
+    //    else
+    //    {
+    //        Console.WriteLine("All files are identical!");
+    //    }
+    //}
 
 
     static void Upsync(string path, string destination, string indexPath)
@@ -152,6 +152,16 @@ MemTracer.Init();
 }
 
 Console.WriteLine($"Allocations: {MemTracer.Allocations}. Deallocations: {MemTracer.Deallocations}. Memory allocated: {MemTracer.MemoryAllocated} bytes");
+if (MemTracer.Allocations != MemTracer.Deallocations)
+{
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"Memory leaked: {MemTracer.Allocations - MemTracer.Deallocations} allocations.");
+    Console.ResetColor();
+    Console.WriteLine("Summary");
+    Console.WriteLine(MemTracer.GetStatsSummary());
+    Console.WriteLine("Details");
+    Console.WriteLine(MemTracer.GetStatsDetailed());
+}
 //Console.WriteLine(MemTracer.GetStatsSummary());
 //Console.WriteLine(MemTracer.GetStatsDetailed());
 MemTracer.Dispose();

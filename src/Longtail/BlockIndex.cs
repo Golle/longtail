@@ -1,8 +1,8 @@
 ﻿namespace Longtail;
 
-public readonly unsafe struct BlockIndex
+public unsafe class BlockIndex : IDisposable
 {
-    private readonly Longtail_BlockIndex* _index;
+    private Longtail_BlockIndex* _index;
     internal Longtail_BlockIndex* AsPointer() => _index;
     public ulong BlockHash => *_index->m_BlockHash;
     public uint HashIdentifier => *_index->m_HashIdentifier;
@@ -13,5 +13,14 @@ public readonly unsafe struct BlockIndex
     internal BlockIndex(Longtail_BlockIndex* index)
     {
         _index = index;
+    }
+
+    public void Dispose()
+    {
+        if (_index != null)
+        {
+            LongtailLibrary.Longtail_Free(_index);
+            _index = null;
+        }
     }
 }

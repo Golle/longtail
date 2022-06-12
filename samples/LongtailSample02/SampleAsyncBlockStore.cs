@@ -37,7 +37,7 @@ internal class SampleAsyncBlockStore : IAsyncBlockstore
         var block = StoredBlock.ReadStoredBlock(path, _storageApi);
         return Task.FromResult(block)!;
     }
-
+   
     public async Task<StoreIndex?> GetExistingContent(ReadOnlyMemory<ulong> blockHashes, uint minBlockUsagePercent)
     {
         using var fileInfos = FileInfos.GetFilesRecursively(_basePath, _storageApi);
@@ -52,7 +52,18 @@ internal class SampleAsyncBlockStore : IAsyncBlockstore
             var path = fileInfos.GetPath(i);
             blockIndexes[i] = await _storageApi.ReadBlockIndexAsync(Path.Combine(_basePath, path));
         }
-        return StoreIndex.CreateStoreIndexFromBlocks(blockIndexes);
+
+        try
+        {
+            return StoreIndex.CreateStoreIndexFromBlocks(blockIndexes);
+        }
+        finally
+        {
+            foreach (var blockIndex in blockIndexes)
+            {
+                blockIndex.Dispose();
+            }
+        }
     }
 
     public Task<uint> PruneBlocks(ReadOnlyMemory<ulong> blockKeepHashes)

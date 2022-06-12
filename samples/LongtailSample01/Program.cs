@@ -50,8 +50,7 @@ MemTracer.Init();
 
     // Download the chunks and unpack them
     {
-
-        // using a cache
+        // using no cach
         var timer = Stopwatch.StartNew();
         var output = Path.Combine(outPath, "cache");
         Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
@@ -70,7 +69,7 @@ MemTracer.Init();
         }
     }
     {
-        // using no cache
+        // using a cache
         var timer = Stopwatch.StartNew();
         var output = Path.Combine(outPath, "nocache");
         Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
@@ -155,8 +154,17 @@ MemTracer.Init();
 }
 
 Console.WriteLine($"Allocations: {MemTracer.Allocations}. Deallocations: {MemTracer.Deallocations}. Memory allocated: {MemTracer.MemoryAllocated} bytes");
-//Console.WriteLine(MemTracer.GetStatsSummary());
-//Console.WriteLine(MemTracer.GetStatsDetailed());
+if (MemTracer.Allocations != MemTracer.Deallocations)
+{
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"Memory leaked: {MemTracer.Allocations - MemTracer.Deallocations} allocations.");
+    Console.ResetColor();
+    Console.WriteLine("Summary");
+    Console.WriteLine(MemTracer.GetStatsSummary());
+    Console.WriteLine("Details");
+    Console.WriteLine(MemTracer.GetStatsDetailed());
+}
+
 MemTracer.Dispose();
 
 return 0;
