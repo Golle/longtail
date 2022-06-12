@@ -7,7 +7,7 @@ public unsafe class StoredBlock : IDisposable
     private Longtail_StoredBlock* _storedBlock;
     private readonly bool _owner;
     internal Longtail_StoredBlock* AsPointer() => _storedBlock;
-    public BlockIndex BlockIndex => new(_storedBlock->m_BlockIndex);
+    public BlockIndex BlockIndex => new(_storedBlock->m_BlockIndex, false);
     public uint BlockChunksDataSize => _storedBlock->m_BlockChunksDataSize;
     public ReadOnlySpan<byte> BlockData => new(_storedBlock->m_BlockData, (int)_storedBlock->m_BlockChunksDataSize);
     public StoredBlock()

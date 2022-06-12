@@ -74,7 +74,7 @@ internal unsafe class BlockIndexTests
         };
 
         var blockIndex = new BlockIndex(&index);
-        
+
         Assert.That(blockIndex.ChunkHashes.Length, Is.EqualTo(count));
         Assert.That(blockIndex.ChunkHashes[0], Is.EqualTo(3));
         Assert.That(blockIndex.ChunkHashes[1], Is.EqualTo(4));
@@ -88,7 +88,7 @@ internal unsafe class BlockIndexTests
         chunkSizes[0] = 3;
         chunkSizes[1] = 4;
         var index = new Longtail_BlockIndex
-        { 
+        {
             m_ChunkSizes = chunkSizes,
             m_ChunkCount = &count
         };
@@ -98,5 +98,32 @@ internal unsafe class BlockIndexTests
         Assert.That(blockIndex.ChunkSizes.Length, Is.EqualTo(count));
         Assert.That(blockIndex.ChunkSizes[0], Is.EqualTo(3));
         Assert.That(blockIndex.ChunkSizes[1], Is.EqualTo(4));
+    }
+
+    [Test]
+    public void Dispose_Owner_SetPointerToNull()
+    {
+        var mem = (Longtail_BlockIndex*)LongtailLibrary.Longtail_Alloc(null, (ulong)sizeof(Longtail_BlockIndex));
+        var blockIndex = new BlockIndex(mem, true);
+        blockIndex.Dispose();
+
+        Assert.That(blockIndex.AsPointer() == null, Is.True);
+    }
+
+    [Test]
+    public void Dispose_NotOwner_DontSetPointerToNull()
+    {
+        var mem = (Longtail_BlockIndex*)LongtailLibrary.Longtail_Alloc(null, (ulong)sizeof(Longtail_BlockIndex));
+        try
+        {
+            var blockIndex = new BlockIndex(mem, false);
+            blockIndex.Dispose();
+
+            Assert.That(blockIndex.AsPointer() == null, Is.False);
+        }
+        finally
+        {
+            LongtailLibrary.Longtail_Free(mem);
+        }
     }
 }
