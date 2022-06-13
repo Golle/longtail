@@ -162,8 +162,7 @@ if (MemTracer.Allocations != MemTracer.Deallocations)
     Console.WriteLine("Details");
     Console.WriteLine(MemTracer.GetStatsDetailed());
 }
-//Console.WriteLine(MemTracer.GetStatsSummary());
-//Console.WriteLine(MemTracer.GetStatsDetailed());
+
 MemTracer.Dispose();
 
 return 0;

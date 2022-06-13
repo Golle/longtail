@@ -1,6 +1,6 @@
 ﻿namespace Longtail;
 
-public unsafe class HashApi : IDisposable
+public sealed unsafe class HashApi : IDisposable
 {
     private Longtail_HashAPI* _hashApi;
     private readonly bool _owner;
@@ -27,6 +27,32 @@ public unsafe class HashApi : IDisposable
     {
         var api = LongtailLibrary.Longtail_CreateMeowHashAPI();
         return api != null ? new HashApi(api) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateBlake2HashAPI)} returned a null pointer");
+    }
+
+
+    public HashApiContext BeginContext()
+    {
+        Longtail_HashAPI_Context* context;
+        var err = LongtailLibrary.Longtail_Hash_BeginContext(_hashApi, &context);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_Hash_BeginContext), err);
+        }
+        return context != null ? new HashApiContext(_hashApi, context) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_Hash_BeginContext)} returned a null pointer");
+    }
+
+    public ulong HashBuffer(ReadOnlySpan<byte> data)
+    {
+        fixed (byte* pdata = data)
+        {
+            ulong hash;
+            var err = LongtailLibrary.Longtail_Hash_HashBuffer(_hashApi, (uint)data.Length, pdata, &hash);
+            if (err != 0)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_Hash_HashBuffer), err);
+            }
+            return hash;
+        }
     }
 
     public void Dispose()

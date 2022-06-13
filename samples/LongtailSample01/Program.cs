@@ -164,7 +164,6 @@ if (MemTracer.Allocations != MemTracer.Deallocations)
     Console.WriteLine("Details");
     Console.WriteLine(MemTracer.GetStatsDetailed());
 }
-
 MemTracer.Dispose();
 
 return 0;
