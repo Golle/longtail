@@ -34,9 +34,6 @@ public unsafe class StorageApi : IDisposable
         }
     }
 
-
-    public Task<BlockIndex> ReadBlockIndexAsync(string path) =>
-        Task.Run(() => ReadBlockIndex(path));
     public BlockIndex ReadBlockIndex(string path)
     {
         using var utf8Path = new Utf8String(path);
@@ -48,6 +45,46 @@ public unsafe class StorageApi : IDisposable
         }
         return blockIndex != null ? new BlockIndex(blockIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_ReadBlockIndex)} returned a null pointer");
     }
+
+    public StorageApiOpenFile? OpenReadFile(string path)
+    {
+        using var utf8Path = new Utf8String(path);
+        Longtail_StorageAPI_OpenFile* openFile;
+        var err = LongtailLibrary.Longtail_Storage_OpenReadFile(_storageApi, utf8Path, &openFile);
+        if (err == ErrorCodes.ENOENT)
+        {
+            return null;
+        }
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_Storage_OpenReadFile), err);
+        }
+        return openFile != null ? new StorageApiOpenFile(_storageApi, openFile) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_Storage_OpenReadFile)} returned a null pointer");
+
+    }
+    
+    //public static extern int Longtail_Storage_OpenWriteFile(
+    //    Longtail_StorageAPI* storage_api,
+    //    byte* path,
+    //    ulong initial_size,
+    //    Longtail_StorageAPI_OpenFile** out_open_file
+    //);
+
+    //public static extern int Longtail_Storage_Write(
+    //    Longtail_StorageAPI* storage_api,
+    //    Longtail_StorageAPI_OpenFile* f,
+    //    ulong offset,
+    //    ulong length,
+    //    void* input
+    //);
+
+    //public static extern int Longtail_Storage_SetSize(
+    //    Longtail_StorageAPI* storage_api,
+    //    Longtail_StorageAPI_OpenFile* f,
+    //    ulong length
+    //);
+
+
 
     public void Dispose()
     {

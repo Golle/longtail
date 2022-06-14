@@ -29,7 +29,6 @@ public sealed unsafe class HashApi : IDisposable
         return api != null ? new HashApi(api) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateBlake2HashAPI)} returned a null pointer");
     }
 
-
     public HashApiContext BeginContext()
     {
         Longtail_HashAPI_Context* context;
