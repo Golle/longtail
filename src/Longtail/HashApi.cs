@@ -1,4 +1,6 @@
-﻿namespace Longtail;
+﻿using Longtail.Internal;
+
+namespace Longtail;
 
 public sealed unsafe class HashApi : IDisposable
 {
@@ -52,6 +54,18 @@ public sealed unsafe class HashApi : IDisposable
             }
             return hash;
         }
+    }
+
+    public ulong GetPathHash(string path)
+    {
+        using var utf8Path = new Utf8String(path);
+        ulong hash;
+        var err = LongtailLibrary.Longtail_GetPathHash(_hashApi, utf8Path, &hash);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_GetPathHash), err);
+        }
+        return hash;
     }
 
     public void Dispose()
