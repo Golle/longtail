@@ -55,6 +55,47 @@ internal class StorageApiTests
         Assert.That(buffer, Is.EqualTo(testFile.Bytes));
     }
 
+    [Test]
+    public void OpenWriteFile_FileExists_ReturnFile()
+    {
+        using var testFile = new TestFile();
+        using var storage = StorageApi.CreateFSStorageAPI();
+
+        using var file = storage.OpenWriteFile(testFile.Path, 0);
+        
+        Assert.That(file, Is.Not.Null);
+    }
+
+    [Test]
+    public void SetSize_FileExists_SetTheFileSize()
+    {
+        using var testFile = new TestFile();
+        using var storage = StorageApi.CreateFSStorageAPI();
+
+        using var file = storage.OpenWriteFile(testFile.Path, 0)!;
+        file.SetSize(50);
+
+        var newFileSize = new FileInfo(testFile.Path).Length;
+        Assert.That(newFileSize, Is.EqualTo(50));
+    }
+
+    [Test]
+    public void Write_FileExists_WriteContents()
+    {
+        using var testFile = new TestFile();
+        using var storage = StorageApi.CreateFSStorageAPI();
+        var content = new byte[] { 1, 2, 3, 4, 5, 6 };
+        {
+            using var file = storage.OpenWriteFile(testFile.Path, 0)!;
+            file.Write(0, content);
+        }
+
+        var readBytes = testFile.ReadBytes();
+        var bytes = readBytes.ToArray();
+        
+        Assert.That(bytes, Is.EqualTo(content));
+    }
+
     /// <summary>
     /// This will create a temporary file which will be deleted when its disposed. (Not sure if this api works on all platforms)
     /// </summary>
@@ -72,6 +113,7 @@ internal class StorageApiTests
             File.WriteAllBytes(Path, Bytes);
         }
 
+        public byte[] ReadBytes() => File.ReadAllBytes(Path);
         public void Dispose() => File.Delete(Path);
     }
 }

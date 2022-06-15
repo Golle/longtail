@@ -34,6 +34,27 @@ public unsafe class StorageApiOpenFile : IDisposable
         }
     }
 
+    public void Write(ulong offset, ReadOnlySpan<byte> buffer)
+    {
+        fixed (byte* pInput = buffer)
+        {
+            var err = LongtailLibrary.Longtail_Storage_Write(_storageApi, _openFile, offset, (ulong)buffer.Length, pInput);
+            if (err != 0)
+            {
+                throw new LongtailException(nameof(LongtailLibrary.Longtail_Storage_Write), err);
+            }
+        }
+    }
+
+    public void SetSize(ulong length)
+    {
+        var err = LongtailLibrary.Longtail_Storage_SetSize(_storageApi, _openFile, length);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_Storage_SetSize), err);
+        }
+    }
+
     public void Dispose()
     {
         if (_openFile == null)

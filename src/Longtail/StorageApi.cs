@@ -62,27 +62,23 @@ public unsafe class StorageApi : IDisposable
         return openFile != null ? new StorageApiOpenFile(_storageApi, openFile) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_Storage_OpenReadFile)} returned a null pointer");
 
     }
-    
-    //public static extern int Longtail_Storage_OpenWriteFile(
-    //    Longtail_StorageAPI* storage_api,
-    //    byte* path,
-    //    ulong initial_size,
-    //    Longtail_StorageAPI_OpenFile** out_open_file
-    //);
 
-    //public static extern int Longtail_Storage_Write(
-    //    Longtail_StorageAPI* storage_api,
-    //    Longtail_StorageAPI_OpenFile* f,
-    //    ulong offset,
-    //    ulong length,
-    //    void* input
-    //);
+    public StorageApiOpenFile? OpenWriteFile(string path, ulong initialState)
+    {
+        using var utf8Path = new Utf8String(path);
+        Longtail_StorageAPI_OpenFile* file;
+        var err = LongtailLibrary.Longtail_Storage_OpenWriteFile(_storageApi, utf8Path, initialState, &file);
+        if (err == ErrorCodes.ENOENT)
+        {
+            return null;
+        }
 
-    //public static extern int Longtail_Storage_SetSize(
-    //    Longtail_StorageAPI* storage_api,
-    //    Longtail_StorageAPI_OpenFile* f,
-    //    ulong length
-    //);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_Storage_OpenWriteFile), err);
+        }
+        return file != null ? new StorageApiOpenFile(_storageApi, file) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_Storage_OpenWriteFile)} returned a null pointer");
+    }
 
 
 
