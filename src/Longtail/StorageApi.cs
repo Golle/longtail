@@ -1,4 +1,5 @@
-﻿using Longtail.Internal;
+﻿using System.Runtime.InteropServices;
+using Longtail.Internal;
 
 namespace Longtail;
 
@@ -128,14 +129,28 @@ public unsafe class StorageApi : IDisposable
         using var root = new Utf8String(rootPath);
         using var sub = new Utf8String(subPath);
         var result = LongtailLibrary.Longtail_Storage_ConcatPath(_storageApi, root, sub);
-        return Utf8String.GetString(result);
+        try
+        {
+            return Utf8String.GetString(result);
+        }
+        finally
+        {
+            LongtailLibrary.Longtail_Free(result);
+        }
     }
 
     public string GetParentPath(string path)
     {
         using var utf8Path = new Utf8String(path);
         var parentPath = LongtailLibrary.Longtail_Storage_GetParentPath(_storageApi, utf8Path);
-        return Utf8String.GetString(parentPath);
+        try
+        {
+            return Utf8String.GetString(parentPath);
+        }
+        finally
+        {
+            LongtailLibrary.Longtail_Free(parentPath);
+        }
     }
 
     public bool IsDir(string path)
@@ -168,6 +183,12 @@ public unsafe class StorageApi : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_Storage_RemoveFile), err);
         }
+    }
+
+    public bool EnsureParentPathExists(string path)
+    {
+        using var utf8Path = new Utf8String(path);
+        return LongtailLibrary.EnsureParentPathExists(_storageApi, utf8Path) != 0;
     }
 
     public void Dispose()
