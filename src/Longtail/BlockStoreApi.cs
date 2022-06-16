@@ -49,12 +49,7 @@ public unsafe class BlockStoreApi : IDisposable
             }
         }
     }
-
-    // TODO: investigate how to properly make an async api for these functions
-    // TODO: can TaskCompletionSource be used instead of EventWaitHandle ? Maybe we can avoid Task.Run
-    public Task<StoredBlock?> GetStoredBlockAsync(ulong blockHash)
-        => Task.Run(() => GetStoredBlock(blockHash));
-
+    
     public StoredBlock? GetStoredBlock(ulong blockHash)
     {
         using var storedBlockApi = new AsyncGetStoredBlockAPI();
@@ -71,9 +66,6 @@ public unsafe class BlockStoreApi : IDisposable
         }
         return storedBlockApi.StoredBlock != null ? new StoredBlock(storedBlockApi.StoredBlock, false) : null;
     }
-
-    public Task<StoreIndex?> GetExistingContentAsync(ReadOnlyMemory<ulong> chunkHashes, uint minBlockUsagePercent = 0)
-        => Task.Run(() => GetExistingContent(chunkHashes.Span, minBlockUsagePercent));
 
     public StoreIndex? GetExistingContent(ReadOnlySpan<ulong> chunkHashes, uint minBlockUsagePercent = 0)
     {
@@ -167,7 +159,7 @@ public unsafe class BlockStoreApi : IDisposable
     public static BlockStoreApi CreateShareBlockStoreAPI(BlockStoreApi backingBlockStoreApi)
         => Wrap(LongtailLibrary.Longtail_CreateShareBlockStoreAPI(backingBlockStoreApi.AsPointer()));
 
-
+    public static BlockStoreApi MakeBlockStoreApi(IAsyncBlockstore blockstore) => MakeBlockStoreApi(new AsyncBlockStore(blockstore));
     public static BlockStoreApi MakeBlockStoreApi(IBlockstore blockstore)
     {
         using var name = new Utf8String(nameof(BlockStoreApi));

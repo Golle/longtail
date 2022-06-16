@@ -8,6 +8,13 @@ public unsafe class ArchiveIndex : IDisposable
     private Longtail_ArchiveIndex* _archiveIndex;
     internal Longtail_ArchiveIndex* AsPointer() => _archiveIndex;
 
+    public uint Version => *_archiveIndex->m_Version;
+    public uint IndexDataSize => *_archiveIndex->m_IndexDataSize;
+    public StoreIndex StoreIndex => new(&_archiveIndex->m_StoreIndex, false);
+    public ulong GetBlockStartOffet(int index) => _archiveIndex->m_BlockStartOffets[index];
+    public uint GetBlockSize(int index) => _archiveIndex->m_BlockSizes[index];
+    public VersionIndex VersionIndex => new(&_archiveIndex->m_VersionIndex, false);
+
     internal ArchiveIndex(Longtail_ArchiveIndex* archiveIndex)
     {
         _archiveIndex = archiveIndex;

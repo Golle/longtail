@@ -1,8 +1,6 @@
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using Longtail;
+using LongtailSample02;
 
 MemTracer.Init();
 {
@@ -17,7 +15,7 @@ MemTracer.Init();
     const uint targetBlocKSize = 8388608u;
     const uint chunksPerBlock = 1024u;
 
-    var versionFileName = "version_index.1.2.2.lvi";
+    const string versionFileName = "version_index.1.2.2.lvi";
     var samplePath = Path.Combine(basePath, "tmp", typeof(Program).Assembly.GetName().Name!);
     var dataPath = Path.Combine(samplePath, "data");
     var downloadCachePath = Path.Combine(samplePath, "cache");
@@ -38,19 +36,21 @@ MemTracer.Init();
 
 
     var indexFilePath = Path.Combine(indexPath, versionFileName);
-    
+
     // Take the data and upload it to a path
     {
         var timer = Stopwatch.StartNew();
         Console.WriteLine($"Starting upsync from {dataPath} to {destinationPath}");
         Upsync(dataPath, destinationPath, indexFilePath);
         Console.WriteLine($"Finished upsync in {timer.Elapsed.TotalMilliseconds:0.00}");
-        
+
     }
 
+    
     // Download the chunks and unpack them
     {
-        // using no cach
+        // using no cache
+        
         var timer = Stopwatch.StartNew();
         var output = Path.Combine(outPath, "cache");
         Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
@@ -68,25 +68,26 @@ MemTracer.Init();
             Console.WriteLine("All files are identical!");
         }
     }
-    {
-        // using a cache
-        var timer = Stopwatch.StartNew();
-        var output = Path.Combine(outPath, "nocache");
-        Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
-        Downsync(destinationPath, output, indexFilePath, downloadCachePath);
-        Console.WriteLine($"Finished downsync in {timer.Elapsed.TotalMilliseconds:0.00} ms");
-        Console.WriteLine("Comparing file content");
-        if (!CompareContent(dataPath, output))
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Mismatch in content.");
-            Console.ResetColor();
-        }
-        else
-        {
-            Console.WriteLine("All files are identical!");
-        }
-    }
+    
+    //{
+    //    // using a cache
+    //    var timer = Stopwatch.StartNew();
+    //    var output = Path.Combine(outPath, "nocache");
+    //    Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
+    //    Downsync(destinationPath, output, indexFilePath, downloadCachePath);
+    //    Console.WriteLine($"Finished downsync in {timer.Elapsed.TotalMilliseconds:0.00} ms");
+    //    Console.WriteLine("Comparing file content");
+    //    if (!CompareContent(dataPath, output))
+    //    {
+    //        Console.ForegroundColor = ConsoleColor.Red;
+    //        Console.WriteLine("Mismatch in content.");
+    //        Console.ResetColor();
+    //    }
+    //    else
+    //    {
+    //        Console.WriteLine("All files are identical!");
+    //    }
+    //}
 
 
     static void Upsync(string path, string destination, string indexPath)
@@ -99,7 +100,7 @@ MemTracer.Init();
         using var chunker = ChunkerApi.CreateHPCDCChunkerAPI();
         using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
         using var versionIndex = VersionIndex.Create(path, fsStorage, hashApi!, chunker!, jobApi, files!, targetChunkSize, false)!;
-        using var outBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, destination)!;
+        using var outBlockStore = BlockStoreApi.MakeBlockStoreApi(new SampleAsyncBlockStore(destination, "stuff", fsStorage));
         using var outStoreIndex = outBlockStore.GetExistingContent(versionIndex.GetChunkHashes())!;
         using var versionMissingStoreIndex = StoreIndex.CreateMissingContent(hashApi, outStoreIndex, versionIndex, targetBlocKSize, chunksPerBlock);
         if (versionMissingStoreIndex.BlockCount > 0)
@@ -112,9 +113,6 @@ MemTracer.Init();
         using var file = File.OpenWrite(indexPath);
         file.SetLength(0);
         file.Write(versionIndexBuffer.AsReadOnlySpan());
-
-        //This can be used to write the version to a blockstore
-        //API.WriteVersion(indexPath, SomeBlocKStore, fsStorage, outStoreIndex, versionIndex, jobApi, true);
     }
 
     static void Downsync(string source, string output, string version, string? cachePath = null)
@@ -131,7 +129,7 @@ MemTracer.Init();
         using var currentVersionIndex = VersionIndex.Create(output, fsStorage, hashApi, chunkerApi, jobApi, fileInfos, targetVersionIndex.TargetChunkSize, false)!;
         using var versionDiff = VersionDiff.Create(hashApi, currentVersionIndex, targetVersionIndex)!;
         var requiredChunkHashes = targetVersionIndex.GetRequiredChunkHashes(versionDiff);
-        using var blockStoreApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, source)!;
+        using var blockStoreApi = BlockStoreApi.MakeBlockStoreApi(new SampleAsyncBlockStore(source, "stuff", fsStorage));
 
         using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
         if (cachePath != null)
@@ -164,6 +162,7 @@ if (MemTracer.Allocations != MemTracer.Deallocations)
     Console.WriteLine("Details");
     Console.WriteLine(MemTracer.GetStatsDetailed());
 }
+
 MemTracer.Dispose();
 
 return 0;

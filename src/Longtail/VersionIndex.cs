@@ -5,12 +5,12 @@ namespace Longtail;
 public unsafe class VersionIndex : IDisposable
 {
     private Longtail_VersionIndex* _versionIndex;
+    private readonly bool _owner;
 
-    // Note(Jens): The implementation for these are very simple, maybe we should not do an interop call to get the values?
-    public uint Version => *_versionIndex->m_Version; // LongtailLibrary.Longtail_VersionIndex_GetVersion(_versionIndex);
-    public uint HashIdentifier => *_versionIndex->m_HashIdentifier; //LongtailLibrary.Longtail_VersionIndex_GetHashAPI(_versionIndex);
-    public uint AssetCount => *_versionIndex->m_AssetCount; //LongtailLibrary.Longtail_VersionIndex_GetAssetCount(_versionIndex);
-    public uint ChunkCount => *_versionIndex->m_ChunkCount; //LongtailLibrary.Longtail_VersionIndex_GetChunkCount(_versionIndex);
+    public uint Version => *_versionIndex->m_Version;
+    public uint HashIdentifier => *_versionIndex->m_HashIdentifier;
+    public uint AssetCount => *_versionIndex->m_AssetCount;
+    public uint ChunkCount => *_versionIndex->m_ChunkCount;
     public uint TargetChunkSize => *_versionIndex->m_TargetChunkSize;
 
     public ReadOnlySpan<ulong> GetChunkHashes() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkHashes(_versionIndex), (int)ChunkCount);
@@ -18,9 +18,10 @@ public unsafe class VersionIndex : IDisposable
     public ReadOnlySpan<uint> GetChunkTags() => new(LongtailLibrary.Longtail_VersionIndex_GetChunkTags(_versionIndex), (int)ChunkCount);
 
     internal Longtail_VersionIndex* AsPointer() => _versionIndex;
-    internal VersionIndex(Longtail_VersionIndex* versionIndex)
+    internal VersionIndex(Longtail_VersionIndex* versionIndex, bool owner = true)
     {
         _versionIndex = versionIndex;
+        _owner = owner;
     }
 
     public static VersionIndex ReadFromBuffer(ReadOnlySpan<byte> buffer)
@@ -145,7 +146,7 @@ public unsafe class VersionIndex : IDisposable
 
     public void Dispose()
     {
-        if (_versionIndex != null)
+        if (_versionIndex != null && _owner)
         {
             LongtailLibrary.Longtail_Free(_versionIndex);
             _versionIndex = null;
