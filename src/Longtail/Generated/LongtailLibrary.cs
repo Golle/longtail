@@ -727,6 +727,34 @@ internal unsafe partial class LongtailLibrary
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern ulong Longtail_GetVersionIndexSize(
+        uint asset_count,
+        uint chunk_count,
+        uint asset_chunk_index_count,
+        uint path_data_size
+    );
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int Longtail_BuildVersionIndex(
+        void* mem,
+        ulong mem_size,
+        Longtail_FileInfos* file_infos,
+        ulong* path_hashes,
+        ulong* content_hashes,
+        uint* asset_chunk_index_starts,
+        uint* asset_chunk_counts,
+        uint asset_chunk_index_count,
+        uint* asset_chunk_indexes,
+        uint chunk_count,
+        uint* chunk_sizes,
+        ulong* chunk_hashes,
+        uint* optional_chunk_tags,
+        uint hash_api_identifier,
+        uint target_chunk_size,
+        Longtail_VersionIndex** out_version_index
+    );
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern int Longtail_CreateVersionIndex(
         Longtail_StorageAPI* storage_api,
         Longtail_HashAPI* hash_api,
@@ -1021,11 +1049,6 @@ internal unsafe partial class LongtailLibrary
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern Longtail_Paths* Longtail_FileInfos_GetPaths(
-        Longtail_FileInfos* file_infos
-    );
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern ulong Longtail_FileInfos_GetSize(
         Longtail_FileInfos* file_infos,
         uint index
@@ -1232,84 +1255,56 @@ internal unsafe partial class LongtailLibrary
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int Longtail_GetPathHash(
+    public static extern int LongtailPrivate_GetPathHash(
         Longtail_HashAPI* hash_api,
         byte* path,
         ulong* out_hash
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern ulong Longtail_LookupTable_GetSize(
+    public static extern ulong LongtailPrivate_LookupTable_GetSize(
         uint capacity
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern Longtail_LookupTable* Longtail_LookupTable_Create(
+    public static extern Longtail_LookupTable* LongtailPrivate_LookupTable_Create(
         void* mem,
         uint capacity,
         Longtail_LookupTable* optional_source_entries
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int Longtail_LookupTable_Put(
+    public static extern int LongtailPrivate_LookupTable_Put(
         Longtail_LookupTable* lut,
         ulong key,
         uint value
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint* Longtail_LookupTable_PutUnique(
+    public static extern uint* LongtailPrivate_LookupTable_PutUnique(
         Longtail_LookupTable* lut,
         ulong key,
         uint value
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint* Longtail_LookupTable_Get(
+    public static extern uint* LongtailPrivate_LookupTable_Get(
         Longtail_LookupTable* lut,
         ulong key
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint Longtail_LookupTable_GetSpaceLeft(
+    public static extern uint LongtailPrivate_LookupTable_GetSpaceLeft(
         Longtail_LookupTable* lut
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int Longtail_MakeFileInfos(
+    public static extern int LongtailPrivate_MakeFileInfos(
         uint path_count,
         byte** path_names,
         ulong* file_sizes,
         ushort* file_permissions,
         Longtail_FileInfos** out_file_infos
-    );
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern ulong Longtail_GetVersionIndexSize(
-        uint asset_count,
-        uint chunk_count,
-        uint asset_chunk_index_count,
-        uint path_data_size
-    );
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int Longtail_BuildVersionIndex(
-        void* mem,
-        ulong mem_size,
-        Longtail_FileInfos* file_infos,
-        ulong* path_hashes,
-        ulong* content_hashes,
-        uint* asset_chunk_index_starts,
-        uint* asset_chunk_counts,
-        uint asset_chunk_index_count,
-        uint* asset_chunk_indexes,
-        uint chunk_count,
-        uint* chunk_sizes,
-        ulong* chunk_hashes,
-        uint* optional_chunk_tags,
-        uint hash_api_identifier,
-        uint target_chunk_size,
-        Longtail_VersionIndex** out_version_index
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

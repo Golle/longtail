@@ -106,34 +106,4 @@ internal class HashApiTests
 
         Assert.That(result, Is.EqualTo(Blake3Hash));
     }
-
-    [Test, Ignore($"{nameof(LongtailLibrary.Longtail_GetPathHash)} is missing LONGTAIL_EXPORT")]
-    public void GetPathHash_Blake2_ReturnHash()
-    {
-        using var hashApi = HashApi.CreateBlake2HashAPI();
-
-        var hash = hashApi.GetPathHash(Path.GetTempPath());
-
-        Assert.That(hash, Is.Not.EqualTo(0));
-    }
-
-    [Test, Ignore($"{nameof(LongtailLibrary.Longtail_GetPathHash)} is missing LONGTAIL_EXPORT")]
-    public void GetPathHash_Blake3_ReturnHash()
-    {
-        using var hashApi = HashApi.CreateBlake3HashAPI();
-
-        var hash = hashApi.GetPathHash(Path.GetTempPath());
-
-        Assert.That(hash, Is.Not.EqualTo(0));
-    }
-
-    [Test, Ignore($"{nameof(LongtailLibrary.Longtail_GetPathHash)} is missing LONGTAIL_EXPORT")]
-    public void GetPathHash_Meow_ReturnHash()
-    {
-        using var hashApi = HashApi.CreateMeowHashAPI();
-
-        var hash = hashApi.GetPathHash(Path.GetTempPath());
-
-        Assert.That(hash, Is.Not.EqualTo(0));
-    }
 }

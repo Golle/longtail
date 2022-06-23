@@ -56,18 +56,6 @@ public sealed unsafe class HashApi : IDisposable
         }
     }
 
-    public ulong GetPathHash(string path)
-    {
-        using var utf8Path = new Utf8String(path);
-        ulong hash;
-        var err = LongtailLibrary.Longtail_GetPathHash(_hashApi, utf8Path, &hash);
-        if (err != 0)
-        {
-            throw new LongtailException(nameof(LongtailLibrary.Longtail_GetPathHash), err);
-        }
-        return hash;
-    }
-
     public void Dispose()
     {
         if (_hashApi != null && _owner)
