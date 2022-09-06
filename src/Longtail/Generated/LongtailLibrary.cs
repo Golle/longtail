@@ -386,7 +386,7 @@ internal unsafe partial class LongtailLibrary
         delegate* unmanaged[Cdecl]<Longtail_API*, void> dispose_func,
         delegate* unmanaged[Cdecl]<Longtail_JobAPI*, uint> get_worker_count_func,
         delegate* unmanaged[Cdecl]<Longtail_JobAPI*, uint, void**, int> reserve_jobs_func,
-        delegate* unmanaged[Cdecl]<Longtail_JobAPI*, void*, Longtail_ProgressAPI*, Longtail_CancelAPI*, Longtail_CancelAPI_CancelToken*, uint, delegate* unmanaged[Cdecl]<void*, uint, int, int>*, void**, void**, int> create_jobs_func,
+        delegate* unmanaged[Cdecl]<Longtail_JobAPI*, void*, Longtail_ProgressAPI*, Longtail_CancelAPI*, Longtail_CancelAPI_CancelToken*, uint, delegate* unmanaged[Cdecl]<void*, uint, int, int>*, void**, byte, void**, int> create_jobs_func,
         delegate* unmanaged[Cdecl]<Longtail_JobAPI*, uint, void*, uint, void*, int> add_dependecies_func,
         delegate* unmanaged[Cdecl]<Longtail_JobAPI*, uint, void*, int> ready_jobs_func,
         delegate* unmanaged[Cdecl]<Longtail_JobAPI*, void*, Longtail_ProgressAPI*, Longtail_CancelAPI*, Longtail_CancelAPI_CancelToken*, int> wait_for_all_jobs_func,
@@ -416,6 +416,7 @@ internal unsafe partial class LongtailLibrary
         uint job_count,
         delegate* unmanaged[Cdecl]<void*, uint, int, int>* job_funcs,
         void** job_contexts,
+        byte job_channel,
         void** out_jobs
     );
 
