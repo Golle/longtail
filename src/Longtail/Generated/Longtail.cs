@@ -234,9 +234,9 @@ internal unsafe struct Longtail_JobAPI
     /// </summary>
     public delegate* unmanaged[Cdecl]<Longtail_JobAPI*, uint, void**, int> ReserveJobs;
     /// <summary>
-    /// int Longtail_Job_CreateJobsFunc(struct Longtail_JobAPI* job_api, void* job_group, struct Longtail_ProgressAPI* progressAPI, struct Longtail_CancelAPI* optional_cancel_api, struct Longtail_CancelAPI_CancelToken* optional_cancel_token, unsigned int job_count, int Longtail_JobAPI_JobFunc(void* context, unsigned int job_id, int is_cancelled)* job_funcs, void** job_contexts, void** out_jobs)
+    /// int Longtail_Job_CreateJobsFunc(struct Longtail_JobAPI* job_api, void* job_group, struct Longtail_ProgressAPI* progressAPI, struct Longtail_CancelAPI* optional_cancel_api, struct Longtail_CancelAPI_CancelToken* optional_cancel_token, unsigned int job_count, int Longtail_JobAPI_JobFunc(void* context, unsigned int job_id, int is_cancelled)* job_funcs, void** job_contexts, char job_channel, void** out_jobs)
     /// </summary>
-    public delegate* unmanaged[Cdecl]<Longtail_JobAPI*, void*, Longtail_ProgressAPI*, Longtail_CancelAPI*, Longtail_CancelAPI_CancelToken*, uint, delegate* unmanaged[Cdecl]<void*, uint, int, int>*, void**, void**, int> CreateJobs;
+    public delegate* unmanaged[Cdecl]<Longtail_JobAPI*, void*, Longtail_ProgressAPI*, Longtail_CancelAPI*, Longtail_CancelAPI_CancelToken*, uint, delegate* unmanaged[Cdecl]<void*, uint, int, int>*, void**, byte, void**, int> CreateJobs;
     /// <summary>
     /// int Longtail_Job_AddDependeciesFunc(struct Longtail_JobAPI* job_api, unsigned int job_count, void* jobs, unsigned int dependency_job_count, void* dependency_jobs)
     /// </summary>
