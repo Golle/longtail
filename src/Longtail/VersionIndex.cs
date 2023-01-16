@@ -141,7 +141,18 @@ public unsafe class VersionIndex : IDisposable
         {
             throw new LongtailException(nameof(LongtailLibrary.Longtail_CreateVersionIndex), err);
         }
-        return versionIndex != null ? new VersionIndex(versionIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_ReadVersionIndex)} returned a null pointer");
+        return versionIndex != null ? new VersionIndex(versionIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_CreateVersionIndex)} returned a null pointer");
+    }
+
+    public VersionIndex Merge(VersionIndex overlayVersionIndex)
+    {
+        Longtail_VersionIndex* versionIndex;
+        var err = LongtailLibrary.Longtail_MergeVersionIndex(_versionIndex, overlayVersionIndex.AsPointer(), &versionIndex);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_MergeVersionIndex), err);
+        }
+        return versionIndex != null ? new VersionIndex(versionIndex) : throw new InvalidOperationException($"{nameof(LongtailLibrary.Longtail_MergeVersionIndex)} returned a null pointer");
     }
 
     public void Dispose()

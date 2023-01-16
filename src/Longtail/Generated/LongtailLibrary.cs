@@ -773,6 +773,13 @@ internal unsafe partial class LongtailLibrary
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int Longtail_MergeVersionIndex(
+        Longtail_VersionIndex* base_version_index,
+        Longtail_VersionIndex* overlay_version_index,
+        Longtail_VersionIndex** out_version_index
+    );
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern int Longtail_WriteVersionIndexToBuffer(
         Longtail_VersionIndex* version_index,
         void** out_buffer,

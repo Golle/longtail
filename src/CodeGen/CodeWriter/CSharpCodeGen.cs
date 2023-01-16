@@ -21,7 +21,7 @@ internal record Argument(string Type, string Name);
 
 internal class CSharpCodeGen
 {
-    private List<EnumCode> _enums = new();
+    private readonly List<EnumCode> _enums = new();
 
     public CSharpCode[] GenerateCode(BoundSyntaxNode[] nodes)
     {
