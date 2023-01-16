@@ -2,10 +2,8 @@
 [![Build and Test CodeGen](https://github.com/Golle/longtail/actions/workflows/build.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/build.yml)   
 [![Run longtail tests](https://github.com/Golle/longtail/actions/workflows/longtail.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/longtail.yml)
 
-### Nuget
-(This is a pre-release, some APIs are missing and some error handling are inconsistent)
-![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Longtail) 
-
+### NuGet
+![NuGet](https://img.shields.io/nuget/v/Longtail) 
 
 ## Longtail C# Bindings
 This project generates cross platform C# bindings for Dan Engelbrecht longtail library. [Longtail](https://github.com/DanEngelbrecht/longtail).
@@ -21,7 +19,7 @@ Delete the LONGTAIL_VERSION file in the root folder of the repo to force the pip
 ```
 
 ## Current status
-Version 0.3.6 of longtail - [0.3.6](https://github.com/DanEngelbrecht/longtail/releases/tag/v0.3.6)
+Version 0.3.7 of longtail - [0.3.7](https://github.com/DanEngelbrecht/longtail/releases/tag/v0.3.7)
 
 **Implemented**
 * Generates bindings for all structs, enums, functions, function pointers
