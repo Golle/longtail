@@ -47,7 +47,7 @@ internal class ReadWriteCurrentVersion : IMiddleware<LongtailContext>
                 Logger.Warning($"The {versionFilePath} seems to be corrupt. Expected 3 lines, but found {result.Length}. Please delete.");
                 return null;
             }
-            return new(result[0], result[1], DateTime.Parse(result[2]));
+            return new(result[0], result[1], DateTime.Parse(result[2], CultureInfo.InvariantCulture));
         }
     }
 }
