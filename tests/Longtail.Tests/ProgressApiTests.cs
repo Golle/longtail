@@ -5,11 +5,11 @@ namespace Longtail.Tests;
 internal class ProgressApiTests
 {
     [Test]
-    public void Ctor_CreateAndDispose_DontThrowException()
+    public void Create_CreateAndDispose_DontThrowException()
     {
         Assert.DoesNotThrow(() =>
         {
-            using var progressApi = new ProgressApi(_ => { });
+            using var progressApi = ProgressApi.Create(_ => { });
         });
     }
 
@@ -19,7 +19,7 @@ internal class ProgressApiTests
     public void OnProgress_DoneCount_CallbackWithDoneCount(uint doneCount)
     {
         var result = 0u;
-        using var progressApi = new ProgressApi(tuple => result = tuple.DoneCount);
+        using var progressApi = ProgressApi.Create(tuple => result = tuple.DoneCount);
 
         progressApi.OnProgress(0, doneCount);
 
@@ -32,7 +32,7 @@ internal class ProgressApiTests
     public void OnProgress_TotalCount_CallbackWithTotalCount(uint totalCount)
     {
         var result = 0u;
-        using var progressApi = new ProgressApi(tuple => result = tuple.TotalCount);
+        using var progressApi = ProgressApi.Create(tuple => result = tuple.TotalCount);
 
         progressApi.OnProgress(totalCount, 0);
 
