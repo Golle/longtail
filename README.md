@@ -19,7 +19,7 @@ Delete the LONGTAIL_VERSION file in the root folder of the repo to force the pip
 ```
 
 ## Current status
-Version 0.3.7 of longtail - [0.3.7](https://github.com/DanEngelbrecht/longtail/releases/tag/v0.3.7)
+Version 0.3.8 of longtail - [0.3.8](https://github.com/DanEngelbrecht/longtail/releases/tag/v0.3.8)
 
 **Implemented**
 * Generates bindings for all structs, enums, functions, function pointers
