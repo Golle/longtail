@@ -99,6 +99,30 @@ public sealed unsafe class StoreIndex : IDisposable
         }
     }
 
+    public StoreIndex[] SplitStoreIndex(ulong splitSize)
+    {
+        Longtail_StoreIndex** outIndices;
+        ulong outCount = 0;
+        var err = LongtailLibrary.Longtail_SplitStoreIndex(_storeIndex, splitSize, &outIndices, &outCount);
+        if (err != 0)
+        {
+            throw new LongtailException(nameof(LongtailLibrary.Longtail_SplitStoreIndex), err);
+        }
+        // We don't use the array that longtail allocated for us, we use a managed array.
+        LongtailLibrary.Longtail_Free(outIndices);
+        if (outCount == 0)
+        {
+            return Array.Empty<StoreIndex>();
+        }
+
+        var indices = new StoreIndex[outCount];
+        for (var i = 0ul; i < outCount; ++i)
+        {
+            indices[i] = new StoreIndex(outIndices[i]);
+        }
+        return indices;
+    }
+
     public static StoreIndex ReadStoreIndexFromBuffer(ReadOnlySpan<byte> buffer)
     {
         Longtail_StoreIndex* storeindex;

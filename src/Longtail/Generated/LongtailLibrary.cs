@@ -1186,6 +1186,14 @@ internal unsafe partial class LongtailLibrary
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int Longtail_SplitStoreIndex(
+        Longtail_StoreIndex* store_index,
+        ulong split_size,
+        Longtail_StoreIndex*** out_store_indexes,
+        ulong* out_count
+    );
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern int Longtail_WriteStoreIndexToBuffer(
         Longtail_StoreIndex* store_index,
         void** out_buffer,
