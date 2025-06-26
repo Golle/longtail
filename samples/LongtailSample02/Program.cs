@@ -34,7 +34,6 @@ MemTracer.Init();
     CreateSomeFiles(dataPath, 10, 4 * 1024, 10 * 1024 * 1024);
     Console.WriteLine("Files created.");
 
-
     var indexFilePath = Path.Combine(indexPath, versionFileName);
 
     // Take the data and upload it to a path
@@ -43,14 +42,12 @@ MemTracer.Init();
         Console.WriteLine($"Starting upsync from {dataPath} to {destinationPath}");
         Upsync(dataPath, destinationPath, indexFilePath);
         Console.WriteLine($"Finished upsync in {timer.Elapsed.TotalMilliseconds:0.00}");
-
     }
 
-    
     // Download the chunks and unpack them
     {
         // using no cache
-        
+
         var timer = Stopwatch.StartNew();
         var output = Path.Combine(outPath, "cache");
         Console.WriteLine($"Starting downsync from {destinationPath} to {output}");
@@ -68,7 +65,7 @@ MemTracer.Init();
             Console.WriteLine("All files are identical!");
         }
     }
-    
+
     //{
     //    // using a cache
     //    var timer = Stopwatch.StartNew();
@@ -89,7 +86,6 @@ MemTracer.Init();
     //    }
     //}
 
-
     static void Upsync(string path, string destination, string indexPath)
     {
         using var fsStorage = StorageApi.CreateFSStorageAPI()!;
@@ -98,7 +94,7 @@ MemTracer.Init();
         using var hashRegistry = HashRegistry.CreateFullHashRegistry()!;
         using var hashApi = hashRegistry.GetHashApi(HashTypes.Blake3)!;
         using var chunker = ChunkerApi.CreateHPCDCChunkerAPI();
-        using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
+        using var progress = ProgressApi.Create(p => Console.WriteLine($"{p.DoneCount}/{p.TotalCount} completed."));
         using var versionIndex = VersionIndex.Create(path, fsStorage, hashApi!, chunker!, jobApi, files!, targetChunkSize, false)!;
         using var outBlockStore = BlockStoreApi.MakeBlockStoreApi(new SampleAsyncBlockStore(destination, "stuff", fsStorage));
         using var outStoreIndex = outBlockStore.GetExistingContent(versionIndex.GetChunkHashes())!;
@@ -131,7 +127,7 @@ MemTracer.Init();
         var requiredChunkHashes = targetVersionIndex.GetRequiredChunkHashes(versionDiff);
         using var blockStoreApi = BlockStoreApi.MakeBlockStoreApi(new SampleAsyncBlockStore(source, "stuff", fsStorage));
 
-        using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
+        using var progress = ProgressApi.Create(p => Console.WriteLine($"{p.DoneCount}/{p.TotalCount} completed."));
         if (cachePath != null)
         {
             using var cacheFileBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, source)!;
