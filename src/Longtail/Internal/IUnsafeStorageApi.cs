@@ -27,4 +27,5 @@ internal unsafe interface IUnsafeStorageApi : IDisposable
     byte* GetParentPath(byte* path);
     int MapFile(Longtail_StorageAPI_OpenFile* f, ulong offset, ulong length, Longtail_StorageAPI_FileMap** out_file_map, void** out_data_ptr);
     void UnmapFile(Longtail_StorageAPI_FileMap* m);
+    int OpenAppendFile(byte* path, Longtail_StorageAPI_OpenFile** out_open_file);
 }
