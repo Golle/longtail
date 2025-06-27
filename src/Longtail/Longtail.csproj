@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net5.0;net6.0;net7.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -34,7 +34,7 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-   <ItemGroup Condition="'$(Configuration)' == 'Release'"> 
+   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <Content Include="..\..\lib\longtail_win32_x64.dll" Link="longtail_win32_x64.dll" Visible="false">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PackagePath>runtimes/win-x64/native/longtail_win32_x64.dll</PackagePath>

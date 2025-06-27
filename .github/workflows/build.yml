@@ -8,15 +8,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    
-    - name: Install .NET 6.0.x
+
+    - name: Install .NET 9.0.x
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 9.0.x
         include-prerelease: true
-        
+
     - name: Build
       run: dotnet build src/CodeGen -c Release
-    
+
     - name: Test
       run: dotnet test tests/CodeGen.Tests -c Release
