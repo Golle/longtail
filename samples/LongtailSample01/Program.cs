@@ -36,16 +36,14 @@ MemTracer.Init();
     CreateSomeFiles(dataPath, 10, 4 * 1024, 10 * 1024 * 1024);
     Console.WriteLine("Files created.");
 
-
     var indexFilePath = Path.Combine(indexPath, versionFileName);
-    
+
     // Take the data and upload it to a path
     {
         var timer = Stopwatch.StartNew();
         Console.WriteLine($"Starting upsync from {dataPath} to {destinationPath}");
         Upsync(dataPath, destinationPath, indexFilePath);
         Console.WriteLine($"Finished upsync in {timer.Elapsed.TotalMilliseconds:0.00}");
-        
     }
 
     // Download the chunks and unpack them
@@ -88,7 +86,6 @@ MemTracer.Init();
         }
     }
 
-
     static void Upsync(string path, string destination, string indexPath)
     {
         using var fsStorage = StorageApi.CreateFSStorageAPI()!;
@@ -97,7 +94,7 @@ MemTracer.Init();
         using var hashRegistry = HashRegistry.CreateFullHashRegistry()!;
         using var hashApi = hashRegistry.GetHashApi(HashTypes.Blake3)!;
         using var chunker = ChunkerApi.CreateHPCDCChunkerAPI();
-        using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
+        using var progress = ProgressApi.Create(p => Console.WriteLine($"{p.DoneCount}/{p.TotalCount} completed."));
         using var versionIndex = VersionIndex.Create(path, fsStorage, hashApi!, chunker!, jobApi, files!, targetChunkSize, false)!;
         using var outBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, destination)!;
         using var outStoreIndex = outBlockStore.GetExistingContent(versionIndex.GetChunkHashes())!;
@@ -133,7 +130,7 @@ MemTracer.Init();
         var requiredChunkHashes = targetVersionIndex.GetRequiredChunkHashes(versionDiff);
         using var blockStoreApi = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, source)!;
 
-        using var progress = new ProgressApi(tuple => Console.WriteLine($"{tuple.DoneCount}/{tuple.TotalCount} completed."));
+        using var progress = ProgressApi.Create(p => Console.WriteLine($"{p.DoneCount}/{p.TotalCount} completed."));
         if (cachePath != null)
         {
             using var cacheFileBlockStore = BlockStoreApi.CreateFSBlockStoreApi(jobApi, fsStorage, source)!;

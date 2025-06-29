@@ -27,6 +27,7 @@ internal unsafe class UnsafeStorageApi : IUnsafeStorageApi
     public byte* GetParentPath(byte* path) => _storageApi->GetParentPath(_storageApi, path);
     public int MapFile(Longtail_StorageAPI_OpenFile* f, ulong offset, ulong length, Longtail_StorageAPI_FileMap** out_file_map, void** out_data_ptr) => _storageApi->MapFile(_storageApi, f, offset, length, out_file_map, out_data_ptr);
     public void UnmapFile(Longtail_StorageAPI_FileMap* m) => _storageApi->UnMapFile(_storageApi, m);
+    public int OpenAppendFile(byte* path, Longtail_StorageAPI_OpenFile** out_open_file) => _storageApi->OpenAppendFile(_storageApi, path, out_open_file);
 
     public void Dispose()
     {

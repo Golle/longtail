@@ -1,9 +1,9 @@
 ### Builds
-[![Build and Test CodeGen](https://github.com/Golle/longtail/actions/workflows/build.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/build.yml)   
+[![Build and Test CodeGen](https://github.com/Golle/longtail/actions/workflows/build.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/build.yml)
 [![Run longtail tests](https://github.com/Golle/longtail/actions/workflows/longtail.yml/badge.svg)](https://github.com/Golle/longtail/actions/workflows/longtail.yml)
 
 ### NuGet
-![NuGet](https://img.shields.io/nuget/v/Longtail) 
+![NuGet](https://img.shields.io/nuget/v/Longtail)
 
 ## Longtail C# Bindings
 This project generates cross platform C# bindings for Dan Engelbrecht longtail library. [Longtail](https://github.com/DanEngelbrecht/longtail).
@@ -11,7 +11,7 @@ This project generates cross platform C# bindings for Dan Engelbrecht longtail l
 
 ## How to
 ### BuildTool
-Run the entire build pipeline to sync with the latest version of Longtail. 
+Run the entire build pipeline to sync with the latest version of Longtail.
 Delete the LONGTAIL_VERSION file in the root folder of the repo to force the pipeline to run.
 ```powershell
 .\build.ps1     # windows
@@ -19,11 +19,11 @@ Delete the LONGTAIL_VERSION file in the root folder of the repo to force the pip
 ```
 
 ## Current status
-Version 0.3.8 of longtail - [0.3.8](https://github.com/DanEngelbrecht/longtail/releases/tag/v0.3.8)
+Version 0.4.3 of longtail - [0.4.3](https://github.com/DanEngelbrecht/longtail/releases/tag/v0.4.3)
 
 **Implemented**
 * Generates bindings for all structs, enums, functions, function pointers
-* Supports .NET 5.0, 6.0 and 7.0-preview 4 on platforms Linux, MacOS and Windows x64
+* Supports .NET 5.x, 6.x, 7.x and 9.x on platforms Linux, MacOS and Windows x64
 * Automatic documentation for function pointers with the original names of parameters
 
 **Working on**

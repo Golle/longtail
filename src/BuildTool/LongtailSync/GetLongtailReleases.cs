@@ -1,7 +1,7 @@
-﻿using System.Text.Json;
-using BuildTool.Common;
-using BuildTool.Logging;
+﻿using BuildTool.Logging;
 using BuildTool.Pipeline;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace BuildTool.LongtailSync;
 
@@ -33,11 +33,7 @@ internal class GetLongtailReleases : IMiddleware<LongtailContext>
             return context with { Failed = true, Reason = $"Getting version from Github failed with code: {result.StatusCode}" };
         }
 
-        var releases = await JsonSerializer.DeserializeAsync<GithubRelease[]>(await result.Content.ReadAsStreamAsync(), new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
-            PropertyNameCaseInsensitive = false
-        });
+        var releases = await JsonSerializer.DeserializeAsync<GithubRelease[]>(await result.Content.ReadAsStreamAsync(), new JsonSerializerOptions());
 
         if (releases?.Length is null)
         {
@@ -77,6 +73,18 @@ internal class GetLongtailReleases : IMiddleware<LongtailContext>
             NewVersion = new LongtailVersion(latestRelease.Name, latestRelease.TagName, latestRelease.PublishedAt)
         });
     }
-    internal record GithubRelease(string Name, string TagName, DateTime PublishedAt, bool PreRelease, string Url, GithubAsset[]? Assets);
-    internal record GithubAsset(string Name, string ContentType, string BrowserDownloadUrl, long Size);
+
+    internal record GithubRelease(
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("tag_name")] string TagName,
+        [property: JsonPropertyName("published_at")] DateTime PublishedAt,
+        [property: JsonPropertyName("prerelease")] bool PreRelease,
+        [property: JsonPropertyName("url")] string Url,
+        [property: JsonPropertyName("assets")] GithubAsset[]? Assets);
+
+    internal record GithubAsset(
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("content_type")] string ContentType,
+        [property: JsonPropertyName("browser_download_url")] string BrowserDownloadUrl,
+        [property: JsonPropertyName("size")] long Size);
 }

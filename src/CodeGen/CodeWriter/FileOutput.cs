@@ -104,6 +104,7 @@ internal class FileOutput
             if (function.Arguments.Length == 0)
             {
                 builder.AppendLine("();");
+                builder.AppendLine();
             }
             else
             {

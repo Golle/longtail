@@ -213,6 +213,34 @@ internal unsafe struct Longtail_StorageAPI
     /// void Longtail_Storage_UnmapFileFunc(struct Longtail_StorageAPI* storage_api, struct Longtail_StorageAPI_FileMap* m)
     /// </summary>
     public delegate* unmanaged[Cdecl]<Longtail_StorageAPI*, Longtail_StorageAPI_FileMap*, void> UnMapFile;
+    /// <summary>
+    /// int Longtail_Storage_OpenAppendFileFunc(struct Longtail_StorageAPI* storage_api, const char* path, struct Longtail_StorageAPI_OpenFile** out_open_file)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StorageAPI*, byte*, Longtail_StorageAPI_OpenFile**, int> OpenAppendFile;
+}
+internal unsafe struct Longtail_ConcurrentChunkWriteAPI
+{
+    public Longtail_API m_API;
+    /// <summary>
+    /// int Longtail_ConcurrentChunkWrite_CreateDirFunc(struct Longtail_ConcurrentChunkWriteAPI* concurrent_file_write_api, unsigned int asset_index)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_ConcurrentChunkWriteAPI*, uint, int> CreateDir;
+    /// <summary>
+    /// int Longtail_ConcurrentChunkWrite_OpenFunc(struct Longtail_ConcurrentChunkWriteAPI* concurrent_file_write_api, unsigned int asset_index)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_ConcurrentChunkWriteAPI*, uint, int> Open;
+    /// <summary>
+    /// void Longtail_ConcurrentChunkWrite_CloseFunc(struct Longtail_ConcurrentChunkWriteAPI* concurrent_file_write_api, unsigned int asset_index)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_ConcurrentChunkWriteAPI*, uint, void> Close;
+    /// <summary>
+    /// int Longtail_ConcurrentChunkWrite_WriteFunc(struct Longtail_ConcurrentChunkWriteAPI* concurrent_file_write_api, unsigned int asset_index, unsigned long long int offset, unsigned int size, const void* input)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_ConcurrentChunkWriteAPI*, uint, ulong, uint, void*, int> Write;
+    /// <summary>
+    /// int Longtail_ConcurrentChunkWrite_FlushFunc(struct Longtail_ConcurrentChunkWriteAPI* concurrent_file_write_api)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_ConcurrentChunkWriteAPI*, int> Flush;
 }
 internal unsafe struct Longtail_ProgressAPI
 {
@@ -234,7 +262,7 @@ internal unsafe struct Longtail_JobAPI
     /// </summary>
     public delegate* unmanaged[Cdecl]<Longtail_JobAPI*, uint, void**, int> ReserveJobs;
     /// <summary>
-    /// int Longtail_Job_CreateJobsFunc(struct Longtail_JobAPI* job_api, void* job_group, struct Longtail_ProgressAPI* progressAPI, struct Longtail_CancelAPI* optional_cancel_api, struct Longtail_CancelAPI_CancelToken* optional_cancel_token, unsigned int job_count, int Longtail_JobAPI_JobFunc(void* context, unsigned int job_id, int is_cancelled)* job_funcs, void** job_contexts, char job_channel, void** out_jobs)
+    /// int Longtail_Job_CreateJobsFunc(struct Longtail_JobAPI* job_api, void* job_group, struct Longtail_ProgressAPI* progressAPI, struct Longtail_CancelAPI* optional_cancel_api, struct Longtail_CancelAPI_CancelToken* optional_cancel_token, unsigned int job_count, int Longtail_JobAPI_JobFunc(void* context, unsigned int job_id, int detected_error)* job_funcs, void** job_contexts, char job_channel, void** out_jobs)
     /// </summary>
     public delegate* unmanaged[Cdecl]<Longtail_JobAPI*, void*, Longtail_ProgressAPI*, Longtail_CancelAPI*, Longtail_CancelAPI_CancelToken*, uint, delegate* unmanaged[Cdecl]<void*, uint, int, int>*, void**, byte, void**, int> CreateJobs;
     /// <summary>
@@ -256,7 +284,7 @@ internal unsafe struct Longtail_JobAPI
     /// <summary>
     /// int Longtail_Job_GetMaxBatchCountFunc(struct Longtail_JobAPI* job_api, unsigned int* out_max_job_batch_count, unsigned int* out_max_dependency_batch_count)
     /// </summary>
-    public delegate* unmanaged[Cdecl]<Longtail_JobAPI*, uint*, uint*, int> GetMaxBatchCountFunc;
+    public delegate* unmanaged[Cdecl]<Longtail_JobAPI*, uint*, uint*, int> GetMaxBatchCount;
 }
 internal unsafe struct Longtail_Chunker_ChunkRange
 {
@@ -397,6 +425,62 @@ internal unsafe struct Longtail_BlockStoreAPI
     /// int Longtail_BlockStore_FlushFunc(struct Longtail_BlockStoreAPI* block_store_api, struct Longtail_AsyncFlushAPI* async_complete_api)
     /// </summary>
     public delegate* unmanaged[Cdecl]<Longtail_BlockStoreAPI*, Longtail_AsyncFlushAPI*, int> Flush;
+}
+internal unsafe struct Longtail_Monitor
+{
+    public ulong StructSize;
+    /// <summary>
+    /// void Longtail_MonitorGetStoredBlockPrepare(const struct Longtail_StoreIndex* store_index, unsigned int block_index)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, uint, void> BlockPrepare;
+    /// <summary>
+    /// void Longtail_MonitorGetStoredBlockLoad(const struct Longtail_StoreIndex* store_index, unsigned int block_index)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, uint, void> BlockLoad;
+    /// <summary>
+    /// void Longtail_MonitorGetStoredBlockLoaded(const struct Longtail_StoreIndex* store_index, unsigned int block_index, int err)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, uint, int, void> BlockLoaded;
+    /// <summary>
+    /// void Longtail_MonitorGetStoredBlockComplete(const struct Longtail_StoreIndex* store_index, unsigned int block_index, int err)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, uint, int, void> BlockLoadComplete;
+    /// <summary>
+    /// void Longtail_MonitorAssetRemove(const struct Longtail_VersionIndex* source_version_index, unsigned int asset_index, int err)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_VersionIndex*, uint, int, void> AssetRemove;
+    /// <summary>
+    /// void Longtail_MonitorAssetOpen(const struct Longtail_VersionIndex* target_version_index, unsigned int asset_index, int err)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_VersionIndex*, uint, int, void> AssetOpen;
+    /// <summary>
+    /// void Longtail_MonitorAssetWrite(const struct Longtail_StoreIndex* target_store_index, const struct Longtail_VersionIndex* version_index, unsigned int asset_index, unsigned long long int write_offset, unsigned int size, unsigned int chunk_index, unsigned int chunk_index_in_block, unsigned int chunk_count_in_block, unsigned int block_index, unsigned int block_data_offset, int err)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, Longtail_VersionIndex*, uint, ulong, uint, uint, uint, uint, uint, uint, int, void> AssetWrite;
+    /// <summary>
+    /// void Longtail_MonitorChunkRead(const struct Longtail_StoreIndex* store_index, const struct Longtail_VersionIndex* target_version_index, unsigned int block_index, unsigned int chunk_index, unsigned int chunk_index_in_block, int err)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, Longtail_VersionIndex*, uint, uint, uint, int, void> ChunkRead;
+    /// <summary>
+    /// void Longtail_MonitorBlockCompose(const struct Longtail_StoreIndex* store_index, unsigned int block_index)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, uint, void> BlockCompose;
+    /// <summary>
+    /// void Longtail_MonitorBlockSave(const struct Longtail_StoreIndex* store_index, unsigned int block_index, unsigned long long int block_size)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, uint, ulong, void> BlockSave;
+    /// <summary>
+    /// void Longtail_MonitorBlockSaved(const struct Longtail_StoreIndex* store_index, unsigned int block_index, int err)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, uint, int, void> BlockSaved;
+    /// <summary>
+    /// void Longtail_MonitorAssetClose(const struct Longtail_VersionIndex* version_index, unsigned int asset_index)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_VersionIndex*, uint, void> AssetClose;
+    /// <summary>
+    /// void Longtail_MonitorAssetRead(const struct Longtail_StoreIndex* store_index, const struct Longtail_VersionIndex* version_index, unsigned int asset_index, unsigned long long int read_offset, unsigned int size, unsigned long long int chunk_hash, unsigned int block_index, unsigned int block_data_offset, int err)
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<Longtail_StoreIndex*, Longtail_VersionIndex*, uint, ulong, uint, ulong, uint, uint, int, void> AssetRead;
 }
 internal unsafe struct Longtail_LogField
 {
